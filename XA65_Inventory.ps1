@@ -1,8 +1,9 @@
+#Requires -Version 3.0
 #This File is in Unicode format.  Do not edit in an ASCII editor.
 
 <#
 .SYNOPSIS
-	Creates a complete inventory of a Citrix XenApp 6.5 farm using Microsoft Word.
+	Creates a complete inventory of a Citrix XenApp 6.5 farm using Microsoft Word 2010 or 2013.
 .DESCRIPTION
 	Creates a complete inventory of a Citrix XenApp 6.5 farm using Microsoft Word and PowerShell.
 	Creates either a Word document or PDF named after the XenApp 6.5 farm.
@@ -19,6 +20,7 @@
 		Portuguese
 		Spanish
 		Swedish
+		
 .PARAMETER CompanyName
 	Company Name to use for the Cover Page.  
 	Default value is contained in HKCU:\Software\Microsoft\Office\Common\UserInfo\CompanyName or
@@ -27,37 +29,38 @@
 	This parameter has an alias of CN.
 .PARAMETER CoverPage
 	What Microsoft Word Cover Page to use.
-	(Default cover pages in Word en-US)
+	Only Word 2010 and 2013 are supported.
+	(default cover pages in Word en-US)
 	Valid input is:
-		Alphabet (Word 2007/2010. Works)
-		Annual (Word 2007/2010. Doesn't really work well for this report)
-		Austere (Word 2007/2010. Works)
-		Austin (Word 2010/2013. Doesn't work in 2013, mostly works in 2007/2010 but Subtitle/Subject & Author fields need to me moved after title box is moved up)
+		Alphabet (Word 2010. Works)
+		Annual (Word 2010. Doesn't work well for this report)
+		Austere (Word 2010. Works)
+		Austin (Word 2010/2013. Doesn't work in 2013, mostly works in 2010 but Subtitle/Subject & Author fields need to me moved after title box is moved up)
 		Banded (Word 2013. Works)
-		Conservative (Word 2007/2010. Works)
-		Contrast (Word 2007/2010. Works)
-		Cubicles (Word 2007/2010. Works)
-		Exposure (Word 2007/2010. Works if you like looking sideways)
+		Conservative (Word 2010. Works)
+		Contrast (Word 2010. Works)
+		Cubicles (Word 2010. Works)
+		Exposure (Word 2010. Works if you like looking sideways)
 		Facet (Word 2013. Works)
 		Filigree (Word 2013. Works)
 		Grid (Word 2010/2013.Works in 2010)
 		Integral (Word 2013. Works)
 		Ion (Dark) (Word 2013. Top date doesn't fit, box needs to be manually resized or font changed to 8 point)
 		Ion (Light) (Word 2013. Top date doesn't fit, box needs to be manually resized or font changed to 8 point)
-		Mod (Word 2007/2010. Works)
-		Motion (Word 2007/2010/2013. Works if top date is manually changed to 36 point)
+		Mod (Word 2010. Works)
+		Motion (Word 2010/2013. Works if top date is manually changed to 36 point)
 		Newsprint (Word 2010. Works but date is not populated)
 		Perspective (Word 2010. Works)
-		Pinstripes (Word 2007/2010. Works)
-		Puzzle (Word 2007/2010. Top date doesn't fit, box needs to be manually resized or font changed to 14 point)
+		Pinstripes (Word 2010. Works)
+		Puzzle (Word 2010. Top date doesn't fit, box needs to be manually resized or font changed to 14 point)
 		Retrospect (Word 2013. Works)
 		Semaphore (Word 2013. Works)
-		Sideline (Word 2007/2010/2013. Doesn't work in 2013, works in 2007/2010)
+		Sideline (Word 2010/2013. Doesn't work in 2013, works in 2010)
 		Slice (Dark) (Word 2013. Doesn't work)
 		Slice (Light) (Word 2013. Doesn't work)
-		Stacks (Word 2007/2010. Works)
-		Tiles (Word 2007/2010. Date doesn't fit unless changed to 26 point)
-		Transcend (Word 2007/2010. Works)
+		Stacks (Word 2010. Works)
+		Tiles (Word 2010. Date doesn't fit unless changed to 26 point)
+		Transcend (Word 2010. Works)
 		ViewMaster (Word 2013. Works)
 		Whisp (Word 2013. Works)
 	Default value is Sideline.
@@ -72,6 +75,17 @@
 	For Word 2007, the Microsoft add-in for saving as a PDF muct be installed.
 	For Word 2007, please see http://www.microsoft.com/en-us/download/details.aspx?id=9943
 	The PDF file is roughly 5X to 10X larger than the DOCX file.
+.PARAMETER Text
+	Creates a formatted text file with a .txt extension.
+	This parameter is reserved for a future update.
+	This parameter is disabled by default.
+.PARAMETER MSWord
+	SaveAs DOCX file
+	This parameter is set True if no other output format is selected.
+.PARAMETER HTML
+	Creates an HTML file with an .html extension.
+	This parameter is disabled by default.
+	This parameter is reserved for a future update and no output is created at this time.
 .PARAMETER Hardware
 	Use WMI to gather hardware information on: Computer System, Disks, Processor and Network Interface Cards
 	This parameter is disabled by default.
@@ -100,8 +114,22 @@
 	June 1, 2014 at 6PM is 2014-06-01_1800.
 	Output filename will be ReportName_2014-06-01_1800.docx (or .pdf).
 	This parameter is disabled by default.
+.PARAMETER Section
+	Processes a specific section of the report.
+	Valid options are:
+		Admins (Administrators)
+		Apps (Applications)
+		ConfigLog (Configuration Logging)
+		LBPolicies (Load Balancing Policies)
+		LoadEvals (Load Evaluators)
+		Policies
+		Servers
+		WGs (Worker Groups)
+		Zones
+		All
+	This parameter defaults to All sections.
 .EXAMPLE
-	PS C:\PSScript > .\XA65_Inventory_V41.ps1
+	PS C:\PSScript > .\XA65_Inventory_V42.ps1
 	
 	Will use all Default values.
 	HKEY_CURRENT_USER\Software\Microsoft\Office\Common\UserInfo\CompanyName="Carl Webster" or
@@ -112,7 +140,7 @@
 	Sideline for the Cover Page format.
 	Administrator for the User Name.
 .EXAMPLE
-	PS C:\PSScript > .\XA65_Inventory_V41.ps1 -PDF -verbose
+	PS C:\PSScript > .\XA65_Inventory_V42.ps1 -PDF 
 	
 	Will use all Default values and save the document as a PDF file.
 	HKEY_CURRENT_USER\Software\Microsoft\Office\Common\UserInfo\CompanyName="Carl Webster" or
@@ -122,9 +150,34 @@
 	Carl Webster for the Company Name.
 	Sideline for the Cover Page format.
 	Administrator for the User Name.
-	Will display verbose messages as the script is running.
 .EXAMPLE
-	PS C:\PSScript > .\XA65_Inventory_V41.ps1 -Summary
+	PS C:\PSScript > .\XA65_Inventory_V42.ps1 -TEXT
+
+	This parameter is reserved for a future update and no output is created at this time.
+	
+	Will use all default values and save the document as a formatted text file.
+	HKEY_CURRENT_USER\Software\Microsoft\Office\Common\UserInfo\CompanyName="Carl Webster" or
+	HKEY_CURRENT_USER\Software\Microsoft\Office\Common\UserInfo\Company="Carl Webster"
+	$env:username = Administrator
+
+	Carl Webster for the Company Name.
+	Sideline for the Cover Page format.
+	Administrator for the User Name.
+.EXAMPLE
+	PS C:\PSScript > .\XA65_Inventory_V42.ps1 -HTML
+
+	This parameter is reserved for a future update and no output is created at this time.
+	
+	Will use all default values and save the document as an HTML file.
+	HKEY_CURRENT_USER\Software\Microsoft\Office\Common\UserInfo\CompanyName="Carl Webster" or
+	HKEY_CURRENT_USER\Software\Microsoft\Office\Common\UserInfo\Company="Carl Webster"
+	$env:username = Administrator
+
+	Carl Webster for the Company Name.
+	Sideline for the Cover Page format.
+	Administrator for the User Name.
+.EXAMPLE
+	PS C:\PSScript > .\XA65_Inventory_V42.ps1 -Summary
 	
 	Creates a Summary report with no detail.
 	Will use all Default values.
@@ -136,7 +189,7 @@
 	Sideline for the Cover Page format.
 	Administrator for the User Name.
 .EXAMPLE
-	PS C:\PSScript > .\XA65_Inventory_V41.ps1 -PDF -Summary -verbose
+	PS C:\PSScript > .\XA65_Inventory_V42.ps1 -PDF -Summary 
 	
 	Creates a Summary report with no detail.
 	Will use all Default values and save the document as a PDF file.
@@ -147,9 +200,8 @@
 	Carl Webster for the Company Name.
 	Sideline for the Cover Page format.
 	Administrator for the User Name.
-	Will display verbose messages as the script is running.
 .EXAMPLE
-	PS C:\PSScript > .\XA65_Inventory_V41.ps1 -Hardware -verbose
+	PS C:\PSScript > .\XA65_Inventory_V42.ps1 -Hardware 
 	
 	Will use all Default values and add additional information for each server about its hardware.
 	HKEY_CURRENT_USER\Software\Microsoft\Office\Common\UserInfo\CompanyName="Carl Webster" or
@@ -159,9 +211,8 @@
 	Carl Webster for the Company Name.
 	Sideline for the Cover Page format.
 	Administrator for the User Name.
-	Will display verbose messages as the script is running.
 .EXAMPLE
-	PS C:\PSScript > .\XA65_Inventory_V41.ps1 -Software -verbose
+	PS C:\PSScript > .\XA65_Inventory_V42.ps1 -Software 
 	
 	Will use all Default values and add additional information for each server about its installed applications.
 	HKEY_CURRENT_USER\Software\Microsoft\Office\Common\UserInfo\CompanyName="Carl Webster" or
@@ -171,9 +222,8 @@
 	Carl Webster for the Company Name.
 	Sideline for the Cover Page format.
 	Administrator for the User Name.
-	Will display verbose messages as the script is running.
 .EXAMPLE
-	PS C:\PSScript > .\XA65_Inventory_V41.ps1 -StartDate "01/01/2014" -EndDate "01/02/2014" -verbose
+	PS C:\PSScript > .\XA65_Inventory_V42.ps1 -StartDate "01/01/2014" -EndDate "01/02/2014" 
 	
 	Will use all Default values and add additional information for each server about its installed applications.
 	HKEY_CURRENT_USER\Software\Microsoft\Office\Common\UserInfo\CompanyName="Carl Webster" or
@@ -183,10 +233,9 @@
 	Carl Webster for the Company Name.
 	Sideline for the Cover Page format.
 	Administrator for the User Name.
-	Will display verbose messages as the script is running.
 	Will return all Configuration Logging entries from "01/01/2014 00:00:00" through "01/02/2014 "00:00:00".
 .EXAMPLE
-	PS C:\PSScript > .\XA65_Inventory_V41.ps1 -StartDate "01/01/2014" -EndDate "01/01/2014" -verbose
+	PS C:\PSScript > .\XA65_Inventory_V42.ps1 -StartDate "01/01/2014" -EndDate "01/01/2014" 
 	
 	Will use all Default values and add additional information for each server about its installed applications.
 	HKEY_CURRENT_USER\Software\Microsoft\Office\Common\UserInfo\CompanyName="Carl Webster" or
@@ -196,10 +245,9 @@
 	Carl Webster for the Company Name.
 	Sideline for the Cover Page format.
 	Administrator for the User Name.
-	Will display verbose messages as the script is running.
 	Will return all Configuration Logging entries from "01/01/2014 00:00:00" through "01/01/2014 "00:00:00".  In other words, nothing is returned.
 .EXAMPLE
-	PS C:\PSScript > .\XA65_Inventory_V41.ps1 -StartDate "01/01/2014 21:00:00" -EndDate "01/01/2014 22:00:00" -verbose
+	PS C:\PSScript > .\XA65_Inventory_V42.ps1 -StartDate "01/01/2014 21:00:00" -EndDate "01/01/2014 22:00:00" 
 	
 	Will use all Default values and add additional information for each server about its installed applications.
 	HKEY_CURRENT_USER\Software\Microsoft\Office\Common\UserInfo\CompanyName="Carl Webster" or
@@ -209,149 +257,135 @@
 	Carl Webster for the Company Name.
 	Sideline for the Cover Page format.
 	Administrator for the User Name.
-	Will display verbose messages as the script is running.
 	Will return all Configuration Logging entries from 9PM to 10PM on 01/01/2014.
 .EXAMPLE
-	PS C:\PSScript .\XA65_Inventory_V41.ps1 -CompanyName "Carl Webster Consulting" -CoverPage "Mod" -UserName "Carl Webster"
+	PS C:\PSScript .\XA65_Inventory_V42.ps1 -CompanyName "Carl Webster Consulting" -CoverPage "Mod" -UserName "Carl Webster"
 
 	Will use:
 		Carl Webster Consulting for the Company Name.
 		Mod for the Cover Page format.
 		Carl Webster for the User Name.
 .EXAMPLE
-	PS C:\PSScript .\XA65_Inventory_V41.ps1 -CN "Carl Webster Consulting" -CP "Mod" -UN "Carl Webster"
+	PS C:\PSScript .\XA65_Inventory_V42.ps1 -CN "Carl Webster Consulting" -CP "Mod" -UN "Carl Webster"
 
 	Will use:
 		Carl Webster Consulting for the Company Name (alias CN).
 		Mod for the Cover Page format (alias CP).
 		Carl Webster for the User Name (alias UN).
+.EXAMPLE
+	PS C:\PSScript > .\XA65_Inventory_V42.ps1 -Section Policies
+	
+	Will use all Default values.
+	HKEY_CURRENT_USER\Software\Microsoft\Office\Common\UserInfo\CompanyName="Carl Webster" or
+	HKEY_CURRENT_USER\Software\Microsoft\Office\Common\UserInfo\Company="Carl Webster"
+	$env:username = Administrator
+
+	Carl Webster for the Company Name.
+	Sideline for the Cover Page format.
+	Administrator for the User Name.
+	Processes only the Policies section of the report.
+.EXAMPLE
+	PS C:\PSScript > .\XA65_Inventory_V42.ps1 -AddDateTime
+	
+	Will use all Default values.
+	HKEY_CURRENT_USER\Software\Microsoft\Office\Common\UserInfo\CompanyName="Carl Webster" or
+	HKEY_CURRENT_USER\Software\Microsoft\Office\Common\UserInfo\Company="Carl Webster"
+	$env:username = Administrator
+
+	Carl Webster for the Company Name.
+	Sideline for the Cover Page format.
+	Administrator for the User Name.
+
+	Adds a date time stamp to the end of the file name.
+	Time stamp is in the format of yyyy-MM-dd_HHmm.
+	June 1, 2014 at 6PM is 2014-06-01_1800.
+	Output filename will be XA65FarmName_2014-06-01_1800.docx
+.EXAMPLE
+	PS C:\PSScript > .\XA65_Inventory_V42.ps1 -PDF -AddDateTime
+	
+	Will use all Default values and save the document as a PDF file.
+	HKEY_CURRENT_USER\Software\Microsoft\Office\Common\UserInfo\CompanyName="Carl Webster" or
+	HKEY_CURRENT_USER\Software\Microsoft\Office\Common\UserInfo\Company="Carl Webster"
+	$env:username = Administrator
+
+	Carl Webster for the Company Name.
+	Sideline for the Cover Page format.
+	Administrator for the User Name.
+	Will display verbose messages as the script is running.
+
+	Adds a date time stamp to the end of the file name.
+	Time stamp is in the format of yyyy-MM-dd_HHmm.
+	June 1, 2014 at 6PM is 2014-06-01_1800.
+	Output filename will be XA65FarmName_2014-06-01_1800.pdf
 .INPUTS
 	None.  You cannot pipe objects to this script.
 .OUTPUTS
 	No objects are output from this script.  This script creates a Word or PDF document.
 .NOTES
-	NAME: XA65_Inventory_V41.ps1
-	VERSION: 4.14
-	AUTHOR: Carl Webster (with a lot of help from Michael B. Smith and Jeff Wouters)
-	LASTEDIT: June 2, 2014
+	NAME: XA65_Inventory_V42.ps1
+	VERSION: 4.21
+	AUTHOR: Carl Webster (with a lot of help from Michael B. Smith, Jeff Wouters and Iain Brighton)
+	LASTEDIT: December 18, 2014
 #>
 
 
 #thanks to @jeffwouters and Michael B. Smith for helping me with these parameters
-[CmdletBinding(SupportsShouldProcess = $False, ConfirmImpact = "None", DefaultParameterSetName = "Standard") ]
+[CmdletBinding(SupportsShouldProcess = $False, ConfirmImpact = "None", DefaultParameterSetName = "Word") ]
 
 Param(
-	[parameter(ParameterSetName="Standard",
-	Position = 0, 
-	Mandatory=$False )
-	] 
-	[parameter(ParameterSetName="Summary",
-	Position = 0, 
-	Mandatory=$False )
-	] 
+	[parameter(ParameterSetName="Word",Mandatory=$False)] 
+	[Switch]$MSWord=$False,
+
+	[parameter(ParameterSetName="PDF",Mandatory=$False)] 
+	[Switch]$PDF=$False,
+
+	[parameter(ParameterSetName="Text",Mandatory=$False)] 
+	[Switch]$Text=$False,
+
+	[parameter(ParameterSetName="HTML",Mandatory=$False)] 
+	[Switch]$HTML=$False,
+
+	[parameter(Mandatory=$False)] 
+	[Switch]$Hardware=$False, 
+
+	[parameter(Mandatory=$False)] 
+	[Switch]$Software=$False,
+
+	[parameter(Mandatory=$False)] 
+	[Datetime]$StartDate = ((Get-Date -displayhint date).AddDays(-7)),
+
+	[parameter(Mandatory=$False)] 
+	[Datetime]$EndDate = (Get-Date -displayhint date),
+	
+	[parameter(Mandatory=$False)] 
+	[Switch]$Summary=$False,	
+	
+	[parameter(Mandatory=$False)] 
+	[Switch]$AddDateTime=$False,
+	
+	[parameter(Mandatory=$False)] 
+	[string]$Section="All",
+	
+	[parameter(ParameterSetName="Word",Mandatory=$False)] 
+	[parameter(ParameterSetName="PDF",Mandatory=$False)] 
 	[Alias("CN")]
 	[ValidateNotNullOrEmpty()]
 	[string]$CompanyName="",
     
-	[parameter(ParameterSetName="Standard",
-	Position = 1, 
-	Mandatory=$False )
-	] 
-	[parameter(ParameterSetName="Summary",
-	Position = 1, 
-	Mandatory=$False )
-	] 
+	[parameter(ParameterSetName="Word",Mandatory=$False)] 
+	[parameter(ParameterSetName="PDF",Mandatory=$False)] 
 	[Alias("CP")]
 	[ValidateNotNullOrEmpty()]
 	[string]$CoverPage="Sideline", 
 
-	[parameter(ParameterSetName="Standard",
-	Position = 2, 
-	Mandatory=$False )
-	] 
-	[parameter(ParameterSetName="Summary",
-	Position = 2, 
-	Mandatory=$False )
-	] 
+	[parameter(ParameterSetName="Word",Mandatory=$False)] 
+	[parameter(ParameterSetName="PDF",Mandatory=$False)] 
 	[Alias("UN")]
 	[ValidateNotNullOrEmpty()]
-	[string]$UserName=$env:username,
+	[string]$UserName=$env:username
 
-	[parameter(ParameterSetName="Standard",
-	Position = 3, 
-	Mandatory=$False )
-	] 
-	[parameter(ParameterSetName="Summary",
-	Position = 3, 
-	Mandatory=$False )
-	] 
-	[Switch]$PDF=$False,
-
-	[parameter(ParameterSetName="Standard",
-	Position = 4, 
-	Mandatory=$False )
-	] 
-	[Switch]$Hardware=$False, 
-
-	[parameter(ParameterSetName="Standard",
-	Position = 5, 
-	Mandatory=$False )
-	] 
-	[Switch]$Software=$False,
-
-	[parameter(ParameterSetName="Standard",
-	Position = 6, 
-	Mandatory=$False)
-	] 
-	[Datetime]$StartDate = ((Get-Date -displayhint date).AddDays(-7)),
-
-	[parameter(ParameterSetName="Standard",
-	Position = 7, 
-	Mandatory=$False)
-	] 
-	[Datetime]$EndDate = (Get-Date -displayhint date),
-	
-	[parameter(ParameterSetName="Summary",
-	Position = 8, 
-	Mandatory=$False )
-	] 
-	[Switch]$Summary=$False,	
-	
-	[parameter(ParameterSetName="Standard",
-	Position = 9, 
-	Mandatory=$False )
-	] 
-	[parameter(ParameterSetName="Summary",
-	Position = 9, 
-	Mandatory=$False )
-	] 
-	[Switch]$AddDateTime=$False
-	
 	)
 
-#force -verbose on
-$PSDefaultParameterValues = @{"*:Verbose"=$True}
-#set $ErrorActionPreference
-$SaveEAPreference = $ErrorActionPreference
-$ErrorActionPreference = 'SilentlyContinue'
-
-If($Hardware -eq $Null)
-{
-	$Hardware = $False
-}
-If($Software -eq $Null)
-{
-	$Software = $False
-}	
-If($Summary -eq $Null)
-{
-	$Summary = $False
-}
-If($AddDateTime -eq $Null)
-{
-	$AddDateTime = $False
-}
-	
 #Original Script created 8/17/2010 by Michael Bogobowicz, Citrix Systems.
 #To contact, please message @mikebogo on Twitter
 #This script is designed to be run on a XenApp 6.5 server
@@ -360,578 +394,308 @@ If($AddDateTime -eq $Null)
 #webster@carlwebster.com
 #@carlwebster on Twitter
 #http://www.CarlWebster.com
-#modified from the original script for XenApp 6.5
-#	Version 4 of script is based on version 3.17 of XA65 script
-#	Add ability to process AD based Citrix policies
-#	Add Appendix A for Session Sharing information
-#	Add Appendix B for Server Major Items
-#	Add descriptions for Citrix Policy filter type
-#	Add detecting the running Operating System to handle Word 2007 oddness with Server 2003/2008 vs Windows 7 vs Server 2008 R2
-#	Add elapsed time to end of script
-#	Add extra testing for applications, load balancing policies and worker groups to report if none exist instead of issuing a warning
-#	Add get-date to all write-verbose statements
-#	Add missing "None" option to ICA\Visual Display\Moving Images\Progressive compression level
-#	Add more Write-Verbose statements
-#	Add option to SaveAs PDF
-#	Add setting Default tab stops at 36 points (1/2 inch in the USA)
-#	Add Software Inventory
-#	Add Summary Page
-#	Add support for non-English versions of Microsoft Word
-#	Add WMI hardware information for Computer System, Disks, Processor and Network Interface Cards
-#	Change all instances of using $Word.Quit() to also use proper garbage collection
-#	Change all occurrences of Access Session Conditions to Tables 
-#	Change Default Cover Page to Sideline since Motion is not in German Word
-#	Change Get-RegistryValue function to handle $Null return value
-#	Change most $Global: variables to regular variables
-#	Change the test for the existence of XA65ConfigLog.udl from using .\ to $pwd.path
-#	Change wording of not being able to load the Citrix.GroupPolicy.Commands.psm1 module
-#	Change wording when script aborts from a blank company name
-#	Fix issues with Word 2007 SaveAs under (Server 2008 and Windows 7) and Server 2008 R2
-#	Fix logic error when comparing Citrix installed hotfixes to the recommended list
-#	Fix output and missing items from ICA\Printing\Client Printers\Printer driver mapping and compatibility
-#	Fix output of ICA\Adobe Flash Delivery\Flash Redirection\Flash URL compatibility list
-#	Fix output of ICA\MultiStream Connections\Multi-Port Policy
-#	Fix output of ICA\Printing\Drivers\Universal driver preference
-#	Fix output of ICA\Printing\Session printers
-#	Fix output of ICA\Printing\Universal Printing\Universal printing optimization defaults
-#	Fix output of Server Settings\Health Monitoring and Recovery\Health monitoring tests
-#	Fix WaitForPrintersToBeCreated policy setting
-#	Fixing ICA\Printing\Session printers and ICA\Printing\Client Printers\Printer driver mapping and compatibility  required a new Function Get-PrinterModifiedSettings to keep from having duplicate code from Session Printers
-#	Abort script if Farm information cannot be retrieved
-#	Align Tables on Tab stop boundaries
-#	Consolidated all the code to properly abort the script into a function AbortScript
-#	Force the -verbose common parameter to be $True if running PoSH V3 and later
-#	General code cleanup
-#	If cover page selected does not exist, abort script
-#	If running Word 2007 and the Save As PDF option is selected then verify the Save As PDF add-in is installed.  Abort script if not installed.
-#	In the Server section, change Published Application to a Table
-#	Load Balancing Policies: fixed display of "Apply to connections made through Access Gateway" and "Configure application connection preference based on worker group"
-#	Only process WMI hardware information if the server is online
-#	Strongly type all possible variables
-#	Update for changes to CTX129229
-#	Verify Get-HotFix cmdlet worked.  If not, write error and suggestion to document
-#	Verify Word object is created.  If not, write error & suggestion to document and abort script
-#Updated 07-Nov-2013
-#	Changed link to Citrix.GroupPolicy.Commands.psm module to my Dropbox
-#	Changed the GetCtxGPOsInAD function to work in a Windows Workgroup environment
-#	Removed the .LINK section from the help text
-#	The Hotfix array for Citrix hotfixes was not initialized correctly causing all installed Citrix hotfixes to show as not installed.
-#Updated 12-Nov-2013
-#	Added back in the French sections that somehow got removed
-#Version 4.1 Updates and fixes:
-#	Added additional error checking when retrieving Network Interface WMI data
-#	Added additional Write-Verbose statements for the AD policy function
-#	Added beginning and ending dates for retrieving Configuration Logging data
-#	Added four policy settings that are only for AD based Citrix policies
-#	Added help text to show the script produces a Word or PDF document
-#	Added help text to show the Summary option cannot be used with either the Software or Hardware options
-#	Added Parameter sets to support the Summary option
-#	Added Summary report option
-#	Changed Configuration Logging section to a Word table
-#	Changed to using $PSCulture for Word culture setting
-#	Don't abort script if Cover Page is not found
-#	Fixed bug where the AD Policy function did not work if there was only one AD policy
-#	For applications, move list of servers and worker groups to table
-#	For the software inventory add DisplayVersion to the table
-#	For Worker Groups, move list of servers and applications to table
-#	Function, validStateProp, created by Michael B. Smith to handle "property cannot be found on this object" error on Mobile Experience policy settings
-#	If remoting is used, verify that remoting server is not in session-only mode
-#	In Appendix B, if the License Server cell is empty replace with the text "Set by policy"
-#	Only include Valid hotfixes in the table of installed Citrix hotfixes
-#	Removed the Valid column for the Citrix hotfix table
-#	Removed the extra blank line between Administrators
-#	The XenApp 6.5 Mobility Pack added a new User policy node with three settings
-#	Updated for CTX129229 that was updated on 31-Dec-2013
-#Version 4.11
-#	Save current settings for Spell Check and Grammar Check before disabling them
-#	Before closing Word, put Spelling and Grammar settings back to original
-#Version 4.12
-#	Fix divide by 0 error when Worker Group by Security Group or OU and the name is longer than 60 characters
-#	Fix the verbose messages when processing Worker Groups to display Server, Security Group or OU
-#	For Worker Groups based on multiple OUs, sort the OU list by length of distinguished name 
-#	Remove hard-coded value in the BuildTableForServerOrWG function
-#	Add updated WriteWordLine function
-#	Change Command Line and Working Directory for Applications to a different size font and make them bold
-#	Citrix Services table, added a Startup Type column and color stopped services in red only if Startup Type is Auto 
-#	For Active Directory based Citrix policies, added the AD policy name to clarify which Citrix policies are contained in what AD policies
-#Version 4.13
-#	Bring up-to-date with the changes made to the Active Directory and DHCP documentation scripts
-#		Remove all hard-coded values for Word and Table functions
-#		Don't abort script if CompanyName is not provided
-#		Horizontal table header row flows across page Breaks
-#		Format most Warning and Error messages to make them more readable
-#		Test for existence of "word" variable before removal
-#		Fix GetComputerWMIInfo to work in a multi-forest Active Directory environment
-#	Next script update will require PowerShell Version 3.0 or higher
-#Version 4.14
-#	Added an AddDateTime parameter
+#Version 4.21 18-Dec-2014
+#	Updated for CTX129229 dated 18-Dec-2014
+#	Fix wrong variable name for saving as PDF for Word 2013
+#Version 4.2
+#	Fix the SWExclusions function to work if SoftwareExclusions.txt file contains only one item
+#	Cleanup the script's parameters section
+#	Code cleanup and standardization with the master template script
+#	Requires PowerShell V3 or later
+#	Removed support for Word 2007
+#	Word 2007 references in help text removed
+#	Cover page parameter now states only Word 2010 and 2013 are supported
+#	Most Word 2007 references in script removed:
+#		Function ValidateCoverPage
+#		Function SetupWord
+#		Function SaveandCloseDocumentandShutdownWord
+#	Function CheckWord2007SaveAsPDFInstalled removed
+#	If Word 2007 is detected, an error message is now given and the script is aborted
+#	Cleanup Word table code for the first row and background color
+#	Cleanup retrieving services and service startup type with Iain Brighton's optimization
+#	Add Iain Brighton's Word table functions
+#	Move Citrix Services table to new table functions
+#	Move Citrix and Microsoft hotfix tables to new table functions
+#	Move Appendix A and B tables to new table function
+#	Move hardware info to new table functions
+#	Add more write statements and error handling to the Configuration Logging report section
+#	Add parameters for MSWord, Text and HTML for future updates
+#	Add Section parameter
+#	Valid Section options are:
+#		Admins (Administrators)
+#		Apps (Applications)
+#		ConfigLog (Configuration Logging)
+#		LBPolicies (Load Balancing Policies)
+#		LoadEvals (Load Evaluators)
+#		Policies
+#		Servers
+#		WGs (Worker Groups)
+#		Zones
+#		All
 
 Set-StrictMode -Version 2
 
-#the following values were attained from 
-#http://groovy.codehaus.org/modules/scriptom/1.6.0/scriptom-office-2K3-tlb/apidocs/
-#http://msdn.microsoft.com/en-us/library/office/aa211923(v=office.11).aspx
-[int]$wdAlignPageNumberRight = 2
-[long]$wdColorGray15 = 14277081
-[long]$wdColorGray05 = 15987699 
-[int]$wdMove = 0
-[int]$wdSeekMainDocument = 0
-[int]$wdSeekPrimaryFooter = 4
-[int]$wdStory = 6
-[int]$wdColorRed = 255
-[int]$wdColorBlack = 0
-[int]$wdWord2007 = 12
-[int]$wdWord2010 = 14
-[int]$wdWord2013 = 15
-[int]$wdSaveFormatPDF = 17
-#http://blogs.technet.com/b/heyscriptingguy/archive/2006/03/01/how-can-i-right-align-a-single-column-in-a-word-table.aspx
-#http://msdn.microsoft.com/en-us/library/office/ff835817%28v=office.15%29.aspx
-[int]$wdAlignParagraphLeft = 0
-[int]$wdAlignParagraphCenter = 1
-[int]$wdAlignParagraphRight = 2
-#http://msdn.microsoft.com/en-us/library/office/ff193345%28v=office.15%29.aspx
-[int]$wdCellAlignVerticalTop = 0
-[int]$wdCellAlignVerticalCenter = 1
-[int]$wdCellAlignVerticalBottom = 2
-#http://msdn.microsoft.com/en-us/library/office/ff844856%28v=office.15%29.aspx
-[int]$wdAutoFitFixed = 0
-[int]$wdAutoFitContent = 1
-[int]$wdAutoFitWindow = 2
-#http://msdn.microsoft.com/en-us/library/office/ff821928%28v=office.15%29.aspx
-[int]$wdAdjustNone = 0
-[int]$wdAdjustProportional = 1
-[int]$wdAdjustFirstColumn = 2
-[int]$wdAdjustSameWidth = 3
+#force  on
+$PSDefaultParameterValues = @{"*:Verbose"=$True}
+$SaveEAPreference = $ErrorActionPreference
+$ErrorActionPreference = 'SilentlyContinue'
 
-[int]$PointsPerTabStop = 36
-[int]$Indent0TabStops = 0 * $PointsPerTabStop
-[int]$Indent1TabStops = 1 * $PointsPerTabStop
-[int]$Indent2TabStops = 2 * $PointsPerTabStop
-[int]$Indent3TabStops = 3 * $PointsPerTabStop
-[int]$Indent4TabStops = 4 * $PointsPerTabStop
-
-# http://www.thedoctools.com/index.php?show=wt_style_names_english_danish_german_french
-[int]$wdStyleHeading1 = -2
-[int]$wdStyleHeading2 = -3
-[int]$wdStyleHeading3 = -4
-[int]$wdStyleHeading4 = -5
-[int]$wdStyleNoSpacing = -158
-[int]$wdTableGrid = -155
-
-#http://groovy.codehaus.org/modules/scriptom/1.6.0/scriptom-office-2K3-tlb/apidocs/org/codehaus/groovy/scriptom/tlb/office/word/WdLineStyle.html
-[int]$wdLineStyleNone = 0
-[int]$wdLineStyleSingle = 1
-
-[int]$wdHeadingFormatTrue = -1
-[int]$wdHeadingFormatFalse = 0 
-
-[string]$RunningOS = (Get-WmiObject -class Win32_OperatingSystem -EA 0).Caption
-
-$hash = @{}
-
-# DE and FR translations for Word 2010 by Vladimir Radojevic
-# Vladimir.Radojevic@Commerzreal.com
-
-# DA translations for Word 2010 by Thomas Daugaard
-# Citrix Infrastructure Specialist at edgemo A/S
-
-# CA translations by Javier Sanchez 
-# CEO & Founder 101 Consulting
-
-#ca - Catalan
-#da - Danish
-#de - German
-#en - English
-#es - Spanish
-#fi - Finnish
-#fr - French
-#nb - Norwegian
-#nl - Dutch
-#pt - Portuguese
-#sv - Swedish
-
-Switch ($PSCulture.Substring(0,3))
+If($MSWord -eq $Null)
 {
-	'ca-'	{
-			$hash.($($PSCulture)) = @{
-				'Word_TableOfContents' = 'Taula automática 2';
-			}
-		}
-
-	'da-'	{
-			$hash.($($PSCulture)) = @{
-				'Word_TableOfContents' = 'Automatisk tabel 2';
-			}
-		}
-
-	'de-'	{
-			$hash.($($PSCulture)) = @{
-				'Word_TableOfContents' = 'Automatische Tabelle 2';
-			}
-		}
-
-	'en-'	{
-			$hash.($($PSCulture)) = @{
-				'Word_TableOfContents'  = 'Automatic Table 2';
-			}
-		}
-
-	'es-'	{
-			$hash.($($PSCulture)) = @{
-				'Word_TableOfContents' = 'Tabla automática 2';
-			}
-		}
-
-	'fi-'	{
-			$hash.($($PSCulture)) = @{
-				'Word_TableOfContents' = 'Automaattinen taulukko 2';
-			}
-		}
-
-	'fr-'	{
-			$hash.($($PSCulture)) = @{
-				'Word_TableOfContents' = 'Sommaire Automatique 2';
-			}
-		}
-
-	'nb-'	{
-			$hash.($($PSCulture)) = @{
-				'Word_TableOfContents' = 'Automatisk tabell 2';
-			}
-		}
-
-	'nl-'	{
-			$hash.($($PSCulture)) = @{
-				'Word_TableOfContents' = 'Automatische inhoudsopgave 2';
-			}
-		}
-
-	'pt-'	{
-			$hash.($($PSCulture)) = @{
-				'Word_TableOfContents' = 'Sumário Automático 2';
-			}
-		}
-
-	'sv-'	{
-			$hash.($($PSCulture)) = @{
-				'Word_TableOfContents' = 'Automatisk innehållsförteckning2';
-			}
-		}
-
-	Default	{$hash.('en-US') = @{
-				'Word_TableOfContents'  = 'Automatic Table 2';
-			}
-		}
+	$MSWord = $False
+}
+If($PDF -eq $Null)
+{
+	$PDF = $False
+}
+If($Text -eq $Null)
+{
+	$Text = $False
+}
+If($HTML -eq $Null)
+{
+	$HTML = $False
+}
+If($Hardware -eq $Null)
+{
+	$Hardware = $False
+}
+If($Software -eq $Null)
+{
+	$Software = $False
+}
+If($StartDate -eq $Null)
+{
+	$StartDate = ((Get-Date -displayhint date).AddDays(-7))
+}
+If($EndDate -eq $Null)
+{
+	$EndDate = (Get-Date -displayhint date)
+}
+If($Summary -eq $Null)
+{
+	$Summary = $False
+}
+If($AddDateTime -eq $Null)
+{
+	$AddDateTime = $False
+}
+If($Section -eq $Null)
+{
+	$Section = "All"
 }
 
-$myHash = $hash.$PSCulture
-
-If($myHash -eq $Null)
+If(!(Test-Path Variable:MSWord))
 {
-	$myHash = $hash.('en-US')
+	$MSWord = $False
+}
+If(!(Test-Path Variable:PDF))
+{
+	$PDF = $False
+}
+If(!(Test-Path Variable:Text))
+{
+	$Text = $False
+}
+If(!(Test-Path Variable:HTML))
+{
+	$HTML = $False
+}
+If(!(Test-Path Variable:Hardware))
+{
+	$Hardware = $False
+}
+If(!(Test-Path Variable:Software))
+{
+	$Software = $False
+}
+If(!(Test-Path Variable:StartDate))
+{
+	$StartDate = ((Get-Date -displayhint date).AddDays(-7))
+}
+If(!(Test-Path Variable:EndDate))
+{
+	$EndDate = ((Get-Date -displayhint date))
+}
+If(!(Test-Path Variable:Summary))
+{
+	$Summary = $False
+}
+If(!(Test-Path Variable:AddDateTime))
+{
+	$AddDateTime = $False
+}
+If(!(Test-Path Variable:Section))
+{
+	$Section = "All"
 }
 
-$myHash.Word_NoSpacing = $wdStyleNoSpacing
-$myHash.Word_Heading1 = $wdStyleheading1
-$myHash.Word_Heading2 = $wdStyleheading2
-$myHash.Word_Heading3 = $wdStyleheading3
-$myHash.Word_Heading4 = $wdStyleheading4
-$myHash.Word_TableGrid = $wdTableGrid
-
-Function ValidateCoverPage
+If($MSWord -eq $Null)
 {
-	Param([int]$xWordVersion, [string]$xCP)
-	
-	$xArray = ""
-	
-	Switch ($PSCulture.Substring(0,3))
+	If($Text -or $HTML -or $PDF)
 	{
-		'ca-'	{
-				If($xWordVersion -eq $wdWord2013)
-				{
-					$xArray = ("Austin", "En bandes", "Faceta", "Filigrana",
-					"Integral", "Ió (clar)", "Ió (fosc)", "Línia lateral",
-					"Moviment", "Quadrícula", "Retrospectiu", "Sector (clar)",
-					"Sector (fosc)", "Semàfor", "Visualització", "Whisp")
-				}
-				ElseIf($xWordVersion -eq $wdWord2010)
-				{
-					$xArray = ("Alfabet", "Anual", "Austin", "Conservador",
-					"Contrast", "Cubicles", "Diplomàtic", "Exposició",
-					"Línia lateral", "Mod", "Mosiac", "Moviment", "Paper de diari",
-					"Perspectiva", "Piles", "Quadrícula", "Sobri",
-					"Transcendir", "Trencaclosques")
-				}
-				ElseIf($xWordVersion -eq $wdWord2007)
-				{
-					$xArray = ("Alfabet", "Anual", "Conservador", "Contrast",
-					"Cubicles", "Diplomàtic", "En mosaic", "Exposició", "Línia lateral",
-					"Mod", "Moviment", "Piles", "Sobri", "Transcendir", "Trencaclosques")
-				}
-			}
-
-		'da-'	{
-				If($xWordVersion -eq $wdWord2013)
-				{
-					$xArray = ("BevægElse", "Brusen", "Ion (lys)", "Filigran",
-					"Retro", "Semafor", "Visningsmaster", "Integral",
-					"Facet", "Gitter", "Stribet", "Sidelinje", "Udsnit (lys)",
-					"Udsnit (mørk)", "Ion (mørk)", "Austin")
-				}
-				ElseIf($xWordVersion -eq $wdWord2010)
-				{
-					$xArray = ("BevægElse", "Moderat", "Perspektiv", "Firkanter",
-					"Overskrid", "Alfabet", "Kontrast", "Stakke", "Fliser", "Gåde",
-					"Gitter", "Austin", "Eksponering", "Sidelinje", "Enkel",
-					"Nålestribet", "Årlig", "Avispapir", "Tradionel")
-				}
-				ElseIf($xWordVersion -eq $wdWord2007)
-				{
-					$xArray = ("Alfabet", "Årlig", "BevægElse", "Eksponering",
-					"Enkel", "Firkanter", "Fliser", "Gåde", "Kontrast",
-					"Mod", "Nålestribet", "Overskrid", "Sidelinje", "Stakke",
-					"Tradionel")
-				}
-			}
-
-		'de-'	{
-				If($xWordVersion -eq $wdWord2013)
-				{
-					$xArray = ("Semaphor", "Segment (hell)", "Ion (hell)",
-					"Raster", "Ion (dunkel)", "Filigran", "Rückblick", "Pfiff",
-					"ViewMaster", "Segment (dunkel)", "Verbunden", "Bewegung",
-					"Randlinie", "Austin", "Integral", "Facette")
-				}
-				ElseIf($xWordVersion -eq $wdWord2010)
-				{
-					$xArray = ("Alphabet", "Austin", "Bewegung", "Durchscheinend",
-					"Herausgestellt", "Jährlich", "Kacheln", "Kontrast", "Kubistisch",
-					"Modern", "Nadelstreifen", "Perspektive", "Puzzle", "Randlinie",
-					"Raster", "Schlicht", "Stapel", "Traditionell", "Zeitungspapier")
-				}
-				ElseIf($xWordVersion -eq $wdWord2007)
-				{
-					$xArray = ("Alphabet", "Bewegung", "Durchscheinend", "Herausgestellt",
-					"Jährlich", "Kacheln", "Kontrast", "Kubistisch", "Modern",
-					"Nadelstreifen", "Puzzle", "Randlinie", "Raster", "Schlicht", "Stapel",
-					"Traditionell")
-				}
-			}
-
-		'en-'	{
-				If($xWordVersion -eq $wdWord2013)
-				{
-					$xArray = ("Austin", "Banded", "Facet", "Filigree", "Grid",
-					"Integral", "Ion (Dark)", "Ion (Light)", "Motion", "Retrospect",
-					"Semaphore", "Sideline", "Slice (Dark)", "Slice (Light)", "ViewMaster",
-					"Whisp")
-				}
-				ElseIf($xWordVersion -eq $wdWord2010)
-				{
-					$xArray = ("Alphabet", "Annual", "Austere", "Austin", "Conservative",
-					"Contrast", "Cubicles", "Exposure", "Grid", "Mod", "Motion", "Newsprint",
-					"Perspective", "Pinstripes", "Puzzle", "Sideline", "Stacks", "Tiles", "Transcend")
-				}
-				ElseIf($xWordVersion -eq $wdWord2007)
-				{
-					$xArray = ("Alphabet", "Annual", "Austere", "Conservative", "Contrast",
-					"Cubicles", "Exposure", "Mod", "Motion", "Pinstripes", "Puzzle",
-					"Sideline", "Stacks", "Tiles", "Transcend")
-				}
-			}
-
-		'es-'	{
-				If($xWordVersion -eq $wdWord2013)
-				{
-					$xArray = ("Whisp", "Vista principal", "Filigrana", "Austin",
-					"Slice (luz)", "Faceta", "Semáforo", "Retrospectiva", "Cuadrícula",
-					"Movimiento", "Cortar (oscuro)", "Línea lateral", "Ion (oscuro)",
-					"Ion (claro)", "Integral", "Con bandas")
-				}
-				ElseIf($xWordVersion -eq $wdWord2010)
-				{
-					$xArray = ("Alfabeto", "Anual", "Austero", "Austin", "Conservador",
-					"Contraste", "Cuadrícula", "Cubículos", "Exposición", "Línea lateral",
-					"Moderno", "Mosaicos", "Movimiento", "Papel periódico",
-					"Perspectiva", "Pilas", "Puzzle", "Rayas", "Sobrepasar")
-				}
-				ElseIf($xWordVersion -eq $wdWord2007)
-				{
-					$xArray = ("Alfabeto", "Anual", "Austero", "Conservador",
-					"Contraste", "Cubículos", "Exposición", "Línea lateral",
-					"Moderno", "Mosaicos", "Movimiento", "Pilas", "Puzzle",
-					"Rayas", "Sobrepasar")
-				}
-			}
-
-		'fi-'	{
-				If($xWordVersion -eq $wdWord2013)
-				{
-					$xArray = ("Filigraani", "Integraali", "Ioni (tumma)",
-					"Ioni (vaalea)", "Opastin", "Pinta", "Retro", "Sektori (tumma)",
-					"Sektori (vaalea)", "Vaihtuvavärinen", "ViewMaster", "Austin",
-					"Kiehkura", "Liike", "Ruudukko", "Sivussa")
-				}
-				ElseIf($xWordVersion -eq $wdWord2010)
-				{
-					$xArray = ("Aakkoset", "Askeettinen", "Austin", "Kontrasti",
-					"Laatikot", "Liike", "Liituraita", "Mod", "Osittain peitossa",
-					"Palapeli", "Perinteinen", "Perspektiivi", "Pinot", "Ruudukko",
-					"Ruudut", "Sanomalehtipaperi", "Sivussa", "Vuotuinen", "Ylitys")
-				}
-				ElseIf($xWordVersion -eq $wdWord2007)
-				{
-					$xArray = ("Aakkoset", "Alttius", "Kontrasti", "Kuvakkeet ja tiedot",
-					"Liike" , "Liituraita" , "Mod" , "Palapeli", "Perinteinen", "Pinot",
-					"Sivussa", "Työpisteet", "Vuosittainen", "Yksinkertainen", "Ylitys")
-				}
-			}
-
-		'fr-'	{
-				If($xWordVersion -eq $wdWord2013)
-				{
-					$xArray = ("ViewMaster", "Secteur (foncé)", "Sémaphore",
-					"Rétrospective", "Ion (foncé)", "Ion (clair)", "Intégrale",
-					"Filigrane", "Facette", "Secteur (clair)", "À bandes", "Austin",
-					"Guide", "Whisp", "Lignes latérales", "Quadrillage")
-				}
-				ElseIf($xWordVersion -eq $wdWord2010)
-				{
-					$xArray = ("Mosaïques", "Ligne latérale", "Annuel", "Perspective",
-					"Contraste", "Emplacements de bureau", "Moderne", "Blocs empilés",
-					"Rayures fines", "Austère", "Transcendant", "Classique", "Quadrillage",
-					"Exposition", "Alphabet", "Mots croisés", "Papier journal", "Austin", "Guide")
-				}
-				ElseIf($xWordVersion -eq $wdWord2007)
-				{
-					$xArray = ("Alphabet", "Annuel", "Austère", "Blocs empilés", "Blocs superposés",
-					"Classique", "Contraste", "Exposition", "Guide", "Ligne latérale", "Moderne",
-					"Mosaïques", "Mots croisés", "Rayures fines", "Transcendant")
-				}
-			}
-
-		'nb-'	{
-				If($xWordVersion -eq $wdWord2013)
-				{
-					$xArray = ("Austin", "BevegElse", "Dempet", "Fasett", "Filigran",
-					"Integral", "Ion (lys)", "Ion (mørk)", "Retrospekt", "Rutenett",
-					"Sektor (lys)", "Sektor (mørk)", "Semafor", "Sidelinje", "Stripet",
-					"ViewMaster")
-				}
-				ElseIf($xWordVersion -eq $wdWord2010)
-				{
-					$xArray = ("Alfabet", "Årlig", "Avistrykk", "Austin", "Avlukker",
-					"BevegElse", "Engasjement", "Enkel", "Fliser", "Konservativ",
-					"Kontrast", "Mod", "Perspektiv", "Puslespill", "Rutenett", "Sidelinje",
-					"Smale striper", "Stabler", "Transcenderende")
-				}
-				ElseIf($xWordVersion -eq $wdWord2007)
-				{
-					$xArray = ("Alfabet", "Årlig", "Avlukker", "BevegElse", "Engasjement",
-					"Enkel", "Fliser", "Konservativ", "Kontrast", "Mod", "Puslespill",
-					"Sidelinje", "Smale striper", "Stabler", "Transcenderende")
-				}
-			}
-
-		'nl-'	{
-				If($xWordVersion -eq $wdWord2013)
-				{
-					$xArray = ("Austin", "Beweging", "Facet", "Filigraan", "Gestreept",
-					"Integraal", "Ion (donker)", "Ion (licht)", "Raster",
-					"Segment (Light)", "Semafoor", "Slice (donker)", "Spriet",
-					"Terugblik", "Terzijde", "ViewMaster")
-				}
-				ElseIf($xWordVersion -eq $wdWord2010)
-				{
-					$xArray = ("Aantrekkelijk", "Alfabet", "Austin", "Bescheiden",
-					"Beweging", "Blikvanger", "Contrast", "Eenvoudig", "Jaarlijks",
-					"Krantenpapier", "Krijtstreep", "Kubussen", "Mod", "Perspectief",
-					"Puzzel", "Raster", "Stapels",
-					"Tegels", "Terzijde")
-				}
-				ElseIf($xWordVersion -eq $wdWord2007)
-				{
-					$xArray = ("Aantrekkelijk", "Alfabet", "Bescheiden", "Beweging",
-					"Blikvanger", "Contrast", "Eenvoudig", "Jaarlijks", "Krijtstreep",
-					"Mod", "Puzzel", "Stapels", "Tegels", "Terzijde", "Werkplekken")
-				}
-			}
-
-		'pt-'	{
-				If($xWordVersion -eq $wdWord2013)
-				{
-					$xArray = ("Animação", "Austin", "Em Tiras", "Exibição Mestra",
-					"Faceta", "Fatia (Clara)", "Fatia (Escura)", "Filete", "Filigrana",
-					"Grade", "Integral", "Íon (Claro)", "Íon (Escuro)", "Linha Lateral",
-					"Retrospectiva", "Semáforo")
-				}
-				ElseIf($xWordVersion -eq $wdWord2010)
-				{
-					$xArray = ("Alfabeto", "Animação", "Anual", "Austero", "Austin", "Baias",
-					"Conservador", "Contraste", "Exposição", "Grade", "Ladrilhos",
-					"Linha Lateral", "Listras", "Mod", "Papel Jornal", "Perspectiva", "Pilhas",
-					"Quebra-cabeça", "Transcend")
-				}
-				ElseIf($xWordVersion -eq $wdWord2007)
-				{
-					$xArray = ("Alfabeto", "Animação", "Anual", "Austero", "Baias", "Conservador",
-					"Contraste", "Exposição", "Ladrilhos", "Linha Lateral", "Listras", "Mod",
-					"Pilhas", "Quebra-cabeça", "Transcendente")
-				}
-			}
-
-		'sv-'	{
-				If($xWordVersion -eq $wdWord2013)
-				{
-					$xArray = ("Austin", "Band", "Fasett", "Filigran", "Integrerad", "Jon (ljust)",
-					"Jon (mörkt)", "Knippe", "Rutnät", "RörElse", "Sektor (ljus)", "Sektor (mörk)",
-					"Semafor", "Sidlinje", "VisaHuvudsida", "Återblick")
-				}
-				ElseIf($xWordVersion -eq $wdWord2010)
-				{
-					$xArray = ("Alfabetmönster", "Austin", "Enkelt", "Exponering", "Konservativt",
-					"Kontrast", "Kritstreck", "Kuber", "Perspektiv", "Plattor", "Pussel", "Rutnät",
-					"RörElse", "Sidlinje", "Sobert", "Staplat", "Tidningspapper", "Årligt",
-					"Övergående")
-				}
-				ElseIf($xWordVersion -eq $wdWord2007)
-				{
-					$xArray = ("Alfabetmönster", "Årligt", "Enkelt", "Exponering", "Konservativt",
-					"Kontrast", "Kritstreck", "Kuber", "Övergående", "Plattor", "Pussel", "RörElse",
-					"Sidlinje", "Sobert", "Staplat")
-				}
-			}
-
-		Default	{
-					If($xWordVersion -eq $wdWord2013)
-					{
-						$xArray = ("Austin", "Banded", "Facet", "Filigree", "Grid", "Integral",
-						"Ion (Dark)", "Ion (Light)", "Motion", "Retrospect", "Semaphore",
-						"Sideline", "Slice (Dark)", "Slice (Light)", "ViewMaster", "Whisp")
-					}
-					ElseIf($xWordVersion -eq $wdWord2010)
-					{
-						$xArray = ("Alphabet", "Annual", "Austere", "Austin", "Conservative",
-						"Contrast", "Cubicles", "Exposure", "Grid", "Mod", "Motion", "Newsprint",
-						"Perspective", "Pinstripes", "Puzzle", "Sideline", "Stacks", "Tiles", "Transcend")
-					}
-					ElseIf($xWordVersion -eq $wdWord2007)
-					{
-						$xArray = ("Alphabet", "Annual", "Austere", "Conservative", "Contrast",
-						"Cubicles", "Exposure", "Mod", "Motion", "Pinstripes", "Puzzle",
-						"Sideline", "Stacks", "Tiles", "Transcend")
-					}
-				}
-	}
-	
-	If($xArray -contains $xCP)
-	{
-		Return $True
+		$MSWord = $False
 	}
 	Else
 	{
-		Return $False
+		$MSWord = $True
 	}
+}
+
+If($MSWord -eq $False -and $PDF -eq $False -and $Text -eq $False -and $HTML -eq $False)
+{
+	$MSWord = $True
+}
+
+Write-Verbose "$(Get-Date): Testing output parameters"
+
+If($MSWord)
+{
+	Write-Verbose "$(Get-Date): MSWord is set"
+}
+ElseIf($PDF)
+{
+	Write-Verbose "$(Get-Date): PDF is set"
+}
+ElseIf($Text)
+{
+	Write-Verbose "$(Get-Date): Text is set"
+}
+ElseIf($HTML)
+{
+	Write-Verbose "$(Get-Date): HTML is set"
+}
+Else
+{
+	$ErrorActionPreference = $SaveEAPreference
+	Write-Verbose "$(Get-Date): Unable to determine output parameter"
+	If($MSWord -eq $Null)
+	{
+		Write-Verbose "$(Get-Date): MSWord is Null"
+	}
+	ElseIf($PDF -eq $Null)
+	{
+		Write-Verbose "$(Get-Date): PDF is Null"
+	}
+	ElseIf($Text -eq $Null)
+	{
+		Write-Verbose "$(Get-Date): Text is Null"
+	}
+	ElseIf($HTML -eq $Null)
+	{
+		Write-Verbose "$(Get-Date): HTML is Null"
+	}
+	Else
+	{
+		Write-Verbose "$(Get-Date): MSWord is $($MSWord)"
+		Write-Verbose "$(Get-Date): PDF is $($PDF)"
+		Write-Verbose "$(Get-Date): Text is $($Text)"
+		Write-Verbose "$(Get-Date): HTML is $($HTML)"
+	}
+	Write-Error "Unable to determine output parameter.  Script cannot continue"
+	Exit
+}
+
+$ValidSection = $False
+Switch ($Section)
+{
+	"Admins" {$ValidSection = $True}
+	"Apps" {$ValidSection = $True}
+	"ConfigLog" {$ValidSection = $True}
+	"LBPolicies" {$ValidSection = $True}
+	"LoadEvals" {$ValidSection = $True}
+	"Policies" {$ValidSection = $True}
+	"Servers" {$ValidSection = $True}
+	"WGs" {$ValidSection = $True}
+	"Zones" {$ValidSection = $True}
+	"All" {$ValidSection = $True}
+}
+
+If($ValidSection -eq $False)
+{
+	$ErrorActionPreference = $SaveEAPreference
+	Write-Error -Message "`n`tThe Section parameter specified, $($Section), is an invalid Section option.`n`tValid options are:
+	
+	`t`tAdmins
+	`t`tApps
+	`t`tConfigLog
+	`t`tLBPolicies
+	`t`tLoadEvals
+	`t`tPolicies
+	`t`tServers
+	`t`tWGs
+	`t`tZones
+	`t`tAll
+	
+	`tScript cannot continue."
+	Exit
+}
+
+If($MSWord -or $PDF)
+{
+	#try and fix the issue with the $CompanyName variable
+	$CoName = $CompanyName
+	Write-Verbose "$(Get-Date): CoName is $($CoName)"
+	
+	#the following values were attained from 
+	#http://groovy.codehaus.org/modules/scriptom/1.6.0/scriptom-office-2K3-tlb/apidocs/
+	#http://msdn.microsoft.com/en-us/library/office/aa211923(v=office.11).aspx
+	[int]$wdAlignPageNumberRight = 2
+	[long]$wdColorGray15 = 14277081
+	[long]$wdColorGray05 = 15987699 
+	[int]$wdMove = 0
+	[int]$wdSeekMainDocument = 0
+	[int]$wdSeekPrimaryFooter = 4
+	[int]$wdStory = 6
+	[int]$wdColorRed = 255
+	[int]$wdColorBlack = 0
+	[int]$wdWord2007 = 12
+	[int]$wdWord2010 = 14
+	[int]$wdWord2013 = 15
+	[int]$wdFormatDocumentDefault = 16
+	[int]$wdFormatPDF = 17
+	#http://blogs.technet.com/b/heyscriptingguy/archive/2006/03/01/how-can-i-right-align-a-single-column-in-a-word-table.aspx
+	#http://msdn.microsoft.com/en-us/library/office/ff835817%28v=office.15%29.aspx
+	[int]$wdAlignParagraphLeft = 0
+	[int]$wdAlignParagraphCenter = 1
+	[int]$wdAlignParagraphRight = 2
+	#http://msdn.microsoft.com/en-us/library/office/ff193345%28v=office.15%29.aspx
+	[int]$wdCellAlignVerticalTop = 0
+	[int]$wdCellAlignVerticalCenter = 1
+	[int]$wdCellAlignVerticalBottom = 2
+	#http://msdn.microsoft.com/en-us/library/office/ff844856%28v=office.15%29.aspx
+	[int]$wdAutoFitFixed = 0
+	[int]$wdAutoFitContent = 1
+	[int]$wdAutoFitWindow = 2
+	#http://msdn.microsoft.com/en-us/library/office/ff821928%28v=office.15%29.aspx
+	[int]$wdAdjustNone = 0
+	[int]$wdAdjustProportional = 1
+	[int]$wdAdjustFirstColumn = 2
+	[int]$wdAdjustSameWidth = 3
+
+	[int]$PointsPerTabStop = 36
+	[int]$Indent0TabStops = 0 * $PointsPerTabStop
+	[int]$Indent1TabStops = 1 * $PointsPerTabStop
+	[int]$Indent2TabStops = 2 * $PointsPerTabStop
+	[int]$Indent3TabStops = 3 * $PointsPerTabStop
+	[int]$Indent4TabStops = 4 * $PointsPerTabStop
+
+	# http://www.thedoctools.com/index.php?show=wt_style_names_english_danish_german_french
+	[int]$wdStyleHeading1 = -2
+	[int]$wdStyleHeading2 = -3
+	[int]$wdStyleHeading3 = -4
+	[int]$wdStyleHeading4 = -5
+	[int]$wdStyleNoSpacing = -158
+	[int]$wdTableGrid = -155
+
+	#http://groovy.codehaus.org/modules/scriptom/1.6.0/scriptom-office-2K3-tlb/apidocs/org/codehaus/groovy/scriptom/tlb/office/word/WdLineStyle.html
+	[int]$wdLineStyleNone = 0
+	[int]$wdLineStyleSingle = 1
+
+	[int]$wdHeadingFormatTrue = -1
+	[int]$wdHeadingFormatFalse = 0 
+
+	[string]$RunningOS = (Get-WmiObject -class Win32_OperatingSystem -EA 0).Caption
 }
 
 Function GetComputerWMIInfo
@@ -948,8 +712,20 @@ Function GetComputerWMIInfo
 	#Get Computer info
 	Write-Verbose "$(Get-Date): `t`tProcessing WMI Computer information"
 	Write-Verbose "$(Get-Date): `t`t`tHardware information"
-	WriteWordLine 3 0 "Computer Information"
-	WriteWordLine 0 1 "General Computer"
+	If($MSWord -or $PDF)
+	{
+		WriteWordLine 3 0 "Computer Information"
+		WriteWordLine 0 1 "General Computer"
+	}
+	ElseIf($Text)
+	{
+		Line 0 "Computer Information"
+		Line 1 "General Computer"
+	}
+	ElseIf($HTML)
+	{
+	}
+	
 	[bool]$GotComputerItems = $True
 	
 	Try
@@ -969,31 +745,63 @@ Function GetComputerWMIInfo
 
 		ForEach($Item in $ComputerItems)
 		{
-			WriteWordLine 0 2 "Manufacturer`t: " $Item.manufacturer
-			WriteWordLine 0 2 "Model`t`t: " $Item.model
-			WriteWordLine 0 2 "Domain`t`t: " $Item.domain
-			WriteWordLine 0 2 "Total Ram`t: $($Item.totalphysicalram) GB"
-			WriteWordLine 0 2 ""
+			OutputComputerItem $Item
 		}
 	}
 	ElseIf(!$?)
 	{
 		Write-Verbose "$(Get-Date): Get-WmiObject win32_computersystem failed for $($RemoteComputerName)"
 		Write-Warning "Get-WmiObject win32_computersystem failed for $($RemoteComputerName)"
-		WriteWordLine 0 2 "Get-WmiObject win32_computersystem failed for $($RemoteComputerName)" "" $Null 0 $False $True
-		WriteWordLine 0 2 "On $($RemoteComputerName) you may need to run winmgmt /verifyrepository" "" $Null 0 $False $True
-		WriteWordLine 0 2 "and winmgmt /salvagerepository.  If this is a trusted Forest, you may" "" $Null 0 $False $True
-		WriteWordLine 0 2 "need to rerun the script with Domain Admin credentials from the trusted Forest." "" $Null 0 $False $True
+		If($MSWORD -or $PDF)
+		{
+			WriteWordLine 0 2 "Get-WmiObject win32_computersystem failed for $($RemoteComputerName)" "" $Null 0 $False $True
+			WriteWordLine 0 2 "On $($RemoteComputerName) you may need to run winmgmt /verifyrepository" "" $Null 0 $False $True
+			WriteWordLine 0 2 "and winmgmt /salvagerepository.  If this is a trusted Forest, you may" "" $Null 0 $False $True
+			WriteWordLine 0 2 "need to rerun the script with Domain Admin credentials from the trusted Forest." "" $Null 0 $False $True
+		}
+		ElseIf($Text)
+		{
+			Line 2 "Get-WmiObject win32_computersystem failed for $($RemoteComputerName)"
+			Line 2 "On $($RemoteComputerName) you may need to run winmgmt /verifyrepository"
+			Line 2 "and winmgmt /salvagerepository.  If this is a trusted Forest, you may"
+			Line 2 "need to rerun the script with Domain Admin credentials from the trusted Forest."
+			Line 2 ""
+		}
+		ElseIf($HTML)
+		{
+		}
 	}
 	Else
 	{
 		Write-Verbose "$(Get-Date): No results returned for Computer information"
-		WriteWordLine 0 2 "No results returned for Computer information" "" $Null 0 $False $True
+		If($MSWORD -or $PDF)
+		{
+			WriteWordLine 0 2 "No results returned for Computer information" "" $Null 0 $False $True
+		}
+		ElseIf($Text)
+		{
+			Line 2 "No results returned for Computer information"
+		}
+		ElseIf($HTML)
+		{
+		}
 	}
 	
 	#Get Disk info
 	Write-Verbose "$(Get-Date): `t`t`tDrive information"
-	WriteWordLine 0 1 "Drive(s)"
+
+	If($MSWord -or $PDF)
+	{
+		WriteWordLine 0 1 "Drive(s)"
+	}
+	ElseIf($Text)
+	{
+		Line 1 "Drive(s)"
+	}
+	ElseIf($HTML)
+	{
+	}
+
 	[bool]$GotDrives = $True
 	
 	Try
@@ -1016,46 +824,7 @@ Function GetComputerWMIInfo
 		{
 			If($drive.caption -ne "A:" -and $drive.caption -ne "B:")
 			{
-				WriteWordLine 0 2 "Caption`t`t: " $drive.caption
-				WriteWordLine 0 2 "Size`t`t: $($drive.drivesize) GB"
-				If(![String]::IsNullOrEmpty($drive.filesystem))
-				{
-					WriteWordLine 0 2 "File System`t: " $drive.filesystem
-				}
-				WriteWordLine 0 2 "Free Space`t: $($drive.drivefreespace) GB"
-				If(![String]::IsNullOrEmpty($drive.volumename))
-				{
-					WriteWordLine 0 2 "Volume Name`t: " $drive.volumename
-				}
-				If(![String]::IsNullOrEmpty($drive.volumedirty))
-				{
-					WriteWordLine 0 2 "Volume is Dirty`t: " -nonewline
-					If($drive.volumedirty)
-					{
-						WriteWordLine 0 0 "Yes"
-					}
-					Else
-					{
-						WriteWordLine 0 0 "No"
-					}
-				}
-				If(![String]::IsNullOrEmpty($drive.volumeserialnumber))
-				{
-					WriteWordLine 0 2 "Volume Serial #`t: " $drive.volumeserialnumber
-				}
-				WriteWordLine 0 2 "Drive Type`t: " -nonewline
-				Switch ($drive.drivetype)
-				{
-					0	{WriteWordLine 0 0 "Unknown"}
-					1	{WriteWordLine 0 0 "No Root Directory"}
-					2	{WriteWordLine 0 0 "Removable Disk"}
-					3	{WriteWordLine 0 0 "Local Disk"}
-					4	{WriteWordLine 0 0 "Network Drive"}
-					5	{WriteWordLine 0 0 "Compact Disc"}
-					6	{WriteWordLine 0 0 "RAM Disk"}
-					Default {WriteWordLine 0 0 "Unknown"}
-				}
-				WriteWordLine 0 2 ""
+				OutputDriveItem $drive
 			}
 		}
 	}
@@ -1063,21 +832,56 @@ Function GetComputerWMIInfo
 	{
 		Write-Verbose "$(Get-Date): Get-WmiObject Win32_LogicalDisk failed for $($RemoteComputerName)"
 		Write-Warning "Get-WmiObject Win32_LogicalDisk failed for $($RemoteComputerName)"
-		WriteWordLine 0 2 "Get-WmiObject Win32_LogicalDisk failed for $($RemoteComputerName)" "" $Null 0 $False $True
-		WriteWordLine 0 2 "On $($RemoteComputerName) you may need to run winmgmt /verifyrepository" "" $Null 0 $False $True
-		WriteWordLine 0 2 "and winmgmt /salvagerepository.  If this is a trusted Forest, you may" "" $Null 0 $False $True
-		WriteWordLine 0 2 "need to rerun the script with Domain Admin credentials from the trusted Forest." "" $Null 0 $False $True
+		If($MSWORD -or $PDF)
+		{
+			WriteWordLine 0 2 "Get-WmiObject Win32_LogicalDisk failed for $($RemoteComputerName)" "" $Null 0 $False $True
+			WriteWordLine 0 2 "On $($RemoteComputerName) you may need to run winmgmt /verifyrepository" "" $Null 0 $False $True
+			WriteWordLine 0 2 "and winmgmt /salvagerepository.  If this is a trusted Forest, you may" "" $Null 0 $False $True
+			WriteWordLine 0 2 "need to rerun the script with Domain Admin credentials from the trusted Forest." "" $Null 0 $False $True
+		}
+		ElseIf($Text)
+		{
+			Line 2 "Get-WmiObject Win32_LogicalDisk failed for $($RemoteComputerName)"
+			Line 2 "On $($RemoteComputerName) you may need to run winmgmt /verifyrepository"
+			Line 2 "and winmgmt /salvagerepository.  If this is a trusted Forest, you may"
+			Line 2 "need to rerun the script with Domain Admin credentials from the trusted Forest."
+		}
+		ElseIf($HTML)
+		{
+		}
 	}
 	Else
 	{
 		Write-Verbose "$(Get-Date): No results returned for Drive information"
-		WriteWordLine 0 2 "No results returned for Drive information" "" $Null 0 $False $True
+		If($MSWORD -or $PDF)
+		{
+			WriteWordLine 0 2 "No results returned for Drive information" "" $Null 0 $False $True
+		}
+		ElseIf($Text)
+		{
+			Line 2 "No results returned for Drive information"
+		}
+		ElseIf($HTML)
+		{
+		}
 	}
 	
 
 	#Get CPU's and stepping
 	Write-Verbose "$(Get-Date): `t`t`tProcessor information"
-	WriteWordLine 0 1 "Processor(s)"
+
+	If($MSWord -or $PDF)
+	{
+		WriteWordLine 0 1 "Processor(s)"
+	}
+	ElseIf($Text)
+	{
+		Line 1 "Processor(s)"
+	}
+	ElseIf($HTML)
+	{
+	}
+
 	[bool]$GotProcessors = $True
 	
 	Try
@@ -1097,68 +901,62 @@ Function GetComputerWMIInfo
 		$Results = $Null
 		ForEach($processor in $processors)
 		{
-			WriteWordLine 0 2 "Name`t`t`t: " $processor.name
-			WriteWordLine 0 2 "Description`t`t: " $processor.description
-			WriteWordLine 0 2 "Max Clock Speed`t: $($processor.maxclockspeed) MHz"
-			If($processor.l2cachesize -gt 0)
-			{
-				WriteWordLine 0 2 "L2 Cache Size`t`t: $($processor.l2cachesize) KB"
-			}
-			If($processor.l3cachesize -gt 0)
-			{
-				WriteWordLine 0 2 "L3 Cache Size`t`t: $($processor.l3cachesize) KB"
-			}
-			If($processor.numberofcores -gt 0)
-			{
-				WriteWordLine 0 2 "# of Cores`t`t: " $processor.numberofcores
-			}
-			If($processor.numberoflogicalprocessors -gt 0)
-			{
-				WriteWordLine 0 2 "# of Logical Procs`t: " $processor.numberoflogicalprocessors
-			}
-			WriteWordLine 0 2 "Availability`t`t: " -nonewline
-			Switch ($processor.availability)
-			{
-				1	{WriteWordLine 0 0 "Other"}
-				2	{WriteWordLine 0 0 "Unknown"}
-				3	{WriteWordLine 0 0 "Running or Full Power"}
-				4	{WriteWordLine 0 0 "Warning"}
-				5	{WriteWordLine 0 0 "In Test"}
-				6	{WriteWordLine 0 0 "Not Applicable"}
-				7	{WriteWordLine 0 0 "Power Off"}
-				8	{WriteWordLine 0 0 "Off Line"}
-				9	{WriteWordLine 0 0 "Off Duty"}
-				10	{WriteWordLine 0 0 "Degraded"}
-				11	{WriteWordLine 0 0 "Not Installed"}
-				12	{WriteWordLine 0 0 "Install Error"}
-				13	{WriteWordLine 0 0 "Power Save - Unknown"}
-				14	{WriteWordLine 0 0 "Power Save - Low Power Mode"}
-				15	{WriteWordLine 0 0 "Power Save - Standby"}
-				16	{WriteWordLine 0 0 "Power Cycle"}
-				17	{WriteWordLine 0 0 "Power Save - Warning"}
-				Default	{WriteWordLine 0 0 "Unknown"}
-			}
-			WriteWordLine 0 2 ""
+			OutputProcessorItem $processor
 		}
 	}
 	ElseIf(!$?)
 	{
 		Write-Verbose "$(Get-Date): Get-WmiObject win32_Processor failed for $($RemoteComputerName)"
 		Write-Warning "Get-WmiObject win32_Processor failed for $($RemoteComputerName)"
-		WriteWordLine 0 2 "Get-WmiObject win32_Processor failed for $($RemoteComputerName)" "" $Null 0 $False $True
-		WriteWordLine 0 2 "On $($RemoteComputerName) you may need to run winmgmt /verifyrepository" "" $Null 0 $False $True
-		WriteWordLine 0 2 "and winmgmt /salvagerepository.  If this is a trusted Forest, you may" "" $Null 0 $False $True
-		WriteWordLine 0 2 "need to rerun the script with Domain Admin credentials from the trusted Forest." "" $Null 0 $False $True
+		If($MSWORD -or $PDF)
+		{
+			WriteWordLine 0 2 "Get-WmiObject win32_Processor failed for $($RemoteComputerName)" "" $Null 0 $False $True
+			WriteWordLine 0 2 "On $($RemoteComputerName) you may need to run winmgmt /verifyrepository" "" $Null 0 $False $True
+			WriteWordLine 0 2 "and winmgmt /salvagerepository.  If this is a trusted Forest, you may" "" $Null 0 $False $True
+			WriteWordLine 0 2 "need to rerun the script with Domain Admin credentials from the trusted Forest." "" $Null 0 $False $True
+		}
+		ElseIf($Text)
+		{
+			Line 2 "Get-WmiObject win32_Processor failed for $($RemoteComputerName)"
+			Line 2 "On $($RemoteComputerName) you may need to run winmgmt /verifyrepository"
+			Line 2 "and winmgmt /salvagerepository.  If this is a trusted Forest, you may"
+			Line 2 "need to rerun the script with Domain Admin credentials from the trusted Forest."
+		}
+		ElseIf($HTML)
+		{
+		}
 	}
 	Else
 	{
 		Write-Verbose "$(Get-Date): No results returned for Processor information"
-		WriteWordLine 0 2 "No results returned for Processor information" "" $Null 0 $False $True
+		If($MSWORD -or $PDF)
+		{
+			WriteWordLine 0 2 "No results returned for Processor information" "" $Null 0 $False $True
+		}
+		ElseIf($Text)
+		{
+			Line 2 "No results returned for Processor information"
+		}
+		ElseIf($HTML)
+		{
+		}
 	}
 
 	#Get Nics
 	Write-Verbose "$(Get-Date): `t`t`tNIC information"
-	WriteWordLine 0 1 "Network Interface(s)"
+
+	If($MSWord -or $PDF)
+	{
+		WriteWordLine 0 1 "Network Interface(s)"
+	}
+	ElseIf($Text)
+	{
+		Line 1 "Network Interface(s)"
+	}
+	ElseIf($HTML)
+	{
+	}
+
 	[bool]$GotNics = $True
 	
 	Try
@@ -1201,149 +999,47 @@ Function GetComputerWMIInfo
 				
 				If($? -and $ThisNic -ne $Null)
 				{
-					If($ThisNic.Name -eq $nic.description)
-					{
-						WriteWordLine 0 2 "Name`t`t`t: " $ThisNic.Name
-					}
-					Else
-					{
-						WriteWordLine 0 2 "Name`t`t`t: " $ThisNic.Name
-						WriteWordLine 0 2 "Description`t`t: " $nic.description
-					}
-					WriteWordLine 0 2 "Connection ID`t`t: " $ThisNic.NetConnectionID
-					WriteWordLine 0 2 "Manufacturer`t`t: " $ThisNic.manufacturer
-					WriteWordLine 0 2 "Availability`t`t: " -nonewline
-					Switch ($ThisNic.availability)
-					{
-						1	{WriteWordLine 0 0 "Other"}
-						2	{WriteWordLine 0 0 "Unknown"}
-						3	{WriteWordLine 0 0 "Running or Full Power"}
-						4	{WriteWordLine 0 0 "Warning"}
-						5	{WriteWordLine 0 0 "In Test"}
-						6	{WriteWordLine 0 0 "Not Applicable"}
-						7	{WriteWordLine 0 0 "Power Off"}
-						8	{WriteWordLine 0 0 "Off Line"}
-						9	{WriteWordLine 0 0 "Off Duty"}
-						10	{WriteWordLine 0 0 "Degraded"}
-						11	{WriteWordLine 0 0 "Not Installed"}
-						12	{WriteWordLine 0 0 "Install Error"}
-						13	{WriteWordLine 0 0 "Power Save - Unknown"}
-						14	{WriteWordLine 0 0 "Power Save - Low Power Mode"}
-						15	{WriteWordLine 0 0 "Power Save - Standby"}
-						16	{WriteWordLine 0 0 "Power Cycle"}
-						17	{WriteWordLine 0 0 "Power Save - Warning"}
-						Default	{WriteWordLine 0 0 "Unknown"}
-					}
-					WriteWordLine 0 2 "Physical Address`t: " $nic.macaddress
-					WriteWordLine 0 2 "IP Address`t`t: " $nic.ipaddress
-					WriteWordLine 0 2 "Default Gateway`t: " $nic.Defaultipgateway
-					WriteWordLine 0 2 "Subnet Mask`t`t: " $nic.ipsubnet
-					If($nic.dhcpenabled)
-					{
-						$DHCPLeaseObtainedDate = $nic.ConvertToDateTime($nic.dhcpleaseobtained)
-						$DHCPLeaseExpiresDate = $nic.ConvertToDateTime($nic.dhcpleaseexpires)
-						WriteWordLine 0 2 "DHCP Enabled`t`t: " $nic.dhcpenabled
-						WriteWordLine 0 2 "DHCP Lease Obtained`t: " $dhcpleaseobtaineddate
-						WriteWordLine 0 2 "DHCP Lease Expires`t: " $dhcpleaseexpiresdate
-						WriteWordLine 0 2 "DHCP Server`t`t:" $nic.dhcpserver
-					}
-					If(![String]::IsNullOrEmpty($nic.dnsdomain))
-					{
-						WriteWordLine 0 2 "DNS Domain`t`t: " $nic.dnsdomain
-					}
-					If($nic.dnsdomainsuffixsearchorder -ne $Null -and $nic.dnsdomainsuffixsearchorder.length -gt 0)
-					{
-						[int]$x = 1
-						WriteWordLine 0 2 "DNS Search Suffixes`t:" -nonewline
-						ForEach($DNSDomain in $nic.dnsdomainsuffixsearchorder)
-						{
-							If($x -eq 1)
-							{
-								$x = 2
-								WriteWordLine 0 0 " $($DNSDomain)"
-							}
-							Else
-							{
-								WriteWordLine 0 5 " $($DNSDomain)"
-							}
-						}
-					}
-					WriteWordLine 0 2 "DNS WINS Enabled`t: " -nonewline
-					If($nic.dnsenabledforwinsresolution)
-					{
-						WriteWordLine 0 0 "Yes"
-					}
-					Else
-					{
-						WriteWordLine 0 0 "No"
-					}
-					If($nic.dnsserversearchorder -ne $Null -and $nic.dnsserversearchorder.length -gt 0)
-					{
-						[int]$x = 1
-						WriteWordLine 0 2 "DNS Servers`t`t:" -nonewline
-						ForEach($DNSServer in $nic.dnsserversearchorder)
-						{
-							If($x -eq 1)
-							{
-								$x = 2
-								WriteWordLine 0 0 " $($DNSServer)"
-							}
-							Else
-							{
-								WriteWordLine 0 5 " $($DNSServer)"
-							}
-						}
-					}
-					WriteWordLine 0 2 "NetBIOS Setting`t`t: " -nonewline
-					Switch ($nic.TcpipNetbiosOptions)
-					{
-						0	{WriteWordLine 0 0 "Use NetBIOS setting from DHCP Server"}
-						1	{WriteWordLine 0 0 "Enable NetBIOS"}
-						2	{WriteWordLine 0 0 "Disable NetBIOS"}
-						Default	{WriteWordLine 0 0 "Unknown"}
-					}
-					WriteWordLine 0 2 "WINS:"
-					WriteWordLine 0 3 "Enabled LMHosts`t: " -nonewline
-					If($nic.winsenablelmhostslookup)
-					{
-						WriteWordLine 0 0 "Yes"
-					}
-					Else
-					{
-						WriteWordLine 0 0 "No"
-					}
-					If(![String]::IsNullOrEmpty($nic.winshostlookupfile))
-					{
-						WriteWordLine 0 3 "Host Lookup File`t: " $nic.winshostlookupfile
-					}
-					If(![String]::IsNullOrEmpty($nic.winsprimaryserver))
-					{
-						WriteWordLine 0 3 "Primary Server`t`t: " $nic.winsprimaryserver
-					}
-					If(![String]::IsNullOrEmpty($nic.winssecondaryserver))
-					{
-						WriteWordLine 0 3 "Secondary Server`t: " $nic.winssecondaryserver
-					}
-					If(![String]::IsNullOrEmpty($nic.winsscopeid))
-					{
-						WriteWordLine 0 3 "Scope ID`t`t: " $nic.winsscopeid
-					}
+					OutputNicItem $Nic $ThisNic
 				}
 				ElseIf(!$?)
 				{
 					Write-Warning "$(Get-Date): Error retrieving NIC information"
-					Write-Verbose "$(Get-Date): Get-WmiObject win32_networkadapter failed for $($RemoteComputerName)"
+					Write-Verbose "$(Get-Date): Get-WmiObject win32_networkadapterconfiguration failed for $($RemoteComputerName)"
 					Write-Warning "Get-WmiObject win32_networkadapterconfiguration failed for $($RemoteComputerName)"
-					WriteWordLine 0 2 "Error retrieving NIC information" "" $Null 0 $False $True
-					WriteWordLine 0 2 "Get-WmiObject win32_networkadapterconfiguration failed for $($RemoteComputerName)" $Null 0 $False $True
-					WriteWordLine 0 2 "On $($RemoteComputerName) you may need to run winmgmt /verifyrepository" "" $Null 0 $False $True
-					WriteWordLine 0 2 "and winmgmt /salvagerepository.  If this is a trusted Forest, you may" "" $Null 0 $False $True
-					WriteWordLine 0 2 "need to rerun the script with Domain Admin credentials from the trusted Forest." "" $Null 0 $False $True
+					If($MSWORD -or $PDF)
+					{
+						WriteWordLine 0 2 "Error retrieving NIC information" "" $Null 0 $False $True
+						WriteWordLine 0 2 "Get-WmiObject win32_networkadapterconfiguration failed for $($RemoteComputerName)" "" $Null 0 $False $True
+						WriteWordLine 0 2 "On $($RemoteComputerName) you may need to run winmgmt /verifyrepository" "" $Null 0 $False $True
+						WriteWordLine 0 2 "and winmgmt /salvagerepository.  If this is a trusted Forest, you may" "" $Null 0 $False $True
+						WriteWordLine 0 2 "need to rerun the script with Domain Admin credentials from the trusted Forest." "" $Null 0 $False $True
+					}
+					ElseIf($Text)
+					{
+						Line 2 "Error retrieving NIC information"
+						Line 2 "Get-WmiObject win32_networkadapterconfiguration failed for $($RemoteComputerName)"
+						Line 2 "On $($RemoteComputerName) you may need to run winmgmt /verifyrepository"
+						Line 2 "and winmgmt /salvagerepository.  If this is a trusted Forest, you may"
+						Line 2 "need to rerun the script with Domain Admin credentials from the trusted Forest."
+					}
+					ElseIf($HTML)
+					{
+					}
 				}
 				Else
 				{
 					Write-Verbose "$(Get-Date): No results returned for NIC information"
-					WriteWordLine 0 2 "No results returned for NIC information" "" $Null 0 $False $True
+					If($MSWORD -or $PDF)
+					{
+						WriteWordLine 0 2 "No results returned for NIC information" "" $Null 0 $False $True
+					}
+					ElseIf($Text)
+					{
+						Line 2 "No results returned for NIC information"
+					}
+					ElseIf($HTML)
+					{
+					}
 				}
 			}
 		}	
@@ -1353,19 +1049,925 @@ Function GetComputerWMIInfo
 		Write-Warning "$(Get-Date): Error retrieving NIC configuration information"
 		Write-Verbose "$(Get-Date): Get-WmiObject win32_networkadapterconfiguration failed for $($RemoteComputerName)"
 		Write-Warning "Get-WmiObject win32_networkadapterconfiguration failed for $($RemoteComputerName)"
-		WriteWordLine 0 2 "Error retrieving NIC configuration information" "" $Null 0 $False $True
-		WriteWordLine 0 2 "Get-WmiObject win32_networkadapterconfiguration failed for $($RemoteComputerName)" $Null 0 $False $True
-		WriteWordLine 0 2 "On $($RemoteComputerName) you may need to run winmgmt /verifyrepository" "" $Null 0 $False $True
-		WriteWordLine 0 2 "and winmgmt /salvagerepository.  If this is a trusted Forest, you may" "" $Null 0 $False $True
-		WriteWordLine 0 2 "need to rerun the script with Domain Admin credentials from the trusted Forest." "" $Null 0 $False $True
+		If($MSWORD -or $PDF)
+		{
+			WriteWordLine 0 2 "Error retrieving NIC configuration information" "" $Null 0 $False $True
+			WriteWordLine 0 2 "Get-WmiObject win32_networkadapterconfiguration failed for $($RemoteComputerName)" "" $Null 0 $False $True
+			WriteWordLine 0 2 "On $($RemoteComputerName) you may need to run winmgmt /verifyrepository" "" $Null 0 $False $True
+			WriteWordLine 0 2 "and winmgmt /salvagerepository.  If this is a trusted Forest, you may" "" $Null 0 $False $True
+			WriteWordLine 0 2 "need to rerun the script with Domain Admin credentials from the trusted Forest." "" $Null 0 $False $True
+		}
+		ElseIf($Text)
+		{
+			Line 2 "Error retrieving NIC configuration information"
+			Line 2 "Get-WmiObject win32_networkadapterconfiguration failed for $($RemoteComputerName)"
+			Line 2 "On $($RemoteComputerName) you may need to run winmgmt /verifyrepository"
+			Line 2 "and winmgmt /salvagerepository.  If this is a trusted Forest, you may"
+			Line 2 "need to rerun the script with Domain Admin credentials from the trusted Forest."
+		}
+		ElseIf($HTML)
+		{
+		}
 	}
 	Else
 	{
 		Write-Verbose "$(Get-Date): No results returned for NIC configuration information"
-		WriteWordLine 0 2 "No results returned for NIC configuration information" "" $Null 0 $False $True
+		If($MSWORD -or $PDF)
+		{
+			WriteWordLine 0 2 "No results returned for NIC configuration information" "" $Null 0 $False $True
+		}
+		ElseIf($Text)
+		{
+			Line 2 "No results returned for NIC configuration information"
+		}
+		ElseIf($HTML)
+		{
+		}
 	}
 	
-	WriteWordLine 0 0 ""
+	If($MSWORD -or $PDF)
+	{
+		WriteWordLine 0 0 ""
+	}
+	ElseIf($Text)
+	{
+		Line 0 ""
+	}
+	ElseIf($HTML)
+	{
+	}
+
+	$Results = $Null
+	$ComputerItems = $Null
+	$Drives = $Null
+	$Processors = $Null
+	$Nics = $Null
+}
+
+Function OutputComputerItem
+{
+	Param([object]$Item)
+	If($MSWord -or $PDF)
+	{
+		[System.Collections.Hashtable[]] $ItemInformation = @()
+		$ItemInformation += @{ Data = "Manufacturer"; Value = $Item.manufacturer; }
+		$ItemInformation += @{ Data = "Model"; Value = $Item.model; }
+		$ItemInformation += @{ Data = "Domain"; Value = $Item.domain; }
+		$ItemInformation += @{ Data = "Total Ram"; Value = "$($Item.totalphysicalram) GB"; }
+		$Table = AddWordTable -Hashtable $ItemInformation -Columns Data,Value -List -AutoFit $wdAutoFitFixed;
+
+		## Set first column format
+		SetWordCellFormat -Collection $Table.Columns.Item(1).Cells -Bold -BackgroundColor $wdColorGray15;
+
+		## IB - set column widths without recursion
+		$Table.Columns.Item(1).Width = 125;
+		$Table.Columns.Item(2).Width = 100;
+
+		$Table.Rows.SetLeftIndent($Indent2TabStops,$wdAdjustNone)
+
+		FindWordDocumentEnd
+		$Table = $Null
+		WriteWordLine 0 2 ""
+		
+	}
+	ElseIf($Text)
+	{
+		Line 2 "Manufacturer`t: " $Item.manufacturer
+		Line 2 "Model`t`t: " $Item.model
+		Line 2 "Domain`t`t: " $Item.domain
+		Line 2 "Total Ram`t: $($Item.totalphysicalram) GB"
+		Line 2 ""
+	}
+	ElseIf($HTML)
+	{
+	}
+}
+
+Function OutputDriveItem
+{
+	Param([object]$Drive)
+	If($MSWORD -or $PDF)
+	{
+		[System.Collections.Hashtable[]] $DriveInformation = @()
+		$DriveInformation += @{ Data = "Caption"; Value = $Drive.caption; }
+		$DriveInformation += @{ Data = "Size"; Value = "$($drive.drivesize) GB"; }
+		If(![String]::IsNullOrEmpty($drive.filesystem))
+		{
+			$DriveInformation += @{ Data = "File System"; Value = $Drive.filesystem; }
+		}
+		$DriveInformation += @{ Data = "Free Space"; Value = "$($drive.drivefreespace) GB"; }
+		If(![String]::IsNullOrEmpty($drive.volumename))
+		{
+			$DriveInformation += @{ Data = "Volume Name"; Value = $Drive.volumename; }
+		}
+		If(![String]::IsNullOrEmpty($drive.volumedirty))
+		{
+			If($drive.volumedirty)
+			{
+				$tmp = "Yes"
+			}
+			Else
+			{
+				$tmp = "No"
+			}
+			$DriveInformation += @{ Data = "Volume is Dirty"; Value = $tmp; }
+		}
+		If(![String]::IsNullOrEmpty($drive.volumeserialnumber))
+		{
+			$DriveInformation += @{ Data = "Volume Serial Number"; Value = $Drive.volumeserialnumber; }
+		}
+		Switch ($drive.drivetype)
+		{
+			0	{$tmp = "Unknown"}
+			1	{$tmp = "No Root Directory"}
+			2	{$tmp = "Removable Disk"}
+			3	{$tmp = "Local Disk"}
+			4	{$tmp = "Network Drive"}
+			5	{$tmp = "Compact Disc"}
+			6	{$tmp = "RAM Disk"}
+			Default {$tmp = "Unknown"}
+		}
+		$DriveInformation += @{ Data = "Drive Type"; Value = $tmp; }
+		$Table = AddWordTable -Hashtable $DriveInformation -Columns Data,Value -List -AutoFit $wdAutoFitContent;
+
+		## Set first column format
+		SetWordCellFormat -Collection $Table.Columns.Item(1).Cells -Bold -BackgroundColor $wdColorGray15;
+
+		## IB - set column widths without recursion
+		$Table.Columns.Item(1).Width = 125;
+		$Table.Columns.Item(2).Width = 100;
+
+		$Table.Rows.SetLeftIndent($Indent2TabStops,$wdAdjustNone)
+
+		FindWordDocumentEnd
+		$Table = $Null
+		WriteWordLine 0 2 ""
+	}
+	ElseIf($Text)
+	{
+		Line 2 "Caption`t`t: " $drive.caption
+		Line 2 "Size`t`t: $($drive.drivesize) GB"
+		If(![String]::IsNullOrEmpty($drive.filesystem))
+		{
+			Line 2 "File System`t: " $drive.filesystem
+		}
+		Line 2 "Free Space`t: $($drive.drivefreespace) GB"
+		If(![String]::IsNullOrEmpty($drive.volumename))
+		{
+			Line 2 "Volume Name`t: " $drive.volumename
+		}
+		If(![String]::IsNullOrEmpty($drive.volumedirty))
+		{
+			Line 2 "Volume is Dirty`t: " -nonewline
+			If($drive.volumedirty)
+			{
+				Line 0 "Yes"
+			}
+			Else
+			{
+				Line 0 "No"
+			}
+		}
+		If(![String]::IsNullOrEmpty($drive.volumeserialnumber))
+		{
+			Line 2 "Volume Serial #`t: " $drive.volumeserialnumber
+		}
+		Line 2 "Drive Type`t: " -nonewline
+		Switch ($drive.drivetype)
+		{
+			0	{Line 0 "Unknown"}
+			1	{Line 0 "No Root Directory"}
+			2	{Line 0 "Removable Disk"}
+			3	{Line 0 "Local Disk"}
+			4	{Line 0 "Network Drive"}
+			5	{Line 0 "Compact Disc"}
+			6	{Line 0 "RAM Disk"}
+			Default {Line 0 "Unknown"}
+		}
+		Line 2 ""
+	}
+	ElseIf($HTML)
+	{
+	}
+}
+
+Function OutputProcessorItem
+{
+	Param([object]$Processor)
+	If($MSWORD -or $PDF)
+	{
+		[System.Collections.Hashtable[]] $ProcessorInformation = @()
+		$ProcessorInformation += @{ Data = "Name"; Value = $Processor.name; }
+		$ProcessorInformation += @{ Data = "Description"; Value = $Processor.description; }
+		$ProcessorInformation += @{ Data = "Max Clock Speed"; Value = "$($processor.maxclockspeed) MHz"; }
+		If($processor.l2cachesize -gt 0)
+		{
+			$ProcessorInformation += @{ Data = "L2 Cache Size"; Value = "$($processor.l2cachesize) KB"; }
+		}
+		If($processor.l3cachesize -gt 0)
+		{
+			$ProcessorInformation += @{ Data = "L3 Cache Size"; Value = "$($processor.l3cachesize) KB"; }
+		}
+		If($processor.numberofcores -gt 0)
+		{
+			$ProcessorInformation += @{ Data = "Number of Cores"; Value = $Processor.numberofcores; }
+		}
+		If($processor.numberoflogicalprocessors -gt 0)
+		{
+			$ProcessorInformation += @{ Data = "Number of Logical Processors"; Value = $Processor.numberoflogicalprocessors; }
+		}
+		Switch ($processor.availability)
+		{
+			1	{$tmp = "Other"}
+			2	{$tmp = "Unknown"}
+			3	{$tmp = "Running or Full Power"}
+			4	{$tmp = "Warning"}
+			5	{$tmp = "In Test"}
+			6	{$tmp = "Not Applicable"}
+			7	{$tmp = "Power Off"}
+			8	{$tmp = "Off Line"}
+			9	{$tmp = "Off Duty"}
+			10	{$tmp = "Degraded"}
+			11	{$tmp = "Not Installed"}
+			12	{$tmp = "Install Error"}
+			13	{$tmp = "Power Save - Unknown"}
+			14	{$tmp = "Power Save - Low Power Mode"}
+			15	{$tmp = "Power Save - Standby"}
+			16	{$tmp = "Power Cycle"}
+			17	{$tmp = "Power Save - Warning"}
+			Default	{$tmp = "Unknown"}
+		}
+		$ProcessorInformation += @{ Data = "Availability"; Value = $tmp; }
+		$Table = AddWordTable -Hashtable $ProcessorInformation -Columns Data,Value -List -AutoFit $wdAutoFitFixed;
+
+		## Set first column format
+		SetWordCellFormat -Collection $Table.Columns.Item(1).Cells -Bold -BackgroundColor $wdColorGray15;
+
+		## IB - set column widths without recursion
+		$Table.Columns.Item(1).Width = 150;
+		$Table.Columns.Item(2).Width = 200;
+
+		$Table.Rows.SetLeftIndent($Indent2TabStops,$wdAdjustNone)
+
+		FindWordDocumentEnd
+		$Table = $Null
+		WriteWordLine 0 2 ""
+	}
+	ElseIf($Text)
+	{
+		Line 2 "Name`t`t`t: " $processor.name
+		Line 2 "Description`t`t: " $processor.description
+		Line 2 "Max Clock Speed`t`t: $($processor.maxclockspeed) MHz"
+		If($processor.l2cachesize -gt 0)
+		{
+			Line 2 "L2 Cache Size`t`t: $($processor.l2cachesize) KB"
+		}
+		If($processor.l3cachesize -gt 0)
+		{
+			Line 2 "L3 Cache Size`t`t: $($processor.l3cachesize) KB"
+		}
+		If($processor.numberofcores -gt 0)
+		{
+			Line 2 "# of Cores`t`t: " $processor.numberofcores
+		}
+		If($processor.numberoflogicalprocessors -gt 0)
+		{
+			Line 2 "# of Logical Procs`t: " $processor.numberoflogicalprocessors
+		}
+		Line 2 "Availability`t`t: " -nonewline
+		Switch ($processor.availability)
+		{
+			1	{Line 0 "Other"}
+			2	{Line 0 "Unknown"}
+			3	{Line 0 "Running or Full Power"}
+			4	{Line 0 "Warning"}
+			5	{Line 0 "In Test"}
+			6	{Line 0 "Not Applicable"}
+			7	{Line 0 "Power Off"}
+			8	{Line 0 "Off Line"}
+			9	{Line 0 "Off Duty"}
+			10	{Line 0 "Degraded"}
+			11	{Line 0 "Not Installed"}
+			12	{Line 0 "Install Error"}
+			13	{Line 0 "Power Save - Unknown"}
+			14	{Line 0 "Power Save - Low Power Mode"}
+			15	{Line 0 "Power Save - Standby"}
+			16	{Line 0 "Power Cycle"}
+			17	{Line 0 "Power Save - Warning"}
+			Default	{Line 0 "Unknown"}
+		}
+		Line 2 ""
+	}
+	ElseIf($HTML)
+	{
+	}
+}
+
+Function OutputNicItem
+{
+	Param([object]$Nic, [object]$ThisNic)
+	If($MSWORD -or $PDF)
+	{
+		[System.Collections.Hashtable[]] $NicInformation = @()
+		If($ThisNic.Name -eq $nic.description)
+		{
+			$NicInformation += @{ Data = "Name"; Value = $ThisNic.Name; }
+		}
+		Else
+		{
+			$NicInformation += @{ Data = "Name"; Value = $ThisNic.Name; }
+			$NicInformation += @{ Data = "Description"; Value = $Nic.description; }
+		}
+		$NicInformation += @{ Data = "Connection ID"; Value = $ThisNic.NetConnectionID; }
+		$NicInformation += @{ Data = "Manufacturer"; Value = $Nic.manufacturer; }
+		Switch ($ThisNic.availability)
+		{
+			1	{$tmp = "Other"}
+			2	{$tmp = "Unknown"}
+			3	{$tmp = "Running or Full Power"}
+			4	{$tmp = "Warning"}
+			5	{$tmp = "In Test"}
+			6	{$tmp = "Not Applicable"}
+			7	{$tmp = "Power Off"}
+			8	{$tmp = "Off Line"}
+			9	{$tmp = "Off Duty"}
+			10	{$tmp = "Degraded"}
+			11	{$tmp = "Not Installed"}
+			12	{$tmp = "Install Error"}
+			13	{$tmp = "Power Save - Unknown"}
+			14	{$tmp = "Power Save - Low Power Mode"}
+			15	{$tmp = "Power Save - Standby"}
+			16	{$tmp = "Power Cycle"}
+			17	{$tmp = "Power Save - Warning"}
+			Default	{$tmp = "Unknown"}
+		}
+		$NicInformation += @{ Data = "Availability"; Value = $tmp; }
+		$NicInformation += @{ Data = "Physical Address"; Value = $Nic.macaddress; }
+		$NicInformation += @{ Data = "IP Address"; Value = $Nic.ipaddress; }
+		$NicInformation += @{ Data = "Default Gateway"; Value = $Nic.Defaultipgateway; }
+		$NicInformation += @{ Data = "Subnet Mask"; Value = $Nic.ipsubnet; }
+		If($nic.dhcpenabled)
+		{
+			$DHCPLeaseObtainedDate = $nic.ConvertToDateTime($nic.dhcpleaseobtained)
+			$DHCPLeaseExpiresDate = $nic.ConvertToDateTime($nic.dhcpleaseexpires)
+			$NicInformation += @{ Data = "DHCP Enabled"; Value = $Nic.dhcpenabled; }
+			$NicInformation += @{ Data = "DHCP Lease Obtained"; Value = $dhcpleaseobtaineddate; }
+			$NicInformation += @{ Data = "DHCP Lease Expires"; Value = $dhcpleaseexpiresdate; }
+			$NicInformation += @{ Data = "DHCP Server"; Value = $Nic.dhcpserver; }
+		}
+		If(![String]::IsNullOrEmpty($nic.dnsdomain))
+		{
+			$NicInformation += @{ Data = "DNS Domain"; Value = $Nic.dnsdomain; }
+		}
+		If($nic.dnsdomainsuffixsearchorder -ne $Null -and $nic.dnsdomainsuffixsearchorder.length -gt 0)
+		{
+			[int]$x = 1
+			WriteWordLine 0 2 "DNS Search Suffixes`t:" -nonewline
+			$nicdnsdomainsuffixsearchorder = $nic.dnsdomainsuffixsearchorder
+			$tmp = @()
+			ForEach($DNSDomain in $nicdnsdomainsuffixsearchorder)
+			{
+				$tmp += "$($DNSDomain)`r"
+			}
+			$NicInformation += @{ Data = "DNS Search Suffixes"; Value = $tmp; }
+		}
+		If($nic.dnsenabledforwinsresolution)
+		{
+			$tmp = "Yes"
+		}
+		Else
+		{
+			$tmp = "No"
+		}
+		$NicInformation += @{ Data = "DNS WINS Enabled"; Value = $tmp; }
+		If($nic.dnsserversearchorder -ne $Null -and $nic.dnsserversearchorder.length -gt 0)
+		{
+			$nicdnsserversearchorder = $nic.dnsserversearchorder
+			$tmp = @()
+			ForEach($DNSServer in $nicdnsserversearchorder)
+			{
+				$tmp += "$($DNSServer)`r"
+			}
+			$NicInformation += @{ Data = "DNS Servers"; Value = $tmp; }
+		}
+		Switch ($nic.TcpipNetbiosOptions)
+		{
+			0	{$tmp = "Use NetBIOS setting from DHCP Server"}
+			1	{$tmp = "Enable NetBIOS"}
+			2	{$tmp = "Disable NetBIOS"}
+			Default	{$tmp = "Unknown"}
+		}
+		$NicInformation += @{ Data = "NetBIOS Setting"; Value = $tmp; }
+		If($nic.winsenablelmhostslookup)
+		{
+			$tmp = "Yes"
+		}
+		Else
+		{
+			$tmp = "No"
+		}
+		$NicInformation += @{ Data = "WINS: Enabled LMHosts"; Value = $tmp; }
+		If(![String]::IsNullOrEmpty($nic.winshostlookupfile))
+		{
+			$NicInformation += @{ Data = "Host Lookup File"; Value = $Nic.winshostlookupfile; }
+		}
+		If(![String]::IsNullOrEmpty($nic.winsprimaryserver))
+		{
+			$NicInformation += @{ Data = "Primary Server"; Value = $Nic.winsprimaryserver; }
+		}
+		If(![String]::IsNullOrEmpty($nic.winssecondaryserver))
+		{
+			$NicInformation += @{ Data = "Secondary Server"; Value = $Nic.winssecondaryserver; }
+		}
+		If(![String]::IsNullOrEmpty($nic.winsscopeid))
+		{
+			$NicInformation += @{ Data = "Scope ID"; Value = $Nic.winsscopeid; }
+		}
+		$Table = AddWordTable -Hashtable $NicInformation -Columns Data,Value -List -AutoFit $wdAutoFitFixed;
+
+		## Set first column format
+		SetWordCellFormat -Collection $Table.Columns.Item(1).Cells -Bold -BackgroundColor $wdColorGray15;
+
+		## IB - set column widths without recursion
+		$Table.Columns.Item(1).Width = 150;
+		$Table.Columns.Item(2).Width = 200;
+
+		$Table.Rows.SetLeftIndent($Indent2TabStops,$wdAdjustNone)
+
+		FindWordDocumentEnd
+		$Table = $Null
+	}
+	ElseIf($Text)
+	{
+		If($ThisNic.Name -eq $nic.description)
+		{
+			Line 2 "Name`t`t`t: " $ThisNic.Name
+		}
+		Else
+		{
+			Line 2 "Name`t`t`t: " $ThisNic.Name
+			Line 2 "Description`t`t: " $nic.description
+		}
+		Line 2 "Connection ID`t`t: " $ThisNic.NetConnectionID
+		Line 2 "Manufacturer`t`t: " $ThisNic.manufacturer
+		Line 2 "Availability`t`t: " -nonewline
+		Switch ($ThisNic.availability)
+		{
+			1	{Line 0 "Other"}
+			2	{Line 0 "Unknown"}
+			3	{Line 0 "Running or Full Power"}
+			4	{Line 0 "Warning"}
+			5	{Line 0 "In Test"}
+			6	{Line 0 "Not Applicable"}
+			7	{Line 0 "Power Off"}
+			8	{Line 0 "Off Line"}
+			9	{Line 0 "Off Duty"}
+			10	{Line 0 "Degraded"}
+			11	{Line 0 "Not Installed"}
+			12	{Line 0 "Install Error"}
+			13	{Line 0 "Power Save - Unknown"}
+			14	{Line 0 "Power Save - Low Power Mode"}
+			15	{Line 0 "Power Save - Standby"}
+			16	{Line 0 "Power Cycle"}
+			17	{Line 0 "Power Save - Warning"}
+			Default	{Line 0 "Unknown"}
+		}
+		Line 2 "Physical Address`t: " $nic.macaddress
+		Line 2 "IP Address`t`t: " $nic.ipaddress
+		Line 2 "Default Gateway`t`t: " $nic.Defaultipgateway
+		Line 2 "Subnet Mask`t`t: " $nic.ipsubnet
+		If($nic.dhcpenabled)
+		{
+			$DHCPLeaseObtainedDate = $nic.ConvertToDateTime($nic.dhcpleaseobtained)
+			$DHCPLeaseExpiresDate = $nic.ConvertToDateTime($nic.dhcpleaseexpires)
+			Line 2 "DHCP Enabled`t`t: " $nic.dhcpenabled
+			Line 2 "DHCP Lease Obtained`t: " $dhcpleaseobtaineddate
+			Line 2 "DHCP Lease Expires`t: " $dhcpleaseexpiresdate
+			Line 2 "DHCP Server`t`t:" $nic.dhcpserver
+		}
+		If(![String]::IsNullOrEmpty($nic.dnsdomain))
+		{
+			Line 2 "DNS Domain`t`t: " $nic.dnsdomain
+		}
+		If($nic.dnsdomainsuffixsearchorder -ne $Null -and $nic.dnsdomainsuffixsearchorder.length -gt 0)
+		{
+			[int]$x = 1
+			Line 2 "DNS Search Suffixes`t:" -nonewline
+			$nicdnsdomainsuffixsearchorder = $nic.dnsdomainsuffixsearchorder
+			ForEach($DNSDomain in $nicdnsdomainsuffixsearchorder)
+			{
+				If($x -eq 1)
+				{
+					$x = 2
+					Line 0 " $($DNSDomain)"
+				}
+				Else
+				{
+					Line 5 " $($DNSDomain)"
+				}
+			}
+		}
+		Line 2 "DNS WINS Enabled`t: " -nonewline
+		If($nic.dnsenabledforwinsresolution)
+		{
+			Line 0 "Yes"
+		}
+		Else
+		{
+			Line 0 "No"
+		}
+		If($nic.dnsserversearchorder -ne $Null -and $nic.dnsserversearchorder.length -gt 0)
+		{
+			[int]$x = 1
+			Line 2 "DNS Servers`t`t:" -nonewline
+			$nicdnsserversearchorder = $nic.dnsserversearchorder
+			ForEach($DNSServer in $nicdnsserversearchorder)
+			{
+				If($x -eq 1)
+				{
+					$x = 2
+					Line 0 " $($DNSServer)"
+				}
+				Else
+				{
+					Line 5 " $($DNSServer)"
+				}
+			}
+		}
+		Line 2 "NetBIOS Setting`t`t: " -nonewline
+		Switch ($nic.TcpipNetbiosOptions)
+		{
+			0	{Line 0 "Use NetBIOS setting from DHCP Server"}
+			1	{Line 0 "Enable NetBIOS"}
+			2	{Line 0 "Disable NetBIOS"}
+			Default	{Line 0 "Unknown"}
+		}
+		Line 2 "WINS:"
+		Line 3 "Enabled LMHosts`t: " -nonewline
+		If($nic.winsenablelmhostslookup)
+		{
+			Line 0 "Yes"
+		}
+		Else
+		{
+			Line 0 "No"
+		}
+		If(![String]::IsNullOrEmpty($nic.winshostlookupfile))
+		{
+			Line 3 "Host Lookup File`t: " $nic.winshostlookupfile
+		}
+		If(![String]::IsNullOrEmpty($nic.winsprimaryserver))
+		{
+			Line 3 "Primary Server`t`t: " $nic.winsprimaryserver
+		}
+		If(![String]::IsNullOrEmpty($nic.winssecondaryserver))
+		{
+			Line 3 "Secondary Server`t: " $nic.winssecondaryserver
+		}
+		If(![String]::IsNullOrEmpty($nic.winsscopeid))
+		{
+			Line 3 "Scope ID`t`t: " $nic.winsscopeid
+		}
+	}
+	ElseIf($HTML)
+	{
+	}
+}
+
+Function SetWordHashTable
+{
+	Param([string]$CultureCode)
+
+	#optimized by Michael B. SMith
+	
+	# DE and FR translations for Word 2010 by Vladimir Radojevic
+	# Vladimir.Radojevic@Commerzreal.com
+
+	# DA translations for Word 2010 by Thomas Daugaard
+	# Citrix Infrastructure Specialist at edgemo A/S
+
+	# CA translations by Javier Sanchez 
+	# CEO & Founder 101 Consulting
+
+	#ca - Catalan
+	#da - Danish
+	#de - German
+	#en - English
+	#es - Spanish
+	#fi - Finnish
+	#fr - French
+	#nb - Norwegian
+	#nl - Dutch
+	#pt - Portuguese
+	#sv - Swedish
+
+	[string]$toc = $(
+		Switch ($CultureCode)
+		{
+			'ca-'	{ 'Taula automática 2' }
+
+			'da-'	{ 'Automatisk tabel 2' }
+
+			'de-'	{ 'Automatische Tabelle 2' }
+
+			'en-'	{ 'Automatic Table 2' }
+
+			'es-'	{ 'Tabla automática 2' }
+
+			'fi-'	{ 'Automaattinen taulukko 2' }
+
+			'fr-'	{ 'Sommaire Automatique 2' }
+
+			'nb-'	{ 'Automatisk tabell 2' }
+
+			'nl-'	{ 'Automatische inhoudsopgave 2' }
+
+			'pt-'	{ 'Sumário Automático 2' }
+
+			'sv-'	{ 'Automatisk innehållsförteckning2' }
+		}
+	)
+
+	$Script:myHash                      = @{}
+	$Script:myHash.Word_TableOfContents = $toc
+	$Script:myHash.Word_NoSpacing       = $wdStyleNoSpacing
+	$Script:myHash.Word_Heading1        = $wdStyleheading1
+	$Script:myHash.Word_Heading2        = $wdStyleheading2
+	$Script:myHash.Word_Heading3        = $wdStyleheading3
+	$Script:myHash.Word_Heading4        = $wdStyleheading4
+	$Script:myHash.Word_TableGrid       = $wdTableGrid
+}
+
+Function GetCulture
+{
+	Param([int]$WordValue)
+	
+	#codes obtained from http://support.microsoft.com/kb/221435
+	#http://msdn.microsoft.com/en-us/library/bb213877(v=office.12).aspx
+	$CatalanArray = 1027
+	$DanishArray = 1030
+	$DutchArray = 2067, 1043
+	$EnglishArray = 3081, 10249, 4105, 9225, 6153, 8201, 5129, 13321, 7177, 11273, 2057, 1033, 12297
+	$FinnishArray = 1035
+	$FrenchArray = 2060, 1036, 11276, 3084, 12300, 5132, 13324, 6156, 8204, 10252, 7180, 9228, 4108
+	$GermanArray = 1031, 3079, 5127, 4103, 2055
+	$NorwegianArray = 1044, 2068
+	$PortugueseArray = 1046, 2070
+	$SpanishArray = 1034, 11274, 16394, 13322, 9226, 5130, 7178, 12298, 17418, 4106, 18442, 19466, 6154, 15370, 10250, 20490, 3082, 14346, 8202
+	$SwedishArray = 1053, 2077
+
+	#ca - Catalan
+	#da - Danish
+	#de - German
+	#en - English
+	#es - Spanish
+	#fi - Finnish
+	#fr - French
+	#nb - Norwegian
+	#nl - Dutch
+	#pt - Portuguese
+	#sv - Swedish
+
+	Switch ($WordValue)
+	{
+		{$CatalanArray -contains $_} {$CultureCode = "ca-"}
+		{$DanishArray -contains $_} {$CultureCode = "da-"}
+		{$DutchArray -contains $_} {$CultureCode = "nl-"}
+		{$EnglishArray -contains $_} {$CultureCode = "en-"}
+		{$FinnishArray -contains $_} {$CultureCode = "fi-"}
+		{$FrenchArray -contains $_} {$CultureCode = "fr-"}
+		{$GermanArray -contains $_} {$CultureCode = "de-"}
+		{$NorwegianArray -contains $_} {$CultureCode = "nb-"}
+		{$PortugueseArray -contains $_} {$CultureCode = "pt-"}
+		{$SpanishArray -contains $_} {$CultureCode = "es-"}
+		{$SwedishArray -contains $_} {$CultureCode = "sv-"}
+		Default {$CultureCode = "en-"}
+	}
+	
+	Return $CultureCode
+}
+
+Function ValidateCoverPage
+{
+	Param([int]$xWordVersion, [string]$xCP, [string]$CultureCode)
+	
+	$xArray = ""
+	
+	Switch ($CultureCode)
+	{
+		'ca-'	{
+				If($xWordVersion -eq $wdWord2013)
+				{
+					$xArray = ("Austin", "En bandes", "Faceta", "Filigrana",
+					"Integral", "Ió (clar)", "Ió (fosc)", "Línia lateral",
+					"Moviment", "Quadrícula", "Retrospectiu", "Sector (clar)",
+					"Sector (fosc)", "Semàfor", "Visualització", "Whisp")
+				}
+				ElseIf($xWordVersion -eq $wdWord2010)
+				{
+					$xArray = ("Alfabet", "Anual", "Austin", "Conservador",
+					"Contrast", "Cubicles", "Diplomàtic", "Exposició",
+					"Línia lateral", "Mod", "Mosiac", "Moviment", "Paper de diari",
+					"Perspectiva", "Piles", "Quadrícula", "Sobri",
+					"Transcendir", "Trencaclosques")
+				}
+			}
+
+		'da-'	{
+				If($xWordVersion -eq $wdWord2013)
+				{
+					$xArray = ("BevægElse", "Brusen", "Ion (lys)", "Filigran",
+					"Retro", "Semafor", "Visningsmaster", "Integral",
+					"Facet", "Gitter", "Stribet", "Sidelinje", "Udsnit (lys)",
+					"Udsnit (mørk)", "Ion (mørk)", "Austin")
+				}
+				ElseIf($xWordVersion -eq $wdWord2010)
+				{
+					$xArray = ("BevægElse", "Moderat", "Perspektiv", "Firkanter",
+					"Overskrid", "Alfabet", "Kontrast", "Stakke", "Fliser", "Gåde",
+					"Gitter", "Austin", "Eksponering", "Sidelinje", "Enkel",
+					"Nålestribet", "Årlig", "Avispapir", "Tradionel")
+				}
+			}
+
+		'de-'	{
+				If($xWordVersion -eq $wdWord2013)
+				{
+					$xArray = ("Semaphor", "Segment (hell)", "Ion (hell)",
+					"Raster", "Ion (dunkel)", "Filigran", "Rückblick", "Pfiff",
+					"ViewMaster", "Segment (dunkel)", "Verbunden", "Bewegung",
+					"Randlinie", "Austin", "Integral", "Facette")
+				}
+				ElseIf($xWordVersion -eq $wdWord2010)
+				{
+					$xArray = ("Alphabet", "Austin", "Bewegung", "Durchscheinend",
+					"Herausgestellt", "Jährlich", "Kacheln", "Kontrast", "Kubistisch",
+					"Modern", "Nadelstreifen", "Perspektive", "Puzzle", "Randlinie",
+					"Raster", "Schlicht", "Stapel", "Traditionell", "Zeitungspapier")
+				}
+			}
+
+		'en-'	{
+				If($xWordVersion -eq $wdWord2013)
+				{
+					$xArray = ("Austin", "Banded", "Facet", "Filigree", "Grid",
+					"Integral", "Ion (Dark)", "Ion (Light)", "Motion", "Retrospect",
+					"Semaphore", "Sideline", "Slice (Dark)", "Slice (Light)", "ViewMaster",
+					"Whisp")
+				}
+				ElseIf($xWordVersion -eq $wdWord2010)
+				{
+					$xArray = ("Alphabet", "Annual", "Austere", "Austin", "Conservative",
+					"Contrast", "Cubicles", "Exposure", "Grid", "Mod", "Motion", "Newsprint",
+					"Perspective", "Pinstripes", "Puzzle", "Sideline", "Stacks", "Tiles", "Transcend")
+				}
+			}
+
+		'es-'	{
+				If($xWordVersion -eq $wdWord2013)
+				{
+					$xArray = ("Whisp", "Vista principal", "Filigrana", "Austin",
+					"Slice (luz)", "Faceta", "Semáforo", "Retrospectiva", "Cuadrícula",
+					"Movimiento", "Cortar (oscuro)", "Línea lateral", "Ion (oscuro)",
+					"Ion (claro)", "Integral", "Con bandas")
+				}
+				ElseIf($xWordVersion -eq $wdWord2010)
+				{
+					$xArray = ("Alfabeto", "Anual", "Austero", "Austin", "Conservador",
+					"Contraste", "Cuadrícula", "Cubículos", "Exposición", "Línea lateral",
+					"Moderno", "Mosaicos", "Movimiento", "Papel periódico",
+					"Perspectiva", "Pilas", "Puzzle", "Rayas", "Sobrepasar")
+				}
+			}
+
+		'fi-'	{
+				If($xWordVersion -eq $wdWord2013)
+				{
+					$xArray = ("Filigraani", "Integraali", "Ioni (tumma)",
+					"Ioni (vaalea)", "Opastin", "Pinta", "Retro", "Sektori (tumma)",
+					"Sektori (vaalea)", "Vaihtuvavärinen", "ViewMaster", "Austin",
+					"Kiehkura", "Liike", "Ruudukko", "Sivussa")
+				}
+				ElseIf($xWordVersion -eq $wdWord2010)
+				{
+					$xArray = ("Aakkoset", "Askeettinen", "Austin", "Kontrasti",
+					"Laatikot", "Liike", "Liituraita", "Mod", "Osittain peitossa",
+					"Palapeli", "Perinteinen", "Perspektiivi", "Pinot", "Ruudukko",
+					"Ruudut", "Sanomalehtipaperi", "Sivussa", "Vuotuinen", "Ylitys")
+				}
+			}
+
+		'fr-'	{
+				If($xWordVersion -eq $wdWord2013)
+				{
+					$xArray = ("ViewMaster", "Secteur (foncé)", "Sémaphore",
+					"Rétrospective", "Ion (foncé)", "Ion (clair)", "Intégrale",
+					"Filigrane", "Facette", "Secteur (clair)", "À bandes", "Austin",
+					"Guide", "Whisp", "Lignes latérales", "Quadrillage")
+				}
+				ElseIf($xWordVersion -eq $wdWord2010)
+				{
+					$xArray = ("Mosaïques", "Ligne latérale", "Annuel", "Perspective",
+					"Contraste", "Emplacements de bureau", "Moderne", "Blocs empilés",
+					"Rayures fines", "Austère", "Transcendant", "Classique", "Quadrillage",
+					"Exposition", "Alphabet", "Mots croisés", "Papier journal", "Austin", "Guide")
+				}
+			}
+
+		'nb-'	{
+				If($xWordVersion -eq $wdWord2013)
+				{
+					$xArray = ("Austin", "BevegElse", "Dempet", "Fasett", "Filigran",
+					"Integral", "Ion (lys)", "Ion (mørk)", "Retrospekt", "Rutenett",
+					"Sektor (lys)", "Sektor (mørk)", "Semafor", "Sidelinje", "Stripet",
+					"ViewMaster")
+				}
+				ElseIf($xWordVersion -eq $wdWord2010)
+				{
+					$xArray = ("Alfabet", "Årlig", "Avistrykk", "Austin", "Avlukker",
+					"BevegElse", "Engasjement", "Enkel", "Fliser", "Konservativ",
+					"Kontrast", "Mod", "Perspektiv", "Puslespill", "Rutenett", "Sidelinje",
+					"Smale striper", "Stabler", "Transcenderende")
+				}
+			}
+
+		'nl-'	{
+				If($xWordVersion -eq $wdWord2013)
+				{
+					$xArray = ("Austin", "Beweging", "Facet", "Filigraan", "Gestreept",
+					"Integraal", "Ion (donker)", "Ion (licht)", "Raster",
+					"Segment (Light)", "Semafoor", "Slice (donker)", "Spriet",
+					"Terugblik", "Terzijde", "ViewMaster")
+				}
+				ElseIf($xWordVersion -eq $wdWord2010)
+				{
+					$xArray = ("Aantrekkelijk", "Alfabet", "Austin", "Bescheiden",
+					"Beweging", "Blikvanger", "Contrast", "Eenvoudig", "Jaarlijks",
+					"Krantenpapier", "Krijtstreep", "Kubussen", "Mod", "Perspectief",
+					"Puzzel", "Raster", "Stapels",
+					"Tegels", "Terzijde")
+				}
+			}
+
+		'pt-'	{
+				If($xWordVersion -eq $wdWord2013)
+				{
+					$xArray = ("Animação", "Austin", "Em Tiras", "Exibição Mestra",
+					"Faceta", "Fatia (Clara)", "Fatia (Escura)", "Filete", "Filigrana",
+					"Grade", "Integral", "Íon (Claro)", "Íon (Escuro)", "Linha Lateral",
+					"Retrospectiva", "Semáforo")
+				}
+				ElseIf($xWordVersion -eq $wdWord2010)
+				{
+					$xArray = ("Alfabeto", "Animação", "Anual", "Austero", "Austin", "Baias",
+					"Conservador", "Contraste", "Exposição", "Grade", "Ladrilhos",
+					"Linha Lateral", "Listras", "Mod", "Papel Jornal", "Perspectiva", "Pilhas",
+					"Quebra-cabeça", "Transcend")
+				}
+			}
+
+		'sv-'	{
+				If($xWordVersion -eq $wdWord2013)
+				{
+					$xArray = ("Austin", "Band", "Fasett", "Filigran", "Integrerad", "Jon (ljust)",
+					"Jon (mörkt)", "Knippe", "Rutnät", "RörElse", "Sektor (ljus)", "Sektor (mörk)",
+					"Semafor", "Sidlinje", "VisaHuvudsida", "Återblick")
+				}
+				ElseIf($xWordVersion -eq $wdWord2010)
+				{
+					$xArray = ("Alfabetmönster", "Austin", "Enkelt", "Exponering", "Konservativt",
+					"Kontrast", "Kritstreck", "Kuber", "Perspektiv", "Plattor", "Pussel", "Rutnät",
+					"RörElse", "Sidlinje", "Sobert", "Staplat", "Tidningspapper", "Årligt",
+					"Övergående")
+				}
+			}
+
+		Default	{
+					If($xWordVersion -eq $wdWord2013)
+					{
+						$xArray = ("Austin", "Banded", "Facet", "Filigree", "Grid", "Integral",
+						"Ion (Dark)", "Ion (Light)", "Motion", "Retrospect", "Semaphore",
+						"Sideline", "Slice (Dark)", "Slice (Light)", "ViewMaster", "Whisp")
+					}
+					ElseIf($xWordVersion -eq $wdWord2010)
+					{
+						$xArray = ("Alphabet", "Annual", "Austere", "Austin", "Conservative",
+						"Contrast", "Cubicles", "Exposure", "Grid", "Mod", "Motion", "Newsprint",
+						"Perspective", "Pinstripes", "Puzzle", "Sideline", "Stacks", "Tiles", "Transcend")
+					}
+				}
+	}
+	
+	If($xArray -contains $xCP)
+	{
+		$xArray = $Null
+		Return $True
+	}
+	Else
+	{
+		$xArray = $Null
+		Return $False
+	}
 }
 
 Function ConvertTo-ScriptBlock 
@@ -1382,16 +1984,27 @@ Function SWExclusions
 	# performance improvements by Jeff Wouters, PowerShell MVP
 	# modified by Webster
 	# modified 3-jan-2014 to add displayversion
+	# bug found 30-jul-2014 by Sam Jacobs
+	# this function did not work if the SoftwareExlusions.txt file contained only one line
 	$var = ""
 	$Tmp = '$InstalledApps | Where {'
 	$Exclusions = Get-Content "$($pwd.path)\SoftwareExclusions.txt" -EA 0
-	If($Exclusions -ne $Null -and $Exclusions.Count -gt 0)
+	If($? -and $Exclusions -ne $Null)
 	{
-		ForEach($Exclusion in $Exclusions) 
+		If($Exclusions -is [array])	
 		{
-			$Tmp += "(`$`_.DisplayName -notlike ""$($Exclusion)"") -and "
+			ForEach($Exclusion in $Exclusions) 
+			{
+				$Tmp += "(`$`_.DisplayName -notlike ""$($Exclusion)"") -and "
+			}
+			$var += $Tmp.Substring(0,($Tmp.Length - 6))
+			}
+		Else
+		{
+			# added 30-jul-2014 to handle if the file contained only one line
+			$tmp += "(`$`_.DisplayName -notlike ""$($Exclusions)"")"
+			$var = $tmp
 		}
-		$var += $Tmp.Substring(0,($Tmp.Length - 6))
 		$var += "} | Select-Object DisplayName, DisplayVersion | Sort DisplayName -unique"
 	}
 	return $var
@@ -1417,18 +2030,6 @@ Function CheckWordPrereq
 		Write-Host "`n`n`tPlease close all instances of Microsoft Word before running this report.`n`n"
 		Exit
 	}
-}
-
-Function CheckWord2007SaveAsPDFInstalled
-{
-	If((Test-Path  REGISTRY::HKEY_CLASSES_ROOT\Installer\Products\000021090B0090400000000000F01FEC) -eq $False)
-	{
-		Write-Host "`n`n`t`tWord 2007 is detected and the option to SaveAs PDF was selected but the Word 2007 SaveAs PDF add-in is not installed."
-		Write-Host "`n`n`t`tThe add-in can be downloaded from http://www.microsoft.com/en-us/download/details.aspx?id=9943"
-		Write-Host "`n`n`t`tInstall the SaveAs PDF add-in and rerun the script."
-		Return $False
-	}
-	Return $True
 }
 
 Function ValidateCompanyName
@@ -1645,6 +2246,26 @@ Function Check-NeededPSSnapins
 	}
 }
 
+Function line
+#function created by Michael B. Smith, Exchange MVP
+#@essentialexchange on Twitter
+#http://TheEssentialExchange.com
+#for creating the formatted text report
+#created March 2011
+#updated March 2014
+{
+	Param( [int]$tabs = 0, [string]$name = '', [string]$value = '', [string]$newline = "`r`n", [switch]$nonewline )
+	While( $tabs -gt 0 ) { $Global:Output += "`t"; $tabs--; }
+	If( $nonewline )
+	{
+		$Global:Output += $name + $value
+	}
+	Else
+	{
+		$Global:Output += $name + $value + $newline
+	}
+}
+
 Function WriteWordLine
 #Function created by Ryan Revord
 #@rsrevord on Twitter
@@ -1729,6 +2350,14 @@ Function _SetDocumentProperty
 
 	#set the value
 	$Prop.GetType().InvokeMember("Value","SetProperty",$Null,$prop,$Value)
+}
+
+Function FindWordDocumentEnd
+{
+	#return focus to main document    
+	$Script:Doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekMainDocument
+	#move to the end of the current document
+	$Script:Selection.EndKey($wdStory,$wdMove) | Out-Null
 }
 
 Function Get-PrinterModifiedSettings
@@ -2132,9 +2761,9 @@ Function Get-PrinterModifiedSettings
 
 Function AbortScript
 {
-	$Word.quit()
+	$Script:Word.quit()
 	Write-Verbose "$(Get-Date): System Cleanup"
-	[System.Runtime.Interopservices.Marshal]::ReleaseComObject($Word) | Out-Null
+	[System.Runtime.Interopservices.Marshal]::ReleaseComObject($Script:Word) | Out-Null
 	If(Test-Path variable:global:word)
 	{
 		Remove-Variable -Name word -Scope Global
@@ -2144,6 +2773,14 @@ Function AbortScript
 	Write-Verbose "$(Get-Date): Script has been aborted"
 	$ErrorActionPreference = $SaveEAPreference
 	Exit
+}
+
+Function FindWordDocumentEnd
+{
+	#return focus to main document    
+	$Script:Doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekMainDocument
+	#move to the end of the current document
+	$Script:Selection.EndKey($wdStory,$wdMove) | Out-Null
 }
 
 Function validStateProp( [object] $object, [string] $topLevel, [string] $secondLevel )
@@ -2193,7 +2830,7 @@ Function ProcessCitrixPolicies
 		}
 	}
 
-	If($?)
+	If($? -and $Policies -ne $Null)
 	{
 		ForEach($Policy in $Policies)
 		{
@@ -2241,7 +2878,7 @@ Function ProcessCitrixPolicies
 					$filters = Get-CtxGroupPolicyFilter -PolicyName $Policy.PolicyName -DriveName $xDriveName -EA 0
 				}
 
-				If($?)
+				If($? -and $Filters -ne $Null)
 				{
 					If(![String]::IsNullOrEmpty($filters))
 					{
@@ -2288,7 +2925,7 @@ Function ProcessCitrixPolicies
 					$Settings = Get-CtxGroupPolicyConfiguration -PolicyName $Policy.PolicyName -DriveName $xDriveName -EA 0
 				}
 					
-				If($?)
+				If($? -and $Settings -ne $Null)
 				{
 					ForEach($Setting in $Settings)
 					{
@@ -2639,11 +3276,7 @@ Function ProcessCitrixPolicies
 									$Table.Rows.SetLeftIndent($Indent3TabStops,$wdAdjustProportional)
 									$Table.AutoFitBehavior($wdAutoFitContent)
 
-									#return focus back to document
-									$doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekMainDocument
-
-									#move to the end of the current document
-									$selection.EndKey($wdStory,$wdMove) | Out-Null
+									FindWordDocumentEnd
 								}
 								$XML = $Null
 								$xRow = $Null
@@ -2951,13 +3584,11 @@ Function ProcessCitrixPolicies
 								$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
 								[int]$xRow = 1
 								Write-Verbose "$(Get-Date): `t`t`t`t`tFormat first row with column headings"
-								$Table.Cell($xRow,1).Shading.BackgroundPatternColor = $wdColorGray15
+								$Table.Rows.First.Shading.BackgroundPatternColor = $wdColorGray15
 								$Table.Cell($xRow,1).Range.Font.Bold = $True
 								$Table.Cell($xRow,1).Range.Text = "Action"
-								$Table.Cell($xRow,2).Shading.BackgroundPatternColor = $wdColorGray15
 								$Table.Cell($xRow,2).Range.Font.Bold = $True
 								$Table.Cell($xRow,2).Range.Text = "URL Pattern"
-								$Table.Cell($xRow,3).Shading.BackgroundPatternColor = $wdColorGray15
 								$Table.Cell($xRow,3).Range.Font.Bold = $True
 								$Table.Cell($xRow,3).Range.Text = "Flash Instance"
 								ForEach($Value in $Values)
@@ -2995,11 +3626,7 @@ Function ProcessCitrixPolicies
 								$Table.Rows.SetLeftIndent($Indent3TabStops,$wdAdjustProportional)
 								$Table.AutoFitBehavior($wdAutoFitContent)
 
-								#return focus back to document
-								$doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekMainDocument
-
-								#move to the end of the current document
-								$selection.EndKey($wdStory,$wdMove) | Out-Null
+								FindWordDocumentEnd
 								$Values = $Null
 								$Action = $Null
 								$Url = $Null
@@ -3332,16 +3959,13 @@ Function ProcessCitrixPolicies
 								$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
 								[int]$xRow = 1
 								Write-Verbose "$(Get-Date): `t`t`t`t`tFormat first row with column headings"
-								$Table.Cell($xRow,1).Shading.BackgroundPatternColor = $wdColorGray15
+								$Table.Rows.First.Shading.BackgroundPatternColor = $wdColorGray15
 								$Table.Cell($xRow,1).Range.Font.Bold = $True
 								$Table.Cell($xRow,1).Range.Text = "Driver Name"
-								$Table.Cell($xRow,2).Shading.BackgroundPatternColor = $wdColorGray15
 								$Table.Cell($xRow,2).Range.Font.Bold = $True
 								$Table.Cell($xRow,2).Range.Text = "Action"
-								$Table.Cell($xRow,3).Shading.BackgroundPatternColor = $wdColorGray15
 								$Table.Cell($xRow,3).Range.Font.Bold = $True
 								$Table.Cell($xRow,3).Range.Text = "Settings"
-								$Table.Cell($xRow,4).Shading.BackgroundPatternColor = $wdColorGray15
 								$Table.Cell($xRow,4).Range.Font.Bold = $True
 								$Table.Cell($xRow,4).Range.Text = "Server Driver"
 								ForEach($element in $array)
@@ -3401,11 +4025,7 @@ Function ProcessCitrixPolicies
 								$Table.Rows.SetLeftIndent($Indent3TabStops,$wdAdjustProportional)
 								$Table.AutoFitBehavior($wdAutoFitContent)
 
-								#return focus back to document
-								$doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekMainDocument
-
-								#move to the end of the current document
-								$selection.EndKey($wdStory,$wdMove) | Out-Null
+								FindWordDocumentEnd
 								WriteWordLine 0 0 ""
 							}
 							If($Setting.PrinterPropertiesRetention.State -ne "NotConfigured")
@@ -3838,9 +4458,13 @@ Function ProcessCitrixPolicies
 			}
 		}
 	}
-	Else 
+	ElseIf(!$?)
 	{
-		Write-Warning "Citrix Policy information could not be retrieved."
+		Write-Warning "Citrix Policy information could not be retrieved"
+	}
+	Else
+	{
+		Write-Warning "No results returned for Citrix Policy information"
 	}
 	
 	$Policies = $Null
@@ -3974,18 +4598,1043 @@ Function BuildTableForServerOrWG
 	$Table.Rows.SetLeftIndent($Indent1TabStops,$wdAdjustProportional)
 	$Table.AutoFitBehavior($wdAutoFitContent)
 
-	#return focus back to document
-	$doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekMainDocument
-
-	#move to the end of the current document
-	$selection.EndKey($wdStory,$wdMove) | Out-Null
+	FindWordDocumentEnd
 	$xArray = $Null
 }
 
+<#
+.Synopsis
+	Add a table to a Microsoft Word document
+.DESCRIPTION
+	This function adds a table to a Microsoft Word document from either an array of
+	Hashtables or an array of PSCustomObjects.
+
+	Using this function is quicker than setting each table cell individually but can
+	only utilise the built-in MS Word table autoformats. Individual tables cells can
+	be altered after the table has been appended to the document (a table reference
+	is returned).
+.EXAMPLE
+	AddWordTable -Hashtable $HashtableArray
+
+	This example adds table to the MS Word document, utilising all key/value pairs in
+	the array of hashtables. Column headers will display the key names as defined.
+	Note: the columns might not be displayed in the order that they were defined. To
+	ensure columns are displayed in the required order utilise the -Columns parameter.
+.EXAMPLE
+	AddWordTable -Hashtable $HashtableArray -List
+
+	This example adds table to the MS Word document, utilising all key/value pairs in
+	the array of hashtables. No column headers will be added, in a ListView format.
+	Note: the columns might not be displayed in the order that they were defined. To
+	ensure columns are displayed in the required order utilise the -Columns parameter.
+.EXAMPLE
+	AddWordTable -CustomObject $PSCustomObjectArray
+
+	This example adds table to the MS Word document, utilising all note property names
+	the array of PSCustomObjects. Column headers will display the note property names.
+	Note: the columns might not be displayed in the order that they were defined. To
+	ensure columns are displayed in the required order utilise the -Columns parameter.
+.EXAMPLE
+	AddWordTable -Hashtable $HashtableArray -Columns FirstName,LastName,EmailAddress
+
+	This example adds a table to the MS Word document, but only using the specified
+	key names: FirstName, LastName and EmailAddress. If other keys are present in the
+	array of Hashtables they will be ignored.
+.EXAMPLE
+	AddWordTable -CustomObject $PSCustomObjectArray -Columns FirstName,LastName,EmailAddress -Headers "First Name","Last Name","Email Address"
+
+	This example adds a table to the MS Word document, but only using the specified
+	PSCustomObject note properties: FirstName, LastName and EmailAddress. If other note
+	properties are present in the array of PSCustomObjects they will be ignored. The
+	display names for each specified column header has been overridden to display a
+	custom header. Note: the order of the header names must match the specified columns.
+#>
+Function AddWordTable
+{
+	[CmdletBinding()]
+	Param
+	(
+		# Array of Hashtable (including table headers)
+		[Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true, ParameterSetName='Hashtable', Position=0)]
+		[ValidateNotNullOrEmpty()] [System.Collections.Hashtable[]] $Hashtable,
+		# Array of PSCustomObjects
+		[Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true, ParameterSetName='CustomObject', Position=0)]
+		[ValidateNotNullOrEmpty()] [PSCustomObject[]] $CustomObject,
+		# Array of Hashtable key names or PSCustomObject property names to include, in display order.
+		# If not supplied then all Hashtable keys or all PSCustomObject properties will be displayed.
+		[Parameter(ValueFromPipelineByPropertyName=$true)] [AllowNull()] [string[]] $Columns = $null,
+		# Array of custom table header strings in display order.
+		[Parameter(ValueFromPipelineByPropertyName=$true)] [AllowNull()] [string[]] $Headers = $null,
+		# AutoFit table behavior.
+		[Parameter(ValueFromPipelineByPropertyName=$true)] [AllowNull()] [int] $AutoFit = -1,
+		# List view (no headers)
+		[Switch] $List,
+		# Grid lines
+		[Switch] $NoGridLines,
+		# Built-in Word table formatting style constant
+		# Would recommend only $wdTableFormatContempory for normal usage (possibly $wdTableFormatList5 for List view)
+		[Parameter(ValueFromPipelineByPropertyName=$true)] [int] $Format = 0
+	)
+
+	Begin 
+	{
+		Write-Debug ("Using parameter set '{0}'" -f $PSCmdlet.ParameterSetName);
+		## Check if -Columns wasn't specified but -Headers were (saves some additional parameter sets!)
+		If(($Columns -eq $null) -and ($Headers -ne $null)) 
+		{
+			Write-Warning "No columns specified and therefore, specified headers will be ignored.";
+			$Columns = $null;
+		}
+		ElseIf(($Columns -ne $null) -and ($Headers -ne $null)) 
+		{
+			## Check if number of specified -Columns matches number of specified -Headers
+			If($Columns.Length -ne $Headers.Length) 
+			{
+				Write-Error "The specified number of columns does not match the specified number of headers.";
+			}
+		} ## end elseif
+	} ## end Begin
+
+	Process
+	{
+		## Build the Word table data string to be converted to a range and then a table later.
+        [System.Text.StringBuilder] $WordRangeString = New-Object System.Text.StringBuilder;
+
+		Switch ($PSCmdlet.ParameterSetName) 
+		{
+			'CustomObject' 
+			{
+				If($Columns -eq $null) 
+				{
+					## Build the available columns from all availble PSCustomObject note properties
+					[string[]] $Columns = @();
+					## Add each NoteProperty name to the array
+					ForEach($Property in ($CustomObject | Get-Member -MemberType NoteProperty)) 
+					{ 
+						$Columns += $Property.Name; 
+					}
+				}
+
+				## Add the table headers from -Headers or -Columns (except when in -List(view)
+				If(-not $List) 
+				{
+					Write-Debug ("$(Get-Date): `t`tBuilding table headers");
+					If($Headers -ne $null) 
+					{
+                        [ref] $null = $WordRangeString.AppendFormat("{0}`n", [string]::Join("`t", $Headers));
+					}
+					Else 
+					{ 
+                        [ref] $null = $WordRangeString.AppendFormat("{0}`n", [string]::Join("`t", $Columns));
+					}
+				}
+
+				## Iterate through each PSCustomObject
+				Write-Debug ("$(Get-Date): `t`tBuilding table rows");
+				ForEach($Object in $CustomObject) 
+				{
+					$OrderedValues = @();
+					## Add each row item in the specified order
+					ForEach($Column in $Columns) 
+					{ 
+						$OrderedValues += $Object.$Column; 
+					}
+					## Use the ordered list to add each column in specified order
+                    [ref] $null = $WordRangeString.AppendFormat("{0}`n", [string]::Join("`t", $OrderedValues));
+				} ## end foreach
+				Write-Debug ("$(Get-Date): `t`t`tAdded '{0}' table rows" -f ($CustomObject.Count));
+			} ## end CustomObject
+
+			Default 
+			{   ## Hashtable
+				If($Columns -eq $null) 
+				{
+					## Build the available columns from all available hashtable keys. Hopefully
+					## all Hashtables have the same keys (they should for a table).
+					$Columns = $Hashtable[0].Keys;
+				}
+
+				## Add the table headers from -Headers or -Columns (except when in -List(view)
+				If(-not $List) 
+				{
+					Write-Debug ("$(Get-Date): `t`tBuilding table headers");
+					If($Headers -ne $null) 
+					{ 
+                        [ref] $null = $WordRangeString.AppendFormat("{0}`n", [string]::Join("`t", $Headers));
+					}
+					Else 
+					{
+                        [ref] $null = $WordRangeString.AppendFormat("{0}`n", [string]::Join("`t", $Columns));
+					}
+				}
+                
+				## Iterate through each Hashtable
+				Write-Debug ("$(Get-Date): `t`tBuilding table rows");
+				ForEach($Hash in $Hashtable) 
+				{
+					$OrderedValues = @();
+					## Add each row item in the specified order
+					ForEach($Column in $Columns) 
+					{ 
+						$OrderedValues += $Hash.$Column; 
+					}
+					## Use the ordered list to add each column in specified order
+                    [ref] $null = $WordRangeString.AppendFormat("{0}`n", [string]::Join("`t", $OrderedValues));
+				} ## end foreach
+
+				Write-Debug ("$(Get-Date): `t`t`tAdded '{0}' table rows" -f $Hashtable.Count);
+			} ## end default
+		} ## end switch
+
+		## Create a MS Word range and set its text to our tab-delimited, concatenated string
+		Write-Debug ("$(Get-Date): `t`tBuilding table range");
+		$WordRange = $Script:Doc.Application.Selection.Range;
+		$WordRange.Text = $WordRangeString.ToString();
+
+		## Create hash table of named arguments to pass to the ConvertToTable method
+		$ConvertToTableArguments = @{ Separator = [Microsoft.Office.Interop.Word.WdTableFieldSeparator]::wdSeparateByTabs; }
+
+		## Negative built-in styles are not supported by the ConvertToTable method
+		If($Format -ge 0) 
+		{
+			$ConvertToTableArguments.Add("Format", $Format);
+			$ConvertToTableArguments.Add("ApplyBorders", $true);
+			$ConvertToTableArguments.Add("ApplyShading", $true);
+			$ConvertToTableArguments.Add("ApplyFont", $true);
+			$ConvertToTableArguments.Add("ApplyColor", $true);
+			If(!$List) 
+			{ 
+				$ConvertToTableArguments.Add("ApplyHeadingRows", $true); 
+			}
+			$ConvertToTableArguments.Add("ApplyLastRow", $true);
+			$ConvertToTableArguments.Add("ApplyFirstColumn", $true);
+			$ConvertToTableArguments.Add("ApplyLastColumn", $true);
+		}
+
+		## Invoke ConvertToTable method - with named arguments - to convert Word range to a table
+		## See http://msdn.microsoft.com/en-us/library/office/aa171893(v=office.11).aspx
+		Write-Debug ("$(Get-Date): `t`tConverting range to table");
+		## Store the table reference just in case we need to set alternate row coloring
+		$WordTable = $WordRange.GetType().InvokeMember(
+			"ConvertToTable",                               # Method name
+			[System.Reflection.BindingFlags]::InvokeMethod, # Flags
+			$null,                                          # Binder
+			$WordRange,                                     # Target (self!)
+			([Object[]]($ConvertToTableArguments.Values)),  ## Named argument values
+			$null,                                          # Modifiers
+			$null,                                          # Culture
+			([String[]]($ConvertToTableArguments.Keys))     ## Named argument names
+		);
+
+		## Implement grid lines (will wipe out any existing formatting
+		If($Format -lt 0) 
+		{
+			Write-Debug ("$(Get-Date): `t`tSetting table format");
+			$WordTable.Style = $Format;
+		}
+
+		## Set the table autofit behavior
+		If($AutoFit -ne -1) 
+		{ 
+			$WordTable.AutoFitBehavior($AutoFit); 
+		}
+
+		#the next line causes the heading row to flow across page breaks
+		$WordTable.Rows.First.Headingformat = $wdHeadingFormatTrue;
+
+		If(!$NoGridLines) 
+		{
+			$WordTable.Borders.InsideLineStyle = $wdLineStyleSingle;
+			$WordTable.Borders.OutsideLineStyle = $wdLineStyleSingle;
+		}
+
+		Return $WordTable;
+
+	} ## end Process
+}
+
+<#
+.Synopsis
+	Sets the format of one or more Word table cells
+.DESCRIPTION
+	This function sets the format of one or more table cells, either from a collection
+	of Word COM object cell references, an individual Word COM object cell reference or
+	a hashtable containing Row and Column information.
+
+	The font name, font size, bold, italic , underline and shading values can be used.
+.EXAMPLE
+	SetWordCellFormat -Hashtable $Coordinates -Table $TableReference -Bold
+
+	This example sets all text to bold that is contained within the $TableReference
+	Word table, using an array of hashtables. Each hashtable contain a pair of co-
+	ordinates that is used to select the required cells. Note: the hashtable must
+	contain the .Row and .Column key names. For example:
+	@ { Row = 7; Column = 3 } to set the cell at row 7 and column 3 to bold.
+.EXAMPLE
+	$RowCollection = $Table.Rows.First.Cells
+	SetWordCellFormat -Collection $RowCollection -Bold -Size 10
+
+	This example sets all text to size 8 and bold for all cells that are contained
+	within the first row of the table.
+	Note: the $Table.Rows.First.Cells returns a collection of Word COM cells objects
+	that are in the first table row.
+.EXAMPLE
+	$ColumnCollection = $Table.Columns.Item(2).Cells
+	SetWordCellFormat -Collection $ColumnCollection -BackgroundColor 255
+
+	This example sets the background (shading) of all cells in the table's second
+	column to red.
+	Note: the $Table.Columns.Item(2).Cells returns a collection of Word COM cells objects
+	that are in the table's second column.
+.EXAMPLE
+	SetWordCellFormat -Cell $Table.Cell(17,3) -Font "Tahoma" -Color 16711680
+
+	This example sets the font to Tahoma and the text color to blue for the cell located
+	in the table's 17th row and 3rd column.
+	Note: the $Table.Cell(17,3) returns a single Word COM cells object.
+#>
+Function SetWordCellFormat 
+{
+	[CmdletBinding(DefaultParameterSetName='Collection')]
+	Param (
+		# Word COM object cell collection reference
+		[Parameter(Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='Collection', Position=0)] [ValidateNotNullOrEmpty()] $Collection,
+		# Word COM object individual cell reference
+		[Parameter(Mandatory=$true, ParameterSetName='Cell', Position=0)] [ValidateNotNullOrEmpty()] $Cell,
+		# Hashtable of cell co-ordinates
+		[Parameter(Mandatory=$true, ParameterSetName='Hashtable', Position=0)] [ValidateNotNullOrEmpty()] [System.Collections.Hashtable[]] $Coordinates,
+		# Word COM object table reference
+		[Parameter(Mandatory=$true, ParameterSetName='Hashtable', Position=1)] [ValidateNotNullOrEmpty()] $Table,
+		# Font name
+		[Parameter()] [AllowNull()] [string] $Font = $null,
+		# Font color
+		[Parameter()] [AllowNull()] $Color = $null,
+		# Font size
+		[Parameter()] [ValidateNotNullOrEmpty()] [int] $Size = 0,
+		# Cell background color
+		[Parameter()] [AllowNull()] $BackgroundColor = $null,
+		# Force solid background color
+		[Switch] $Solid,
+		[Switch] $Bold,
+		[Switch] $Italic,
+		[Switch] $Underline
+	)
+
+	Begin 
+	{
+		Write-Debug ("Using parameter set '{0}'." -f $PSCmdlet.ParameterSetName);
+	}
+
+	Process 
+	{
+		Switch ($PSCmdlet.ParameterSetName) 
+		{
+			'Collection' {
+				ForEach($Cell in $Collection) 
+				{
+					If($BackgroundColor -ne $null) { $Cell.Shading.BackgroundPatternColor = $BackgroundColor; }
+					If($Bold) { $Cell.Range.Font.Bold = $true; }
+					If($Italic) { $Cell.Range.Font.Italic = $true; }
+					If($Underline) { $Cell.Range.Font.Underline = 1; }
+					If($Font -ne $null) { $Cell.Range.Font.Name = $Font; }
+					If($Color -ne $null) { $Cell.Range.Font.Color = $Color; }
+					If($Size -ne 0) { $Cell.Range.Font.Size = $Size; }
+					If($Solid) { $Cell.Shading.Texture = 0; } ## wdTextureNone
+				} # end foreach
+			} # end Collection
+			'Cell' 
+			{
+				If($Bold) { $Cell.Range.Font.Bold = $true; }
+				If($Italic) { $Cell.Range.Font.Italic = $true; }
+				If($Underline) { $Cell.Range.Font.Underline = 1; }
+				If($Font -ne $null) { $Cell.Range.Font.Name = $Font; }
+				If($Color -ne $null) { $Cell.Range.Font.Color = $Color; }
+				If($Size -ne 0) { $Cell.Range.Font.Size = $Size; }
+				If($BackgroundColor -ne $null) { $Cell.Shading.BackgroundPatternColor = $BackgroundColor; }
+				If($Solid) { $Cell.Shading.Texture = 0; } ## wdTextureNone
+			} # end Cell
+			'Hashtable' 
+			{
+				ForEach($Coordinate in $Coordinates) 
+				{
+					$Cell = $Table.Cell($Coordinate.Row, $Coordinate.Column);
+					If($Bold) { $Cell.Range.Font.Bold = $true; }
+					If($Italic) { $Cell.Range.Font.Italic = $true; }
+					If($Underline) { $Cell.Range.Font.Underline = 1; }
+					If($Font -ne $null) { $Cell.Range.Font.Name = $Font; }
+					If($Color -ne $null) { $Cell.Range.Font.Color = $Color; }
+					If($Size -ne 0) { $Cell.Range.Font.Size = $Size; }
+					If($BackgroundColor -ne $null) { $Cell.Shading.BackgroundPatternColor = $BackgroundColor; }
+					If($Solid) { $Cell.Shading.Texture = 0; } ## wdTextureNone
+				}
+			} # end Hashtable
+		} # end switch
+	} # end process
+}
+
+<#
+.Synopsis
+	Sets alternate row colors in a Word table
+.DESCRIPTION
+	This function sets the format of alternate rows within a Word table using the
+	specified $BackgroundColor. This function is expensive (in performance terms) as
+	it recursively sets the format on alternate rows. It would be better to pick one
+	of the predefined table formats (if one exists)? Obviously the more rows, the
+	longer it takes :'(
+
+	Note: this function is called by the AddWordTable function if an alternate row
+	format is specified.
+.EXAMPLE
+	SetWordTableAlternateRowColor -Table $TableReference -BackgroundColor 255
+
+	This example sets every-other table (starting with the first) row and sets the
+	background color to red (wdColorRed).
+.EXAMPLE
+	SetWordTableAlternateRowColor -Table $TableReference -BackgroundColor 39423 -Seed Second
+
+	This example sets every other table (starting with the second) row and sets the
+	background color to light orange (weColorLightOrange).
+#>
+Function SetWordTableAlternateRowColor 
+{
+	[CmdletBinding()]
+	Param (
+		# Word COM object table reference
+		[Parameter(Mandatory=$true, ValueFromPipeline=$true, Position=0)] [ValidateNotNullOrEmpty()] $Table,
+		# Alternate row background color
+		[Parameter(Mandatory=$true, Position=1)] [ValidateNotNull()] [int] $BackgroundColor,
+		# Alternate row starting seed
+		[Parameter(ValueFromPipelineByPropertyName=$true, Position=2)] [ValidateSet('First','Second')] [string] $Seed = 'First'
+	)
+
+	Process 
+	{
+		$StartDateTime = Get-Date;
+		Write-Debug ("{0}: `t`tSetting alternate table row colors.." -f $StartDateTime);
+
+		## Determine the row seed (only really need to check for 'Second' and default to 'First' otherwise
+		If($Seed.ToLower() -eq 'second') 
+		{ 
+			$StartRowIndex = 2; 
+		}
+		Else 
+		{ 
+			$StartRowIndex = 1; 
+		}
+
+		For($AlternateRowIndex = $StartRowIndex; $AlternateRowIndex -lt $Table.Rows.Count; $AlternateRowIndex += 2) 
+		{ 
+			$Table.Rows.Item($AlternateRowIndex).Shading.BackgroundPatternColor = $BackgroundColor;
+		}
+
+		## I've put verbose calls in here we can see how expensive this functionality actually is.
+		$EndDateTime = Get-Date;
+		$ExecutionTime = New-TimeSpan -Start $StartDateTime -End $EndDateTime;
+		Write-Debug ("{0}: `t`tDone setting alternate row style color in '{1}' seconds" -f $EndDateTime, $ExecutionTime.TotalSeconds);
+	}
+}
+
+Function ShowScriptOptions
+{
+	Write-Verbose "$(Get-Date): "
+	Write-Verbose "$(Get-Date): "
+	Write-Verbose "$(Get-Date): Company Name : $($Script:CoName)"
+	Write-Verbose "$(Get-Date): Cover Page   : $($CoverPage)"
+	Write-Verbose "$(Get-Date): User Name    : $($UserName)"
+	Write-Verbose "$(Get-Date): Save As PDF  : $($PDF)"
+	Write-Verbose "$(Get-Date): Save As WORD : $($MSWORD)"
+	Write-Verbose "$(Get-Date): Add DateTime : $($AddDateTime)"
+	Write-Verbose "$(Get-Date): HW Inventory : $($Hardware)"
+	Write-Verbose "$(Get-Date): SW Inventory : $($Software)"
+	If(!$Summary)
+	{
+		Write-Verbose "$(Get-Date): Start Date   : $($StartDate)"
+		Write-Verbose "$(Get-Date): End Date     : $($EndDate)"
+	}
+	Write-Verbose "$(Get-Date): Section      : $($Section)"
+	Write-Verbose "$(Get-Date): Summary      : $($Summary)"
+	Write-Verbose "$(Get-Date): Filename1    : $($Script:FileName1)"
+	If($PDF)
+	{
+		Write-Verbose "$(Get-Date): Filename2    : $($Script:FileName2)"
+	}
+	Write-Verbose "$(Get-Date): OS Detected  : $($RunningOS)"
+	Write-Verbose "$(Get-Date): PSUICulture  : $($PSUICulture)"
+	Write-Verbose "$(Get-Date): PSCulture    : $($PSCulture)"
+	Write-Verbose "$(Get-Date): Word version : $($Script:WordProduct)"
+	Write-Verbose "$(Get-Date): Word language: $($Script:WordLanguageValue)"
+	Write-Verbose "$(Get-Date): PoSH version : $($Host.Version)"
+	Write-Verbose "$(Get-Date): "
+	Write-Verbose "$(Get-Date): Script start : $($Script:StartTime)"
+	Write-Verbose "$(Get-Date): "
+	Write-Verbose "$(Get-Date): "
+}
+
+Function validStateProp( [object] $object, [string] $topLevel, [string] $secondLevel )
+{
+	#function created 8-jan-2014 by Michael B. Smith
+	if( $object )
+	{
+		If( ( gm -Name $topLevel -InputObject $object ) )
+		{
+			If( ( gm -Name $secondLevel -InputObject $object.$topLevel ) )
+			{
+				Return $True
+			}
+		}
+	}
+	Return $False
+}
+
+Function SetupWord
+{
+	Write-Verbose "$(Get-Date): Setting up Word"
+    
+	# Setup word for output
+	Write-Verbose "$(Get-Date): Create Word comObject.  Ignore the next message."
+	$Script:Word = New-Object -comobject "Word.Application" -EA 0
+	
+	If(!$? -or $Script:Word -eq $Null)
+	{
+		Write-Warning "The Word object could not be created.  You may need to repair your Word installation."
+		$ErrorActionPreference = $SaveEAPreference
+		Write-Error "`n`n`t`tThe Word object could not be created.  You may need to repair your Word installation.`n`n`t`tScript cannot continue.`n`n"
+		Exit
+	}
+
+	Write-Verbose "$(Get-Date): Determine Word language value"
+	If( ( validStateProp $Script:Word Language Value__ ) )
+	{
+		[int]$Script:WordLanguageValue = [int]$Script:Word.Language.Value__
+	}
+	Else
+	{
+		[int]$Script:WordLanguageValue = [int]$Script:Word.Language
+	}
+
+	If(!($Script:WordLanguageValue -gt -1))
+	{
+		$ErrorActionPreference = $SaveEAPreference
+		Write-Error "`n`n`t`tUnable to determine the Word language value.`n`n`t`tScript cannot continue.`n`n"
+		AbortScript
+	}
+	Write-Verbose "$(Get-Date): Word language value is $($Script:WordLanguageValue)"
+	
+	$Script:WordCultureCode = GetCulture $Script:WordLanguageValue
+	
+	SetWordHashTable $Script:WordCultureCode
+	
+	[int]$Script:WordVersion = [int]$Script:Word.Version
+	If($Script:WordVersion -eq $wdWord2013)
+	{
+		$Script:WordProduct = "Word 2013"
+	}
+	ElseIf($Script:WordVersion -eq $wdWord2010)
+	{
+		$Script:WordProduct = "Word 2010"
+	}
+	ElseIf($Script:WordVersion -eq $wdWord2007)
+	{
+		$ErrorActionPreference = $SaveEAPreference
+		Write-Error "`n`n`t`tMicrosoft Word 2007 is no longer supported.`n`n`t`tScript will end.`n`n"
+		AbortScript
+	}
+	Else
+	{
+		$ErrorActionPreference = $SaveEAPreference
+		Write-Error "`n`n`t`tYou are running an untested or unsupported version of Microsoft Word.`n`n`t`tScript will end.`n`n`t`tPlease send info on your version of Word to webster@carlwebster.com`n`n"
+		AbortScript
+	}
+
+	#only validate CompanyName if the field is blank
+	If([String]::IsNullOrEmpty($CoName))
+	{
+		Write-Verbose "$(Get-Date): Company name is blank.  Retrieve company name from registry."
+		$TmpName = ValidateCompanyName
+		
+		If([String]::IsNullOrEmpty($TmpName))
+		{
+			Write-Warning "`n`n`t`tCompany Name is blank so Cover Page will not show a Company Name."
+			Write-Warning "`n`t`tCheck HKCU:\Software\Microsoft\Office\Common\UserInfo for Company or CompanyName value."
+			Write-Warning "`n`t`tYou may want to use the -CompanyName parameter if you need a Company Name on the cover page.`n`n"
+		}
+		Else
+		{
+			$Script:CoName = $TmpName
+			Write-Verbose "$(Get-Date): Updated company name to $($Script:CoName)"
+		}
+	}
+
+	If($Script:WordCultureCode -ne "en-")
+	{
+		Write-Verbose "$(Get-Date): Check Default Cover Page for $($WordCultureCode)"
+		[bool]$CPChanged = $False
+		Switch ($Script:WordCultureCode)
+		{
+			'ca-'	{
+					If($CoverPage -eq "Sideline")
+					{
+						$CoverPage = "Línia lateral"
+						$CPChanged = $True
+					}
+				}
+
+			'da-'	{
+					If($CoverPage -eq "Sideline")
+					{
+						$CoverPage = "Sidelinje"
+						$CPChanged = $True
+					}
+				}
+
+			'de-'	{
+					If($CoverPage -eq "Sideline")
+					{
+						$CoverPage = "Randlinie"
+						$CPChanged = $True
+					}
+				}
+
+			'es-'	{
+					If($CoverPage -eq "Sideline")
+					{
+						$CoverPage = "Línea lateral"
+						$CPChanged = $True
+					}
+				}
+
+			'fi-'	{
+					If($CoverPage -eq "Sideline")
+					{
+						$CoverPage = "Sivussa"
+						$CPChanged = $True
+					}
+				}
+
+			'fr-'	{
+					If($CoverPage -eq "Sideline")
+					{
+						If($Script:WordVersion -eq $wdWord2013)
+						{
+							$CoverPage = "Lignes latérales"
+							$CPChanged = $True
+						}
+						Else
+						{
+							$CoverPage = "Ligne latérale"
+							$CPChanged = $True
+						}
+					}
+				}
+
+			'nb-'	{
+					If($CoverPage -eq "Sideline")
+					{
+						$CoverPage = "Sidelinje"
+						$CPChanged = $True
+					}
+				}
+
+			'nl-'	{
+					If($CoverPage -eq "Sideline")
+					{
+						$CoverPage = "Terzijde"
+						$CPChanged = $True
+					}
+				}
+
+			'pt-'	{
+					If($CoverPage -eq "Sideline")
+					{
+						$CoverPage = "Linha Lateral"
+						$CPChanged = $True
+					}
+				}
+
+			'sv-'	{
+					If($CoverPage -eq "Sideline")
+					{
+						$CoverPage = "Sidlinje"
+						$CPChanged = $True
+					}
+				}
+		}
+
+		If($CPChanged)
+		{
+			Write-Verbose "$(Get-Date): Changed Default Cover Page from Sideline to $($CoverPage)"
+		}
+	}
+
+	Write-Verbose "$(Get-Date): Validate cover page $($CoverPage) for culture code $($Script:WordCultureCode)"
+	[bool]$ValidCP = $False
+	
+	$ValidCP = ValidateCoverPage $Script:WordVersion $CoverPage $Script:WordCultureCode
+	
+	If(!$ValidCP)
+	{
+		$ErrorActionPreference = $SaveEAPreference
+		Write-Verbose "$(Get-Date): Word language value $($Script:WordLanguageValue)"
+		Write-Verbose "$(Get-Date): Culture code $($Script:WordCultureCode)"
+		Write-Error "`n`n`t`tFor $($Script:WordProduct), $($CoverPage) is not a valid Cover Page option.`n`n`t`tScript cannot continue.`n`n"
+		AbortScript
+	}
+
+	ShowScriptOptions
+
+	$Script:Word.Visible = $False
+
+	#http://jdhitsolutions.com/blog/2012/05/san-diego-2012-powershell-deep-dive-slides-and-demos/
+	#using Jeff's Demo-WordReport.ps1 file for examples
+	Write-Verbose "$(Get-Date): Load Word Templates"
+
+	[bool]$Script:CoverPagesExist = $False
+	[bool]$BuildingBlocksExist = $False
+
+	$Script:Word.Templates.LoadBuildingBlocks()
+	#word 2010/2013
+	$BuildingBlocksCollection = $Script:Word.Templates | Where {$_.name -eq "Built-In Building Blocks.dotx"}
+
+	Write-Verbose "$(Get-Date): Attempt to load cover page $($CoverPage)"
+	$part = $Null
+
+	$BuildingBlocksCollection | 
+	ForEach{
+		If ($_.BuildingBlockEntries.Item($CoverPage).Name -eq $CoverPage) 
+		{
+			$BuildingBlocks = $_
+		}
+	}        
+
+	If($BuildingBlocks -ne $Null)
+	{
+		$BuildingBlocksExist = $True
+
+		Try 
+		{
+			$part = $BuildingBlocks.BuildingBlockEntries.Item($CoverPage)
+		}
+
+		Catch
+		{
+			$part = $Null
+		}
+
+		If($part -ne $Null)
+		{
+			$Script:CoverPagesExist = $True
+		}
+	}
+
+	If(!$Script:CoverPagesExist)
+	{
+		Write-Verbose "$(Get-Date): Cover Pages are not installed or the Cover Page $($CoverPage) does not exist."
+		Write-Warning "Cover Pages are not installed or the Cover Page $($CoverPage) does not exist."
+		Write-Warning "This report will not have a Cover Page."
+	}
+
+	Write-Verbose "$(Get-Date): Create empty word doc"
+	$Script:Doc = $Script:Word.Documents.Add()
+	If($Script:Doc -eq $Null)
+	{
+		Write-Verbose "$(Get-Date): "
+		$ErrorActionPreference = $SaveEAPreference
+		Write-Error "`n`n`t`tAn empty Word document could not be created.`n`n`t`tScript cannot continue.`n`n"
+		AbortScript
+	}
+
+	$Script:Selection = $Script:Word.Selection
+	If($Script:Selection -eq $Null)
+	{
+		Write-Verbose "$(Get-Date): "
+		$ErrorActionPreference = $SaveEAPreference
+		Write-Error "`n`n`t`tAn unknown error happened selecting the entire Word document for default formatting options.`n`n`t`tScript cannot continue.`n`n"
+		AbortScript
+	}
+
+	#set Default tab stops to 1/2 inch (this line is not from Jeff Hicks)
+	#36 = .50"
+	$Script:Word.ActiveDocument.DefaultTabStop = 36
+
+	#Disable Spell and Grammar Check to resolve issue and improve performance (from Pat Coughlin)
+	Write-Verbose "$(Get-Date): Disable grammar and spell checking"
+	#bug reported 1-Apr-2014 by Tim Mangan
+	#save current options first before turning them off
+	$Script:CurrentGrammarOption = $Script:Word.Options.CheckGrammarAsYouType
+	$Script:CurrentSpellingOption = $Script:Word.Options.CheckSpellingAsYouType
+	$Script:Word.Options.CheckGrammarAsYouType = $False
+	$Script:Word.Options.CheckSpellingAsYouType = $False
+
+	If($BuildingBlocksExist)
+	{
+		#insert new page, getting ready for table of contents
+		Write-Verbose "$(Get-Date): Insert new page, getting ready for table of contents"
+		$part.Insert($Script:Selection.Range,$True) | Out-Null
+		$Script:Selection.InsertNewPage()
+
+		#table of contents
+		Write-Verbose "$(Get-Date): Table of Contents - $($myHash.Word_TableOfContents)"
+		$toc = $BuildingBlocks.BuildingBlockEntries.Item($myHash.Word_TableOfContents)
+		If($toc -eq $Null)
+		{
+			Write-Verbose "$(Get-Date): "
+			Write-Verbose "$(Get-Date): Table of Content - $($myHash.Word_TableOfContents) could not be retrieved."
+			Write-Warning "This report will not have a Table of Contents."
+		}
+		Else
+		{
+			$toc.insert($Script:Selection.Range,$True) | Out-Null
+		}
+	}
+	Else
+	{
+		Write-Verbose "$(Get-Date): Table of Contents are not installed."
+		Write-Warning "Table of Contents are not installed so this report will not have a Table of Contents."
+	}
+
+	#set the footer
+	Write-Verbose "$(Get-Date): Set the footer"
+	[string]$footertext = "Report created by $username"
+
+	#get the footer
+	Write-Verbose "$(Get-Date): Get the footer and format font"
+	$Script:Doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekPrimaryFooter
+	#get the footer and format font
+	$footers = $Script:Doc.Sections.Last.Footers
+	ForEach ($footer in $footers) 
+	{
+		If($footer.exists) 
+		{
+			$footer.range.Font.name = "Calibri"
+			$footer.range.Font.size = 8
+			$footer.range.Font.Italic = $True
+			$footer.range.Font.Bold = $True
+		}
+	} #end ForEach
+	Write-Verbose "$(Get-Date): Footer text"
+	$Script:Selection.HeaderFooter.Range.Text = $footerText
+
+	#add page numbering
+	Write-Verbose "$(Get-Date): Add page numbering"
+	$Script:Selection.HeaderFooter.PageNumbers.Add($wdAlignPageNumberRight) | Out-Null
+
+	FindWordDocumentEnd
+	Write-Verbose "$(Get-Date):"
+	#end of Jeff Hicks 
+}
+
+Function UpdateDocumentProperties
+{
+	Param([string]$AbstractTitle, [string]$SubjectTitle)
+	#Update document properties
+	If($MSWORD -or $PDF)
+	{
+		If($Script:CoverPagesExist)
+		{
+			Write-Verbose "$(Get-Date): Set Cover Page Properties"
+			_SetDocumentProperty $Script:Doc.BuiltInDocumentProperties "Company" $Script:CoName
+			_SetDocumentProperty $Script:Doc.BuiltInDocumentProperties "Title" $Script:title
+			_SetDocumentProperty $Script:Doc.BuiltInDocumentProperties "Author" $username
+
+			_SetDocumentProperty $Script:Doc.BuiltInDocumentProperties "Subject" $SubjectTitle
+
+			#Get the Coverpage XML part
+			$cp = $Script:Doc.CustomXMLParts | Where {$_.NamespaceURI -match "coverPageProps$"}
+
+			#get the abstract XML part
+			$ab = $cp.documentelement.ChildNodes | Where {$_.basename -eq "Abstract"}
+
+			#set the text
+			If([String]::IsNullOrEmpty($Script:CoName))
+			{
+				[string]$abstract = $AbstractTitle
+			}
+			Else
+			{
+				[string]$abstract = "$($AbstractTitle) for $Script:CoName"
+			}
+
+			$ab.Text = $abstract
+
+			$ab = $cp.documentelement.ChildNodes | Where {$_.basename -eq "PublishDate"}
+			#set the text
+			[string]$abstract = (Get-Date -Format d).ToString()
+			$ab.Text = $abstract
+
+			Write-Verbose "$(Get-Date): Update the Table of Contents"
+			#update the Table of Contents
+			$Script:Doc.TablesOfContents.item(1).Update()
+			$cp = $Null
+			$ab = $Null
+			$abstract = $Null
+		}
+	}
+}
+
+Function SaveandCloseDocumentandShutdownWord
+{
+	#bug fix 1-Apr-2014
+	#reset Grammar and Spelling options back to their original settings
+	$Script:Word.Options.CheckGrammarAsYouType = $Script:CurrentGrammarOption
+	$Script:Word.Options.CheckSpellingAsYouType = $Script:CurrentSpellingOption
+
+	Write-Verbose "$(Get-Date): Save and Close document and Shutdown Word"
+	If($Script:WordVersion -eq $wdWord2010)
+	{
+		#the $saveFormat below passes StrictMode 2
+		#I found this at the following two links
+		#http://blogs.technet.com/b/bshukla/archive/2011/09/27/3347395.aspx
+		#http://msdn.microsoft.com/en-us/library/microsoft.office.interop.word.wdsaveformat(v=office.14).aspx
+		If($PDF)
+		{
+			Write-Verbose "$(Get-Date): Saving as DOCX file first before saving to PDF"
+		}
+		Else
+		{
+			Write-Verbose "$(Get-Date): Saving DOCX file"
+		}
+		If($AddDateTime)
+		{
+			$Script:FileName1 += "_$(Get-Date -f yyyy-MM-dd_HHmm).docx"
+			If($PDF)
+			{
+				$Script:FileName2 += "_$(Get-Date -f yyyy-MM-dd_HHmm).pdf"
+			}
+		}
+		Write-Verbose "$(Get-Date): Running Word 2010 and detected operating system $($RunningOS)"
+		$saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], "wdFormatDocumentDefault")
+		$Script:Doc.SaveAs([REF]$Script:FileName1, [ref]$SaveFormat)
+		If($PDF)
+		{
+			Write-Verbose "$(Get-Date): Now saving as PDF"
+			$saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], "wdFormatPDF")
+			$Script:Doc.SaveAs([REF]$Script:FileName2, [ref]$saveFormat)
+		}
+	}
+	ElseIf($Script:WordVersion -eq $wdWord2013)
+	{
+		If($PDF)
+		{
+			Write-Verbose "$(Get-Date): Saving as DOCX file first before saving to PDF"
+		}
+		Else
+		{
+			Write-Verbose "$(Get-Date): Saving DOCX file"
+		}
+		If($AddDateTime)
+		{
+			$Script:FileName1 += "_$(Get-Date -f yyyy-MM-dd_HHmm).docx"
+			If($PDF)
+			{
+				$Script:FileName2 += "_$(Get-Date -f yyyy-MM-dd_HHmm).pdf"
+			}
+		}
+		Write-Verbose "$(Get-Date): Running Word 2013 and detected operating system $($RunningOS)"
+		$Script:Doc.SaveAs2([REF]$Script:FileName1, [ref]$wdFormatDocumentDefault)
+		If($PDF)
+		{
+			Write-Verbose "$(Get-Date): Now saving as PDF"
+			$Script:Doc.SaveAs([REF]$Script:FileName2, [ref]$wdFormatPDF)
+		}
+	}
+
+	Write-Verbose "$(Get-Date): Closing Word"
+	$Script:Doc.Close()
+	$Script:Word.Quit()
+	If($PDF)
+	{
+		Write-Verbose "$(Get-Date): Deleting $($Script:FileName1) since only $($Script:FileName2) is needed"
+		Remove-Item $Script:FileName1
+	}
+	Write-Verbose "$(Get-Date): System Cleanup"
+	[System.Runtime.Interopservices.Marshal]::ReleaseComObject($Script:Word) | Out-Null
+	If(Test-Path variable:global:word)
+	{
+		Remove-Variable -Name word -Scope Global
+	}
+	$SaveFormat = $Null
+	[gc]::collect() 
+	[gc]::WaitForPendingFinalizers()
+}
+
+Function SaveandCloseTextDocument
+{
+	If($AddDateTime)
+	{
+		$Script:FileName1 += "_$(Get-Date -f yyyy-MM-dd_HHmm).txt"
+	}
+
+	Write-Output $Global:Output | Out-File $Script:Filename1
+}
+
+Function SaveandCloseHTMLDocument
+{
+	If($AddDateTime)
+	{
+		$Script:FileName1 += "_$(Get-Date -f yyyy-MM-dd_HHmm).html"
+	}
+}
+
+Function SetFileName1andFileName2
+{
+	Param([string]$OutputFileName)
+	$pwdpath = $pwd.Path
+
+	If($pwdpath.EndsWith("\"))
+	{
+		#remove the trailing \
+		$pwdpath = $pwdpath.SubString(0, ($pwdpath.Length - 1))
+	}
+
+	#set $filename1 and $filename2 with no file extension
+	If($AddDateTime)
+	{
+		[string]$Script:FileName1 = "$($pwdpath)\$($OutputFileName)"
+		If($PDF)
+		{
+			[string]$Script:FileName2 = "$($pwdpath)\$($OutputFileName)"
+		}
+	}
+
+	If($MSWord -or $PDF)
+	{
+		CheckWordPreReq
+
+		If(!$AddDateTime)
+		{
+			[string]$Script:FileName1 = "$($pwdpath)\$($OutputFileName).docx"
+			If($PDF)
+			{
+				[string]$Script:FileName2 = "$($pwdpath)\$($OutputFileName).pdf"
+			}
+		}
+
+		SetupWord
+	}
+	ElseIf($Text)
+	{
+		If(!$AddDateTime)
+		{
+			[string]$Script:FileName1 = "$($pwdpath)\$($OutputFileName).txt"
+		}
+	}
+	ElseIf($HTML)
+	{
+		If(!$AddDateTime)
+		{
+			[string]$Script:FileName1 = "$($pwdpath)\$($OutputFileName).html"
+		}
+	}
+}
 
 #Script begins
 
 $script:startTime = Get-Date
+
+If($TEXT)
+{
+	$global:output = ""
+}
 
 If(!(Check-NeededPSSnapins "Citrix.Common.Commands","Citrix.XenApp.Commands"))
 {
@@ -3994,8 +5643,6 @@ If(!(Check-NeededPSSnapins "Citrix.Common.Commands","Citrix.XenApp.Commands"))
 	Write-Error "Missing Citrix PowerShell Snap-ins Detected, check the console above for more information. Are you sure you are running this script on a XenApp 6.5 Server? Script will now close."
 	Exit
 }
-
-CheckWordPreReq
 
 #if software inventory is specified then verify SoftwareExclusions.txt exists
 If($Software)
@@ -4057,10 +5704,10 @@ Else
 }
 
 # Get farm information
-Write-Verbose "$(Get-Date): Getting Farm data"
+Write-Verbose "$(Get-Date): Getting initial Farm data"
 $farm = Get-XAFarm -EA 0
 
-If($?)
+If($? -and $Farm -ne $Null)
 {
 	Write-Verbose "$(Get-Date): Verify farm version"
 	#first check to make sure this is a XenApp 6.5 farm
@@ -4076,50 +5723,7 @@ If($?)
 	}
 	[string]$FarmName = $farm.FarmName
 	[string]$Title = "Inventory Report for the $($FarmName) Farm"
-	If($AddDateTime)
-	{
-		If($Summary)
-		{
-			[string]$filename1 = "$($pwd.path)\$($farm.FarmName)_Summary"
-		}
-		Else
-		{
-			[string]$filename1 = "$($pwd.path)\$($farm.FarmName)"
-		}
-		If($PDF)
-		{
-			If($Summary)
-			{
-				[string]$filename2 = "$($pwd.path)\$($farm.FarmName)_Summary"
-			}
-			Else
-			{
-				[string]$filename2 = "$($pwd.path)\$($farm.FarmName)"
-			}
-		}
-	}
-	Else
-	{
-		If($Summary)
-		{
-			[string]$filename1 = "$($pwd.path)\$($farm.FarmName)_Summary.docx"
-		}
-		Else
-		{
-			[string]$filename1 = "$($pwd.path)\$($farm.FarmName).docx"
-		}
-		If($PDF)
-		{
-			If($Summary)
-			{
-				[string]$filename2 = "$($pwd.path)\$($farm.FarmName)_Summary.pdf"
-			}
-			Else
-			{
-				[string]$filename2 = "$($pwd.path)\$($farm.FarmName).pdf"
-			}
-		}
-	}
+	SetFileName1andFileName2 "$($farm.FarmName)"
 } 
 Else 
 {
@@ -4137,352 +5741,13 @@ Else
 }
 $farm = $Null
 
-Write-Verbose "$(Get-Date): Setting up Word"
-
-# Setup word for output
-Write-Verbose "$(Get-Date): Create Word comObject.  If you are not running Word 2007, ignore the next message."
-$Word = New-Object -comobject "Word.Application" -EA 0
-
-If(!$? -or $Word -eq $Null)
-{
-	$ErrorActionPreference = $SaveEAPreference
-	Write-Warning "The Word object could not be created.  You may need to repair your Word installation."
-	Write-Error "`n`n`t`tThe Word object could not be created.  You may need to repair your Word installation.`n`n`t`tScript cannot continue.`n`n"
-	Exit
-}
-
-[int]$WordVersion = [int]$Word.Version
-If($WordVersion -eq $wdWord2013)
-{
-	$WordProduct = "Word 2013"
-}
-ElseIf($WordVersion -eq $wdWord2010)
-{
-	$WordProduct = "Word 2010"
-}
-ElseIf($WordVersion -eq $wdWord2007)
-{
-	$WordProduct = "Word 2007"
-}
-Else
-{
-	$ErrorActionPreference = $SaveEAPreference
-	Write-Error "`n`n`t`tYou are running an untested or unsupported version of Microsoft Word.`n`n`t`tScript will end.`n`n`t`tPlease send info on your version of Word to webster@carlwebster.com`n`n"
-	AbortScript
-}
-
-If($PDF -and $WordVersion -eq $wdWord2007)
-{
-	Write-Verbose "$(Get-Date): Verify the Word 2007 Save As PDF add-in is installed"
-	If(CheckWord2007SaveAsPDFInstalled)
-	{
-		Write-Verbose "$(Get-Date): The Word 2007 Save As PDF add-in is installed"
-	}
-	Else
-	{
-		AbortScript
-	}
-}
-
-Write-Verbose "$(Get-Date): Validate company name"
-#only validate CompanyName if the field is blank
-If([String]::IsNullOrEmpty($CompanyName))
-{
-	$CompanyName = ValidateCompanyName
-	If([String]::IsNullOrEmpty($CompanyName))
-	{
-		Write-Warning "`n`n`t`tCompany Name is blank so Cover Page will not show a Company Name."
-		Write-Warning "`n`t`tCheck HKCU:\Software\Microsoft\Office\Common\UserInfo for Company or CompanyName value."
-		Write-Warning "`n`t`tYou may want to use the -CompanyName parameter if you need a Company Name on the cover page.`n`n"
-	}
-}
-
-Write-Verbose "$(Get-Date): Check Default Cover Page for language specific version"
-[bool]$CPChanged = $False
-Switch ($PSCulture.Substring(0,3))
-{
-	'ca-'	{
-			If($CoverPage -eq "Sideline")
-			{
-				$CoverPage = "Línia lateral"
-				$CPChanged = $True
-			}
-		}
-
-	'da-'	{
-			If($CoverPage -eq "Sideline")
-			{
-				$CoverPage = "Sidelinje"
-				$CPChanged = $True
-			}
-		}
-
-	'de-'	{
-			If($CoverPage -eq "Sideline")
-			{
-				$CoverPage = "Randlinie"
-				$CPChanged = $True
-			}
-		}
-
-	'es-'	{
-			If($CoverPage -eq "Sideline")
-			{
-				$CoverPage = "Línea lateral"
-				$CPChanged = $True
-			}
-		}
-
-	'fi-'	{
-			If($CoverPage -eq "Sideline")
-			{
-				$CoverPage = "Sivussa"
-				$CPChanged = $True
-			}
-		}
-
-	'fr-'	{
-			If($CoverPage -eq "Sideline")
-			{
-				If($WordVersion -eq $wdWord2013)
-				{
-					$CoverPage = "Lignes latérales"
-					$CPChanged = $True
-				}
-				Else
-				{
-					$CoverPage = "Ligne latérale"
-					$CPChanged = $True
-				}
-			}
-		}
-
-	'nb-'	{
-			If($CoverPage -eq "Sideline")
-			{
-				$CoverPage = "Sidelinje"
-				$CPChanged = $True
-			}
-		}
-
-	'nl-'	{
-			If($CoverPage -eq "Sideline")
-			{
-				$CoverPage = "Terzijde"
-				$CPChanged = $True
-			}
-		}
-
-	'pt-'	{
-			If($CoverPage -eq "Sideline")
-			{
-				$CoverPage = "Linha Lateral"
-				$CPChanged = $True
-			}
-		}
-
-	'sv-'	{
-			If($CoverPage -eq "Sideline")
-			{
-				$CoverPage = "Sidlinje"
-				$CPChanged = $True
-			}
-		}
-}
-
-If($CPChanged)
-{
-	Write-Verbose "$(Get-Date): Changed Default Cover Page from Sideline to $($CoverPage)"
-}
-
-Write-Verbose "$(Get-Date): Validate cover page"
-[bool]$ValidCP = ValidateCoverPage $WordVersion $CoverPage
-If(!$ValidCP)
-{
-	$ErrorActionPreference = $SaveEAPreference
-	Write-Error "`n`n`t`tFor $WordProduct, $CoverPage is not a valid Cover Page option.`n`n`t`tScript cannot continue.`n`n"
-	AbortScript
-}
-
-Write-Verbose "$(Get-Date): "
-Write-Verbose "$(Get-Date): "
-Write-Verbose "$(Get-Date): Company Name : $CompanyName"
-Write-Verbose "$(Get-Date): Cover Page   : $CoverPage"
-Write-Verbose "$(Get-Date): User Name    : $UserName"
-Write-Verbose "$(Get-Date): Save As PDF  : $PDF"
-Write-Verbose "$(Get-Date): HW Inventory : $Hardware"
-Write-Verbose "$(Get-Date): SW Inventory : $Software"
-If(!$Summary)
-{
-	Write-Verbose "$(Get-Date): Start Date   : $StartDate"
-	Write-Verbose "$(Get-Date): End Date     : $EndDate"
-}
-Write-Verbose "$(Get-Date): Summary      : $Summary"
-Write-Verbose "$(Get-Date): Farm Name    : $FarmName"
-Write-Verbose "$(Get-Date): Title        : $Title"
-Write-Verbose "$(Get-Date): Filename1    : $filename1"
-If($PDF)
-{
-	Write-Verbose "$(Get-Date): Filename2    : $filename2"
-}
-Write-Verbose "$(Get-Date): Add DateTime : $AddDateTime"
-Write-Verbose "$(Get-Date): OS Detected  : $RunningOS"
-Write-Verbose "$(Get-Date): PSUICulture  : $PSUICulture"
-Write-Verbose "$(Get-Date): PSCulture    : $PSCulture"
-Write-Verbose "$(Get-Date): Word version : $WordProduct"
-Write-Verbose "$(Get-Date): Word language: $($Word.Language)"
-Write-Verbose "$(Get-Date): PoSH version : $($Host.Version)"
-Write-Verbose "$(Get-Date): "
-Write-Verbose "$(Get-Date): Script start : $($Script:StartTime)"
-Write-Verbose "$(Get-Date): "
-Write-Verbose "$(Get-Date): "
-
-$Word.Visible = $False
-
-#http://jdhitsolutions.com/blog/2012/05/san-diego-2012-powershell-deep-dive-slides-and-demos/
-#using Jeff's Demo-WordReport.ps1 file for examples
-#down to $configlog = $False is from Jeff Hicks
-Write-Verbose "$(Get-Date): Load Word Templates"
-
-[bool]$CoverPagesExist = $False
-[bool]$BuildingBlocksExist = $False
-
-$word.Templates.LoadBuildingBlocks()
-If($WordVersion -eq $wdWord2007)
-{
-	$BuildingBlocks = $word.Templates | Where {$_.name -eq "Building Blocks.dotx"}
-}
-Else
-{
-	$BuildingBlocks = $word.Templates | Where {$_.name -eq "Built-In Building Blocks.dotx"}
-}
-
-Write-Verbose "$(Get-Date): Attempt to load cover page $($CoverPage)"
-$part = $Null
-
-If($BuildingBlocks -ne $Null)
-{
-	$BuildingBlocksExist = $True
-
-	Try 
-		{$part = $BuildingBlocks.BuildingBlockEntries.Item($CoverPage)}
-
-	Catch
-		{$part = $Null}
-
-	If($part -ne $Null)
-	{
-		$CoverPagesExist = $True
-	}
-}
-
-If(!$CoverPagesExist)
-{
-	Write-Verbose "$(Get-Date): Cover Pages are not installed or the Cover Page $($CoverPage) does not exist."
-	Write-Warning "Cover Pages are not installed or the Cover Page $($CoverPage) does not exist."
-	Write-Warning "This report will not have a Cover Page."
-}
-
-Write-Verbose "$(Get-Date): Create empty word doc"
-$Doc = $Word.Documents.Add()
-If($Doc -eq $Null)
-{
-	Write-Verbose "$(Get-Date): "
-	$ErrorActionPreference = $SaveEAPreference
-	Write-Error "`n`n`t`tAn empty Word document could not be created.`n`n`t`tScript cannot continue.`n`n"
-	AbortScript
-}
-
-$Selection = $Word.Selection
-If($Selection -eq $Null)
-{
-	Write-Verbose "$(Get-Date): "
-	$ErrorActionPreference = $SaveEAPreference
-	Write-Error "`n`n`t`tAn unknown error happened selecting the entire Word document for default formatting options.`n`n`t`tScript cannot continue.`n`n"
-	AbortScript
-}
-
-#set Default tab stops to 1/2 inch (this line is not from Jeff Hicks)
-#36 = .50"
-$Word.ActiveDocument.DefaultTabStop = 36
-
-#Disable Spell and Grammar Check to resolve issue and improve performance (from Pat Coughlin)
-Write-Verbose "$(Get-Date): Disable grammar and spell checking"
-#bug reported 1-Apr-2014 by Tim Mangan
-#save current options first before turning them off
-$CurrentGrammarOption = $Word.Options.CheckGrammarAsYouType
-$CurrentSpellingOption = $Word.Options.CheckSpellingAsYouType
-$Word.Options.CheckGrammarAsYouType = $False
-$Word.Options.CheckSpellingAsYouType = $False
-
-If($CoverPagesExist)
-{
-	#insert new page, getting ready for table of contents
-	Write-Verbose "$(Get-Date): Insert new page, getting ready for table of contents"
-	$part.Insert($selection.Range,$True) | Out-Null
-	$selection.InsertNewPage()
-
-	#table of contents
-	Write-Verbose "$(Get-Date): Table of Contents - $($myHash.Word_TableOfContents)"
-	$toc = $BuildingBlocks.BuildingBlockEntries.Item($myHash.Word_TableOfContents)
-	If($toc -eq $Null)
-	{
-		Write-Verbose "$(Get-Date): "
-		Write-Verbose "$(Get-Date): Table of Content - $($myHash.Word_TableOfContents) could not be retrieved."
-		Write-Warning "This report will not have a Table of Contents."
-	}
-	Else
-	{
-		$toc.insert($selection.Range,$True) | Out-Null
-	}
-}
-Else
-{
-	Write-Verbose "$(Get-Date): Table of Contents are not installed."
-	Write-Warning "Table of Contents are not installed so this report will not have a Table of Contents."
-}
-
-#set the footer
-Write-Verbose "$(Get-Date): Set the footer"
-[string]$footertext = "Report created by $username"
-
-#get the footer
-Write-Verbose "$(Get-Date): Get the footer and format font"
-$doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekPrimaryFooter
-#get the footer and format font
-$footers = $doc.Sections.Last.Footers
-ForEach($footer in $footers) 
-{
-	If($footer.exists) 
-	{
-		$footer.range.Font.name = "Calibri"
-		$footer.range.Font.size = 8
-		$footer.range.Font.Italic = $True
-		$footer.range.Font.Bold = $True
-	}
-} #end ForEach
-Write-Verbose "$(Get-Date): Footer text"
-$selection.HeaderFooter.Range.Text = $footerText
-
-#add page numbering
-Write-Verbose "$(Get-Date): Add page numbering"
-$selection.HeaderFooter.PageNumbers.Add($wdAlignPageNumberRight) | Out-Null
-
-#return focus to main document
-$doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekMainDocument
-
-#move to the end of the current document
-Write-Verbose "$(Get-Date):"
-$selection.EndKey($wdStory,$wdMove) | Out-Null
-#end of Jeff Hicks 
-
-If(!$Summary)
+If(!$Summary -and ($Section -eq "All" -or $Section -eq "ConfigLog"))
 {
 	Write-Verbose "$(Get-Date): Processing Configuration Logging"
 	[bool]$ConfigLog = $False
 	$ConfigurationLogging = Get-XAConfigurationLog -EA 0
 
-	If($?)
+	If($? -and $ConfigurationLogging -ne $Null)
 	{
 		$selection.InsertNewPage()
 		WriteWordLine 1 0 "Configuration Logging"
@@ -4506,290 +5771,249 @@ If(!$Summary)
 			WriteWordLine 0 1 "Configuration Logging is disabled."
 		}
 	}
-	Else 
+	ElseIf(!$?) 
 	{
 		Write-Warning  "Configuration Logging could not be retrieved"
+	}
+	Else
+	{
+		Write-Warning  "No results returned for Configuration Logging"
 	}
 	$ConfigurationLogging = $Null
 	Write-Verbose "$(Get-Date): Finished Configuration Logging"
 	Write-Verbose "$(Get-Date): "
 }
 
-Write-Verbose "$(Get-Date): Processing Administrators"
-Write-Verbose "$(Get-Date): `tSetting summary variables"
-[int]$TotalFullAdmins = 0
-[int]$TotalViewAdmins = 0
-[int]$TotalCustomAdmins = 0
-[int]$TotalAdmins = 0
-
-Write-Verbose "$(Get-Date): `tRetrieving Administrators"
-$Administrators = Get-XAAdministrator -EA 0 | Sort AdministratorName
-
-If($?)
+If($Section -eq "All" -or $Section -eq "Admins")
 {
-	$selection.InsertNewPage()
-	WriteWordLine 1 0 "Administrators:"
-	ForEach($Administrator in $Administrators)
+	Write-Verbose "$(Get-Date): Processing Administrators"
+	Write-Verbose "$(Get-Date): `tSetting summary variables"
+	[int]$TotalFullAdmins = 0
+	[int]$TotalViewAdmins = 0
+	[int]$TotalCustomAdmins = 0
+	[int]$TotalAdmins = 0
+
+	Write-Verbose "$(Get-Date): `tRetrieving Administrators"
+	$Administrators = Get-XAAdministrator -EA 0 | Sort AdministratorName
+
+	If($? -and $Administrators -ne $Null)
 	{
-		Write-Verbose "$(Get-Date): `t`tProcessing administrator $($Administrator.AdministratorName)"
-		If(!$Summary)
+		$selection.InsertNewPage()
+		WriteWordLine 1 0 "Administrators:"
+		ForEach($Administrator in $Administrators)
 		{
-			WriteWordLine 2 0 $Administrator.AdministratorName
-			WriteWordLine 0 1 "Administrator type: " -nonewline
-			Switch ($Administrator.AdministratorType)
+			Write-Verbose "$(Get-Date): `t`tProcessing administrator $($Administrator.AdministratorName)"
+			If(!$Summary)
 			{
-				"Unknown"  {WriteWordLine 0 0 "Unknown"}
-				"Full"     {WriteWordLine 0 0 "Full Administration"; $TotalFullAdmins++}
-				"ViewOnly" {WriteWordLine 0 0 "View Only"; $TotalViewAdmins++}
-				"Custom"   {WriteWordLine 0 0 "Custom"; $TotalCustomAdmins++}
-				Default    {WriteWordLine 0 0 "Administrator type could not be determined: $($Administrator.AdministratorType)"}
-			}
-			WriteWordLine 0 1 "Administrator account is " -NoNewLine
-			If($Administrator.Enabled)
-			{
-				WriteWordLine 0 0 "Enabled" 
-			} 
-			Else
-			{
-				WriteWordLine 0 0 "Disabled" 
-			}
-			If($Administrator.AdministratorType -eq "Custom") 
-			{
-				WriteWordLine 0 1 "Farm Privileges:"
-				ForEach($farmprivilege in $Administrator.FarmPrivileges) 
+				WriteWordLine 2 0 $Administrator.AdministratorName
+				WriteWordLine 0 1 "Administrator type: " -nonewline
+				Switch ($Administrator.AdministratorType)
 				{
-					Write-Verbose "$(Get-Date): `t`t`tProcessing farm privilege $farmprivilege"
-					Switch ($farmprivilege)
-					{
-						"Unknown"                   {WriteWordLine 0 2 "Unknown"}
-						"ViewFarm"                  {WriteWordLine 0 2 "View farm management"}
-						"EditZone"                  {WriteWordLine 0 2 "Edit zones"}
-						"EditConfigurationLog"      {WriteWordLine 0 2 "Configure logging for the farm"}
-						"EditFarmOther"             {WriteWordLine 0 2 "Edit all other farm settings"}
-						"ViewAdmins"                {WriteWordLine 0 2 "View Citrix administrators"}
-						"LogOnConsole"              {WriteWordLine 0 2 "Log on to console"}
-						"LogOnWIConsole"            {WriteWordLine 0 2 "Logon on to Web Interface console"}
-						"ViewLoadEvaluators"        {WriteWordLine 0 2 "View load evaluators"}
-						"AssignLoadEvaluators"      {WriteWordLine 0 2 "Assign load evaluators"}
-						"EditLoadEvaluators"        {WriteWordLine 0 2 "Edit load evaluators"}
-						"ViewLoadBalancingPolicies" {WriteWordLine 0 2 "View load balancing policies"}
-						"EditLoadBalancingPolicies" {WriteWordLine 0 2 "Edit load balancing policies"}
-						"ViewPrinterDrivers"        {WriteWordLine 0 2 "View printer drivers"}
-						"ReplicatePrinterDrivers"   {WriteWordLine 0 2 "Replicate printer drivers"}
-						Default {WriteWordLine 0 2 "Farm privileges could not be determined: $($farmprivilege)"}
-					}
+					"Unknown"  {WriteWordLine 0 0 "Unknown"}
+					"Full"     {WriteWordLine 0 0 "Full Administration"; $TotalFullAdmins++}
+					"ViewOnly" {WriteWordLine 0 0 "View Only"; $TotalViewAdmins++}
+					"Custom"   {WriteWordLine 0 0 "Custom"; $TotalCustomAdmins++}
+					Default    {WriteWordLine 0 0 "Administrator type could not be determined: $($Administrator.AdministratorType)"}
 				}
-		
-				Write-Verbose "$(Get-Date): `t`t`tProcessing folder privileges"
-				WriteWordLine 0 1 "Folder Privileges:"
-				ForEach($folderprivilege in $Administrator.FolderPrivileges) 
+				WriteWordLine 0 1 "Administrator account is " -NoNewLine
+				If($Administrator.Enabled)
 				{
-					#The Citrix PoSH cmdlet only returns data for three folders:
-					#Servers
-					#WorkerGroups
-					#Applications
-					
-					Write-Verbose "$(Get-Date): `t`t`t`tProcessing folder permissions for $($FolderPrivilege.FolderPath)"
-					WriteWordLine 0 2 $FolderPrivilege.FolderPath
-					ForEach($FolderPermission in $FolderPrivilege.FolderPrivileges)
+					WriteWordLine 0 0 "Enabled" 
+				} 
+				Else
+				{
+					WriteWordLine 0 0 "Disabled" 
+				}
+				If($Administrator.AdministratorType -eq "Custom") 
+				{
+					WriteWordLine 0 1 "Farm Privileges:"
+					ForEach($farmprivilege in $Administrator.FarmPrivileges) 
 					{
-						Switch ($folderpermission)
+						Write-Verbose "$(Get-Date): `t`t`tProcessing farm privilege $farmprivilege"
+						Switch ($farmprivilege)
 						{
-							"Unknown"                          {WriteWordLine 0 3 "Unknown"}
-							"ViewApplications"                 {WriteWordLine 0 3 "View applications"}
-							"EditApplications"                 {WriteWordLine 0 3 "Edit applications"}
-							"TerminateProcessApplication"      {WriteWordLine 0 3 "Terminate process that is created as a result of launching a published application"}
-							"AssignApplicationsToServers"      {WriteWordLine 0 3 "Assign applications to servers"}
-							"ViewServers"                      {WriteWordLine 0 3 "View servers"}
-							"EditOtherServerSettings"          {WriteWordLine 0 3 "Edit other server settings"}
-							"RemoveServer"                     {WriteWordLine 0 3 "Remove a bad server from farm"}
-							"TerminateProcess"                 {WriteWordLine 0 3 "Terminate processes on a server"}
-							"ViewSessions"                     {WriteWordLine 0 3 "View ICA/RDP sessions"}
-							"ConnectSessions"                  {WriteWordLine 0 3 "Connect sessions"}
-							"DisconnectSessions"               {WriteWordLine 0 3 "Disconnect sessions"}
-							"LogOffSessions"                   {WriteWordLine 0 3 "Log off sessions"}
-							"ResetSessions"                    {WriteWordLine 0 3 "Reset sessions"}
-							"SendMessages"                     {WriteWordLine 0 3 "Send messages to sessions"}
-							"ViewWorkerGroups"                 {WriteWordLine 0 3 "View worker groups"}
-							"AssignApplicationsToWorkerGroups" {WriteWordLine 0 3 "Assign applications to worker groups"}
-							Default {WriteWordLine 0 3 "Folder permission could not be determined: $($folderpermissions)"}
+							"Unknown"                   {WriteWordLine 0 2 "Unknown"}
+							"ViewFarm"                  {WriteWordLine 0 2 "View farm management"}
+							"EditZone"                  {WriteWordLine 0 2 "Edit zones"}
+							"EditConfigurationLog"      {WriteWordLine 0 2 "Configure logging for the farm"}
+							"EditFarmOther"             {WriteWordLine 0 2 "Edit all other farm settings"}
+							"ViewAdmins"                {WriteWordLine 0 2 "View Citrix administrators"}
+							"LogOnConsole"              {WriteWordLine 0 2 "Log on to console"}
+							"LogOnWIConsole"            {WriteWordLine 0 2 "Logon on to Web Interface console"}
+							"ViewLoadEvaluators"        {WriteWordLine 0 2 "View load evaluators"}
+							"AssignLoadEvaluators"      {WriteWordLine 0 2 "Assign load evaluators"}
+							"EditLoadEvaluators"        {WriteWordLine 0 2 "Edit load evaluators"}
+							"ViewLoadBalancingPolicies" {WriteWordLine 0 2 "View load balancing policies"}
+							"EditLoadBalancingPolicies" {WriteWordLine 0 2 "Edit load balancing policies"}
+							"ViewPrinterDrivers"        {WriteWordLine 0 2 "View printer drivers"}
+							"ReplicatePrinterDrivers"   {WriteWordLine 0 2 "Replicate printer drivers"}
+							Default {WriteWordLine 0 2 "Farm privileges could not be determined: $($farmprivilege)"}
 						}
 					}
-				}
-			}		
-			#WriteWordLine 0 0 ""
-		}
-		Else
-		{
-			WriteWordLine 0 0 $Administrator.AdministratorName
-			$TotalAdmins++
-		}
-	}
-}
-Else 
-{
-	Write-Warning "Administrator information could not be retrieved"
-}
-$Administrators = $Null
-Write-Verbose "$(Get-Date): Finished Processing Administrators"
-Write-Verbose "$(Get-Date): "
-
-Write-Verbose "$(Get-Date): Processing Applications"
-
-Write-Verbose "$(Get-Date): `tSetting summary variables"
-[int]$TotalPublishedApps = 0
-[int]$TotalPublishedContent = 0
-[int]$TotalPublishedDesktops = 0
-[int]$TotalStreamedApps = 0
-[int]$TotalApps = 0
-$SessionSharingItems = @()
-
-Write-Verbose "$(Get-Date): `tRetrieving Applications"
-If($Summary)
-{
-	$Applications = Get-XAApplication -EA 0 | Sort DisplayName
-}
-Else
-{
-	$Applications = Get-XAApplication -EA 0 | Sort FolderPath, DisplayName
-}
-
-If($? -and $Applications -ne $Null)
-{
-	$selection.InsertNewPage()
-	WriteWordLine 1 0 "Applications:"
-
-	ForEach($Application in $Applications)
-	{
-		Write-Verbose "$(Get-Date): `t`tProcessing application $($Application.BrowserName)"
-		
-		If(!$Summary)
-		{
-			If($Application.ApplicationType -ne "ServerDesktop" -and $Application.ApplicationType -ne "Content")
-			{
-				#create array for appendix A
-				#these items are taken from http://support.citrix.com/article/CTX159159
-				#Some properties that must match on both Applications for Session Sharing to Function are:
-				#
-				#Color depth
-				#Screen Size
-				#Access Control Filters (for SmartAccess)
-				#Sound (unexplained in article)
-				#Drive Mapping (unexplained in article)
-				#Printer Mapping (unexplained in article)
-				#Encryption
-				
-				Write-Verbose "$(Get-Date): `t`t`tGather session sharing info for Appendix A"
-				$obj = New-Object -TypeName PSObject
-				$obj | Add-Member -MemberType NoteProperty -Name ApplicationName      -Value $Application.BrowserName
-				$obj | Add-Member -MemberType NoteProperty -Name MaximumColorQuality  -Value $Application.ColorDepth
-				$obj | Add-Member -MemberType NoteProperty -Name SessionWindowSize    -Value $Application.WindowType
-
-				If($Application.AccessSessionConditionsEnabled)
-				{
-					$tmp = @()
-					ForEach($filter in $Application.AccessSessionConditions)
+			
+					Write-Verbose "$(Get-Date): `t`t`tProcessing folder privileges"
+					WriteWordLine 0 1 "Folder Privileges:"
+					ForEach($folderprivilege in $Administrator.FolderPrivileges) 
 					{
-						$tmp += $filter
+						#The Citrix PoSH cmdlet only returns data for three folders:
+						#Servers
+						#WorkerGroups
+						#Applications
+						
+						Write-Verbose "$(Get-Date): `t`t`t`tProcessing folder permissions for $($FolderPrivilege.FolderPath)"
+						WriteWordLine 0 2 $FolderPrivilege.FolderPath
+						ForEach($FolderPermission in $FolderPrivilege.FolderPrivileges)
+						{
+							Switch ($folderpermission)
+							{
+								"Unknown"                          {WriteWordLine 0 3 "Unknown"}
+								"ViewApplications"                 {WriteWordLine 0 3 "View applications"}
+								"EditApplications"                 {WriteWordLine 0 3 "Edit applications"}
+								"TerminateProcessApplication"      {WriteWordLine 0 3 "Terminate process that is created as a result of launching a published application"}
+								"AssignApplicationsToServers"      {WriteWordLine 0 3 "Assign applications to servers"}
+								"ViewServers"                      {WriteWordLine 0 3 "View servers"}
+								"EditOtherServerSettings"          {WriteWordLine 0 3 "Edit other server settings"}
+								"RemoveServer"                     {WriteWordLine 0 3 "Remove a bad server from farm"}
+								"TerminateProcess"                 {WriteWordLine 0 3 "Terminate processes on a server"}
+								"ViewSessions"                     {WriteWordLine 0 3 "View ICA/RDP sessions"}
+								"ConnectSessions"                  {WriteWordLine 0 3 "Connect sessions"}
+								"DisconnectSessions"               {WriteWordLine 0 3 "Disconnect sessions"}
+								"LogOffSessions"                   {WriteWordLine 0 3 "Log off sessions"}
+								"ResetSessions"                    {WriteWordLine 0 3 "Reset sessions"}
+								"SendMessages"                     {WriteWordLine 0 3 "Send messages to sessions"}
+								"ViewWorkerGroups"                 {WriteWordLine 0 3 "View worker groups"}
+								"AssignApplicationsToWorkerGroups" {WriteWordLine 0 3 "Assign applications to worker groups"}
+								Default {WriteWordLine 0 3 "Folder permission could not be determined: $($folderpermissions)"}
+							}
+						}
 					}
-					$obj | Add-Member -MemberType NoteProperty -Name AccessControlFilters -Value $tmp
-				}
-				Else
-				{
-					$obj | Add-Member -MemberType NoteProperty -Name AccessControlFilters -Value "None"
-				}
-				$tmp = $Null
-				
-				$obj | Add-Member -MemberType NoteProperty -Name Encryption           -Value $Application.EncryptionLevel
-				$SessionSharingItems += $obj
+				}		
+				#WriteWordLine 0 0 ""
 			}
-			$AppServerInfoResults = $False
-			$AppServerInfo = Get-XAApplicationReport -BrowserName $Application.BrowserName -EA 0
-			If($?)
-			{
-				$AppServerInfoResults = $True
-			}
-			[bool]$streamedapp = $False
-			If($Application.ApplicationType -Contains "streamedtoclient" -or $Application.ApplicationType -Contains "streamedtoserver")
-			{
-				$streamedapp = $True
-			}
-		}
-		Else
-		{
-			$TotalApps++
-		}
-		
-		#name properties
-		If(!$Summary)
-		{
-			WriteWordLine 2 0 $Application.DisplayName
-			WriteWordLine 0 1 "Application name`t`t: " $Application.BrowserName
-			WriteWordLine 0 1 "Disable application`t`t: " -NoNewLine
-			#weird, if application is enabled, it is disabled!
-			If($Application.Enabled) 
-			{
-				WriteWordLine 0 0 "No"
-			} 
 			Else
 			{
-				WriteWordLine 0 0 "Yes"
-				WriteWordLine 0 1 "Hide disabled application`t: " -nonewline
-				If($Application.HideWhenDisabled)
+				WriteWordLine 0 0 $Administrator.AdministratorName
+				$TotalAdmins++
+			}
+		}
+	}
+	ElseIf(!$?)
+	{
+		Write-Warning "Administrator information could not be retrieved"
+	}
+	Else
+	{
+		Write-Warning "No results returned for Administrator information"
+	}
+	$Administrators = $Null
+	Write-Verbose "$(Get-Date): Finished Processing Administrators"
+	Write-Verbose "$(Get-Date): "
+}
+
+If($Section -eq "All" -or $Section -eq "Apps")
+{
+	Write-Verbose "$(Get-Date): Processing Applications"
+
+	Write-Verbose "$(Get-Date): `tSetting summary variables"
+	[int]$TotalPublishedApps = 0
+	[int]$TotalPublishedContent = 0
+	[int]$TotalPublishedDesktops = 0
+	[int]$TotalStreamedApps = 0
+	[int]$TotalApps = 0
+	$SessionSharingItems = @()
+
+	Write-Verbose "$(Get-Date): `tRetrieving Applications"
+	If($Summary)
+	{
+		$Applications = Get-XAApplication -EA 0 | Sort DisplayName
+	}
+	Else
+	{
+		$Applications = Get-XAApplication -EA 0 | Sort FolderPath, DisplayName
+	}
+
+	If($? -and $Applications -ne $Null)
+	{
+		$selection.InsertNewPage()
+		WriteWordLine 1 0 "Applications:"
+
+		ForEach($Application in $Applications)
+		{
+			Write-Verbose "$(Get-Date): `t`tProcessing application $($Application.BrowserName)"
+			
+			If(!$Summary)
+			{
+				If($Application.ApplicationType -ne "ServerDesktop" -and $Application.ApplicationType -ne "Content")
 				{
-					WriteWordLine 0 0 "Yes"
+					#create array for appendix A
+					#these items are taken from http://support.citrix.com/article/CTX159159
+					#Some properties that must match on both Applications for Session Sharing to Function are:
+					#
+					#Color depth
+					#Screen Size
+					#Access Control Filters (for SmartAccess)
+					#Sound (unexplained in article)
+					#Drive Mapping (unexplained in article)
+					#Printer Mapping (unexplained in article)
+					#Encryption
+					
+					Write-Verbose "$(Get-Date): `t`t`tGather session sharing info for Appendix A"
+					$obj = New-Object -TypeName PSObject
+					$obj | Add-Member -MemberType NoteProperty -Name ApplicationName      -Value $Application.BrowserName
+					$obj | Add-Member -MemberType NoteProperty -Name MaximumColorQuality  -Value $Application.ColorDepth
+					$obj | Add-Member -MemberType NoteProperty -Name SessionWindowSize    -Value $Application.WindowType
+
+					If($Application.AccessSessionConditionsEnabled)
+					{
+						$tmp = @()
+						ForEach($filter in $Application.AccessSessionConditions)
+						{
+							$tmp += $filter
+						}
+						$obj | Add-Member -MemberType NoteProperty -Name AccessControlFilters -Value $tmp
+					}
+					Else
+					{
+						$obj | Add-Member -MemberType NoteProperty -Name AccessControlFilters -Value "None"
+					}
+					$tmp = $Null
+					
+					$obj | Add-Member -MemberType NoteProperty -Name Encryption           -Value $Application.EncryptionLevel
+					$SessionSharingItems += $obj
 				}
-				Else
+				$AppServerInfoResults = $False
+				$AppServerInfo = Get-XAApplicationReport -BrowserName $Application.BrowserName -EA 0
+				If($? -and $AppServerInfo -ne $Null)
 				{
-					WriteWordLine 0 0 "No"
+					$AppServerInfoResults = $True
+				}
+				[bool]$streamedapp = $False
+				If($Application.ApplicationType -Contains "streamedtoclient" -or $Application.ApplicationType -Contains "streamedtoserver")
+				{
+					$streamedapp = $True
 				}
 			}
-
-			If(![String]::IsNullOrEmpty($Application.Description))
+			Else
 			{
-				WriteWordLine 0 1 "Application description`t`t: " $Application.Description
+				$TotalApps++
 			}
 			
-			#type properties
-			WriteWordLine 0 1 "Application Type`t`t: " -nonewline
-			Switch ($Application.ApplicationType)
+			#name properties
+			If(!$Summary)
 			{
-				"Unknown"                            {WriteWordLine 0 0 "Unknown"}
-				"ServerInstalled"                    {WriteWordLine 0 0 "Installed application"; $TotalPublishedApps++}
-				"ServerDesktop"                      {WriteWordLine 0 0 "Server desktop"; $TotalPublishedDesktops++}
-				"Content"                            {WriteWordLine 0 0 "Content"; $TotalPublishedContent++}
-				"StreamedToServer"                   {WriteWordLine 0 0 "Streamed to server"; $TotalStreamedApps++}
-				"StreamedToClient"                   {WriteWordLine 0 0 "Streamed to client"; $TotalStreamedApps++}
-				"StreamedToClientOrInstalled"        {WriteWordLine 0 0 "Streamed if possible, otherwise accessed from server as Installed application"; $TotalStreamedApps++}
-				"StreamedToClientOrStreamedToServer" {WriteWordLine 0 0 "Streamed if possible, otherwise Streamed to server"; $TotalStreamedApps++}
-				Default {WriteWordLine 0 0 "Application Type could not be determined: $($Application.ApplicationType)"}
-			}
-			If(![String]::IsNullOrEmpty($Application.FolderPath))
-			{
-				WriteWordLine 0 1 "Folder path`t`t`t: " $Application.FolderPath
-			}
-			If(![String]::IsNullOrEmpty($Application.ContentAddress))
-			{
-				WriteWordLine 0 1 "Content Address`t`t: " $Application.ContentAddress
-			}
-		
-			#if a streamed app
-			If($streamedapp)
-			{
-				WriteWordLine 0 1 "Citrix streaming app profile address`t`t: " 
-				WriteWordLine 0 2 $Application.ProfileLocation
-				WriteWordLine 0 1 "App to launch from Citrix stream app profile`t: " 
-				WriteWordLine 0 2 $Application.ProfileProgramName
-				If(![String]::IsNullOrEmpty($Application.ProfileProgramArguments))
+				WriteWordLine 2 0 $Application.DisplayName
+				WriteWordLine 0 1 "Application name`t`t: " $Application.BrowserName
+				WriteWordLine 0 1 "Disable application`t`t: " -NoNewLine
+				#weird, if application is enabled, it is disabled!
+				If($Application.Enabled) 
 				{
-					WriteWordLine 0 1 "Extra command line parameters`t`t`t: " 
-					WriteWordLine 0 2 $Application.ProfileProgramArguments
-				}
-				#if streamed, OffWriteWordLine 0 access properties
-				If($Application.OfflineAccessAllowed)
+					WriteWordLine 0 0 "No"
+				} 
+				Else
 				{
-					WriteWordLine 0 1 "Enable offline access`t`t`t`t: " -nonewline
-					If($Application.OfflineAccessAllowed)
+					WriteWordLine 0 0 "Yes"
+					WriteWordLine 0 1 "Hide disabled application`t: " -nonewline
+					If($Application.HideWhenDisabled)
 					{
 						WriteWordLine 0 0 "Yes"
 					}
@@ -4798,402 +6022,452 @@ If($? -and $Applications -ne $Null)
 						WriteWordLine 0 0 "No"
 					}
 				}
-				If($Application.CachingOption)
+
+				If(![String]::IsNullOrEmpty($Application.Description))
 				{
-					WriteWordLine 0 1 "Cache preference`t`t`t`t: " -nonewline
-					Switch ($Application.CachingOption)
-					{
-						"Unknown"   {WriteWordLine 0 0 "Unknown"}
-						"PreLaunch" {WriteWordLine 0 0 "Cache application prior to launching"}
-						"AtLaunch"  {WriteWordLine 0 0 "Cache application during launch"}
-						Default {WriteWordLine 0 0 "Could not be determined: $($Application.CachingOption)"}
-					}
+					WriteWordLine 0 1 "Application description`t`t: " $Application.Description
 				}
-			}
+				
+				#type properties
+				WriteWordLine 0 1 "Application Type`t`t: " -nonewline
+				Switch ($Application.ApplicationType)
+				{
+					"Unknown"                            {WriteWordLine 0 0 "Unknown"}
+					"ServerInstalled"                    {WriteWordLine 0 0 "Installed application"; $TotalPublishedApps++}
+					"ServerDesktop"                      {WriteWordLine 0 0 "Server desktop"; $TotalPublishedDesktops++}
+					"Content"                            {WriteWordLine 0 0 "Content"; $TotalPublishedContent++}
+					"StreamedToServer"                   {WriteWordLine 0 0 "Streamed to server"; $TotalStreamedApps++}
+					"StreamedToClient"                   {WriteWordLine 0 0 "Streamed to client"; $TotalStreamedApps++}
+					"StreamedToClientOrInstalled"        {WriteWordLine 0 0 "Streamed if possible, otherwise accessed from server as Installed application"; $TotalStreamedApps++}
+					"StreamedToClientOrStreamedToServer" {WriteWordLine 0 0 "Streamed if possible, otherwise Streamed to server"; $TotalStreamedApps++}
+					Default {WriteWordLine 0 0 "Application Type could not be determined: $($Application.ApplicationType)"}
+				}
+				If(![String]::IsNullOrEmpty($Application.FolderPath))
+				{
+					WriteWordLine 0 1 "Folder path`t`t`t: " $Application.FolderPath
+				}
+				If(![String]::IsNullOrEmpty($Application.ContentAddress))
+				{
+					WriteWordLine 0 1 "Content Address`t`t: " $Application.ContentAddress
+				}
 			
-			#location properties
-			If(!$streamedapp)
-			{
-				#requested by Pavel Stadler to put Command Line and Working Directory in a different sized font and make it bold
-				If(![String]::IsNullOrEmpty($Application.CommandLineExecutable))
+				#if a streamed app
+				If($streamedapp)
 				{
-					If($Application.CommandLineExecutable.Length -lt 40)
+					WriteWordLine 0 1 "Citrix streaming app profile address`t`t: " 
+					WriteWordLine 0 2 $Application.ProfileLocation
+					WriteWordLine 0 1 "App to launch from Citrix stream app profile`t: " 
+					WriteWordLine 0 2 $Application.ProfileProgramName
+					If(![String]::IsNullOrEmpty($Application.ProfileProgramArguments))
 					{
-						WriteWordLine 0 1 "Command Line`t`t`t: " -NoNewLine
-						WriteWordLine 0 0 $Application.CommandLineExecutable "" "Courier New" 9 $False $True
+						WriteWordLine 0 1 "Extra command line parameters`t`t`t: " 
+						WriteWordLine 0 2 $Application.ProfileProgramArguments
 					}
-					Else
+					#if streamed, OffWriteWordLine 0 access properties
+					If($Application.OfflineAccessAllowed)
 					{
-						WriteWordLine 0 1 "Command Line: " 
-						WriteWordLine 0 2 $Application.CommandLineExecutable "" "Courier New" 9 $False $True
+						WriteWordLine 0 1 "Enable offline access`t`t`t`t: " -nonewline
+						If($Application.OfflineAccessAllowed)
+						{
+							WriteWordLine 0 0 "Yes"
+						}
+						Else
+						{
+							WriteWordLine 0 0 "No"
+						}
 					}
-				}
-				If(![String]::IsNullOrEmpty($Application.WorkingDirectory))
-				{
-					If($Application.WorkingDirectory.Length -lt 40)
+					If($Application.CachingOption)
 					{
-						WriteWordLine 0 1 "Working directory`t`t: " -NoNewLine
-						WriteWordLine 0 0 $Application.WorkingDirectory "" "Courier New" 9 $False $True
-					}
-					Else
-					{
-						WriteWordLine 0 1 "Working directory: " 
-						WriteWordLine 0 2 $Application.WorkingDirectory "" "Courier New" 9 $False $True
+						WriteWordLine 0 1 "Cache preference`t`t`t`t: " -nonewline
+						Switch ($Application.CachingOption)
+						{
+							"Unknown"   {WriteWordLine 0 0 "Unknown"}
+							"PreLaunch" {WriteWordLine 0 0 "Cache application prior to launching"}
+							"AtLaunch"  {WriteWordLine 0 0 "Cache application during launch"}
+							Default {WriteWordLine 0 0 "Could not be determined: $($Application.CachingOption)"}
+						}
 					}
 				}
 				
-				#servers properties
-				If($AppServerInfoResults)
+				#location properties
+				If(!$streamedapp)
 				{
-					If(![String]::IsNullOrEmpty($AppServerInfo.ServerNames))
+					#requested by Pavel Stadler to put Command Line and Working Directory in a different sized font and make it bold
+					If(![String]::IsNullOrEmpty($Application.CommandLineExecutable))
 					{
-						WriteWordLine 0 1 "Servers:"
-						$TempArray = $AppServerInfo.ServerNames | Sort
-						BuildTableForServerOrWG $TempArray "Server"
-						$TempArray = $Null
+						If($Application.CommandLineExecutable.Length -lt 40)
+						{
+							WriteWordLine 0 1 "Command Line`t`t`t: " -NoNewLine
+							WriteWordLine 0 0 $Application.CommandLineExecutable "" "Courier New" 9 $False $True
+						}
+						Else
+						{
+							WriteWordLine 0 1 "Command Line: " 
+							WriteWordLine 0 2 $Application.CommandLineExecutable "" "Courier New" 9 $False $True
+						}
 					}
-					If(![String]::IsNullOrEmpty($AppServerInfo.WorkerGroupNames))
+					If(![String]::IsNullOrEmpty($Application.WorkingDirectory))
 					{
-						WriteWordLine 0 1 "Worker Groups:"
-						$TempArray = $AppServerInfo.WorkerGroupNames | Sort
-						BuildTableForServerOrWG $TempArray "Server"
-						$TempArray = $Null
+						If($Application.WorkingDirectory.Length -lt 40)
+						{
+							WriteWordLine 0 1 "Working directory`t`t: " -NoNewLine
+							WriteWordLine 0 0 $Application.WorkingDirectory "" "Courier New" 9 $False $True
+						}
+						Else
+						{
+							WriteWordLine 0 1 "Working directory: " 
+							WriteWordLine 0 2 $Application.WorkingDirectory "" "Courier New" 9 $False $True
+						}
 					}
+					
+					#servers properties
+					If($AppServerInfoResults)
+					{
+						If(![String]::IsNullOrEmpty($AppServerInfo.ServerNames))
+						{
+							WriteWordLine 0 1 "Servers:"
+							$TempArray = $AppServerInfo.ServerNames | Sort
+							BuildTableForServerOrWG $TempArray "Server"
+							$TempArray = $Null
+						}
+						If(![String]::IsNullOrEmpty($AppServerInfo.WorkerGroupNames))
+						{
+							WriteWordLine 0 1 "Worker Groups:"
+							$TempArray = $AppServerInfo.WorkerGroupNames | Sort
+							BuildTableForServerOrWG $TempArray "Server"
+							$TempArray = $Null
+						}
+					}
+					Else
+					{
+						WriteWordLine 0 2 "Unable to retrieve a list of Servers or Worker Groups for this application"
+					}
+				}
+			
+				#users properties
+				If($Application.AnonymousConnectionsAllowed)
+				{
+					WriteWordLine 0 1 "Allow anonymous users: " $Application.AnonymousConnectionsAllowed
 				}
 				Else
 				{
-					WriteWordLine 0 2 "Unable to retrieve a list of Servers or Worker Groups for this application"
-				}
-			}
-		
-			#users properties
-			If($Application.AnonymousConnectionsAllowed)
-			{
-				WriteWordLine 0 1 "Allow anonymous users: " $Application.AnonymousConnectionsAllowed
-			}
-			Else
-			{
-				If($AppServerInfoResults)
-				{
-					WriteWordLine 0 1 "Users:"
-					ForEach($user in $AppServerInfo.Accounts)
+					If($AppServerInfoResults)
 					{
-						WriteWordLine 0 2 $user
+						WriteWordLine 0 1 "Users:"
+						ForEach($user in $AppServerInfo.Accounts)
+						{
+							WriteWordLine 0 2 $user
+						}
 					}
-				}
-				Else
-				{
-					WriteWordLine 0 2 "Unable to retrieve a list of Users for this application"
-				}
-			}	
+					Else
+					{
+						WriteWordLine 0 2 "Unable to retrieve a list of Users for this application"
+					}
+				}	
 
-			#shortcut presentation properties
-			#application icon is ignored
-			If(![String]::IsNullOrEmpty($Application.ClientFolder))
-			{
-				If($Application.ClientFolder.Length -lt 30)
+				#shortcut presentation properties
+				#application icon is ignored
+				If(![String]::IsNullOrEmpty($Application.ClientFolder))
 				{
-					WriteWordLine 0 1 "Client application folder`t`t`t`t: " $Application.ClientFolder
+					If($Application.ClientFolder.Length -lt 30)
+					{
+						WriteWordLine 0 1 "Client application folder`t`t`t`t: " $Application.ClientFolder
+					}
+					Else
+					{
+						WriteWordLine 0 1 "Client application folder`t`t`t`t: " 
+						WriteWordLine 0 2 $Application.ClientFolder
+					}
 				}
-				Else
+				If($Application.AddToClientStartMenu)
 				{
-					WriteWordLine 0 1 "Client application folder`t`t`t`t: " 
-					WriteWordLine 0 2 $Application.ClientFolder
+					WriteWordLine 0 1 "Add to client's start menu"
+					If($Application.StartMenuFolder)
+					{
+						WriteWordLine 0 2 "Start menu folder`t`t`t: " $Application.StartMenuFolder
+					}
 				}
-			}
-			If($Application.AddToClientStartMenu)
-			{
-				WriteWordLine 0 1 "Add to client's start menu"
-				If($Application.StartMenuFolder)
+				If($Application.AddToClientDesktop)
 				{
-					WriteWordLine 0 2 "Start menu folder`t`t`t: " $Application.StartMenuFolder
+					WriteWordLine 0 1 "Add shortcut to the client's desktop"
 				}
-			}
-			If($Application.AddToClientDesktop)
-			{
-				WriteWordLine 0 1 "Add shortcut to the client's desktop"
-			}
-		
-			#access control properties
-			If($Application.ConnectionsThroughAccessGatewayAllowed)
-			{
-				WriteWordLine 0 1 "Allow connections made through AGAE`t`t: " -nonewline
+			
+				#access control properties
 				If($Application.ConnectionsThroughAccessGatewayAllowed)
 				{
-					WriteWordLine 0 0 "Yes"
-				} 
-				Else
-				{
-					WriteWordLine 0 0 "No"
+					WriteWordLine 0 1 "Allow connections made through AGAE`t`t: " -nonewline
+					If($Application.ConnectionsThroughAccessGatewayAllowed)
+					{
+						WriteWordLine 0 0 "Yes"
+					} 
+					Else
+					{
+						WriteWordLine 0 0 "No"
+					}
 				}
-			}
-			If($Application.OtherConnectionsAllowed)
-			{
-				WriteWordLine 0 1 "Any connection`t`t`t`t`t: " -nonewline
 				If($Application.OtherConnectionsAllowed)
 				{
-					WriteWordLine 0 0 "Yes"
-				} 
-				Else
-				{
-					WriteWordLine 0 0 "No"
-				}
-			}
-			If($Application.AccessSessionConditionsEnabled)
-			{
-				WriteWordLine 0 1 "Any connection that meets any of the following filters: " $Application.AccessSessionConditionsEnabled
-				WriteWordLine 0 1 "Access Gateway Filters:"
-				$TableRange = $doc.Application.Selection.Range
-				[int]$Columns = 2
-				[int]$Rows = $Application.AccessSessionConditions.count + 1
-				$Table = $doc.Tables.Add($TableRange, $Rows, $Columns)
-				$Table.rows.first.headingformat = $wdHeadingFormatTrue
-				$Table.Style = $myHash.Word_TableGrid
-				$Table.Borders.InsideLineStyle = $wdLineStyleSingle
-				$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
-				[int]$xRow = 1
-				Write-Verbose "$(Get-Date): `t`t`t`tFormat first row with column headings"
-				$Table.Cell($xRow,1).Shading.BackgroundPatternColor = $wdColorGray15
-				$Table.Cell($xRow,1).Range.Font.Bold = $True
-				$Table.Cell($xRow,1).Range.Text = "Farm Name"
-				$Table.Cell($xRow,2).Shading.BackgroundPatternColor = $wdColorGray15
-				$Table.Cell($xRow,2).Range.Font.Bold = $True
-				$Table.Cell($xRow,2).Range.Text = "Filter"
-				ForEach($AccessCondition in $Application.AccessSessionConditions)
-				{
-					[string]$Tmp = $AccessCondition
-					[string]$AGFarm = $Tmp.substring(0, $Tmp.indexof(":"))
-					[string]$AGFilter = $Tmp.substring($Tmp.indexof(":")+1)
-					$xRow++
-					Write-Verbose "$(Get-Date): `t`t`t`t`tProcessing row for Access Condition $($Tmp)"
-					$Table.Cell($xRow,1).Range.Text = $AGFarm
-					$Table.Cell($xRow,2).Range.Text = $AGFilter
-				}
-
-				$Table.Rows.SetLeftIndent($Indent2TabStops,$wdAdjustProportional)
-				$Table.AutoFitBehavior($wdAutoFitContent)
-
-				#return focus back to document
-				$doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekMainDocument
-
-				#move to the end of the current document
-				$selection.EndKey($wdStory,$wdMove) | Out-Null
-				$tmp = $Null
-				$AGFarm = $Null
-				$AGFilter = $Null
-			}
-		
-			#content redirection properties
-			If($AppServerInfoResults)
-			{
-				If($AppServerInfo.FileTypes)
-				{
-					WriteWordLine 0 1 "File type associations:"
-					ForEach($filetype in $AppServerInfo.FileTypes)
+					WriteWordLine 0 1 "Any connection`t`t`t`t`t: " -nonewline
+					If($Application.OtherConnectionsAllowed)
 					{
-						WriteWordLine 0 2 $filetype
+						WriteWordLine 0 0 "Yes"
+					} 
+					Else
+					{
+						WriteWordLine 0 0 "No"
+					}
+				}
+				If($Application.AccessSessionConditionsEnabled)
+				{
+					WriteWordLine 0 1 "Any connection that meets any of the following filters: " $Application.AccessSessionConditionsEnabled
+					WriteWordLine 0 1 "Access Gateway Filters:"
+					$TableRange = $doc.Application.Selection.Range
+					[int]$Columns = 2
+					[int]$Rows = $Application.AccessSessionConditions.count + 1
+					$Table = $doc.Tables.Add($TableRange, $Rows, $Columns)
+					$Table.rows.first.headingformat = $wdHeadingFormatTrue
+					$Table.Style = $myHash.Word_TableGrid
+					$Table.Borders.InsideLineStyle = $wdLineStyleSingle
+					$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
+					[int]$xRow = 1
+					Write-Verbose "$(Get-Date): `t`t`t`tFormat first row with column headings"
+					$Table.Rows.First.Shading.BackgroundPatternColor = $wdColorGray15
+					$Table.Cell($xRow,1).Range.Font.Bold = $True
+					$Table.Cell($xRow,1).Range.Text = "Farm Name"
+					$Table.Cell($xRow,2).Range.Font.Bold = $True
+					$Table.Cell($xRow,2).Range.Text = "Filter"
+					ForEach($AccessCondition in $Application.AccessSessionConditions)
+					{
+						[string]$Tmp = $AccessCondition
+						[string]$AGFarm = $Tmp.substring(0, $Tmp.indexof(":"))
+						[string]$AGFilter = $Tmp.substring($Tmp.indexof(":")+1)
+						$xRow++
+						Write-Verbose "$(Get-Date): `t`t`t`t`tProcessing row for Access Condition $($Tmp)"
+						$Table.Cell($xRow,1).Range.Text = $AGFarm
+						$Table.Cell($xRow,2).Range.Text = $AGFilter
+					}
+
+					$Table.Rows.SetLeftIndent($Indent2TabStops,$wdAdjustProportional)
+					$Table.AutoFitBehavior($wdAutoFitContent)
+
+					FindWordDocumentEnd
+					$tmp = $Null
+					$AGFarm = $Null
+					$AGFilter = $Null
+				}
+			
+				#content redirection properties
+				If($AppServerInfoResults)
+				{
+					If($AppServerInfo.FileTypes)
+					{
+						WriteWordLine 0 1 "File type associations:"
+						ForEach($filetype in $AppServerInfo.FileTypes)
+						{
+							WriteWordLine 0 2 $filetype
+						}
+					}
+					Else
+					{
+						WriteWordLine 0 1 "File Type Associations for this application`t: None"
 					}
 				}
 				Else
 				{
-					WriteWordLine 0 1 "File Type Associations for this application`t: None"
-				}
-			}
-			Else
-			{
-				WriteWordLine 0 1 "Unable to retrieve the list of FTAs for this application"
-			}
-		
-			#if streamed app, Alternate profiles
-			If($streamedapp)
-			{
-				If($Application.AlternateProfiles)
-				{
-					WriteWordLine 0 1 "Primary application profile location`t`t: " $Application.AlternateProfiles
+					WriteWordLine 0 1 "Unable to retrieve the list of FTAs for this application"
 				}
 			
-				#if streamed app, User privileges properties
-				If($Application.RunAsLeastPrivilegedUser)
+				#if streamed app, Alternate profiles
+				If($streamedapp)
 				{
-					WriteWordLine 0 1 "Run app as a least-privileged user account`t: " $Application.RunAsLeastPrivilegedUser
+					If($Application.AlternateProfiles)
+					{
+						WriteWordLine 0 1 "Primary application profile location`t`t: " $Application.AlternateProfiles
+					}
+				
+					#if streamed app, User privileges properties
+					If($Application.RunAsLeastPrivilegedUser)
+					{
+						WriteWordLine 0 1 "Run app as a least-privileged user account`t: " $Application.RunAsLeastPrivilegedUser
+					}
 				}
-			}
-		
-			#limits properties
-			WriteWordLine 0 1 "Limit instances allowed to run in server farm`t: " -NoNewLine
+			
+				#limits properties
+				WriteWordLine 0 1 "Limit instances allowed to run in server farm`t: " -NoNewLine
 
-			If($Application.InstanceLimit -eq -1)
-			{
-				WriteWordLine 0 0 "No limit set"
-			}
-			Else
-			{
-				WriteWordLine 0 0 $Application.InstanceLimit
-			}
-		
-			WriteWordLine 0 1 "Allow only 1 instance of app for each user`t: " -NoNewLine
-		
-			If($Application.MultipleInstancesPerUserAllowed) 
-			{
-				WriteWordLine 0 0 "No"
-			} 
-			Else
-			{
-				WriteWordLine 0 0 "Yes"
-			}
-		
-			If($Application.CpuPriorityLevel)
-			{
-				WriteWordLine 0 1 "Application importance`t`t`t`t: " -nonewline
-				Switch ($Application.CpuPriorityLevel)
+				If($Application.InstanceLimit -eq -1)
 				{
-					"Unknown"     {WriteWordLine 0 0 "Unknown"}
-					"BelowNormal" {WriteWordLine 0 0 "Below Normal"}
-					"Low"         {WriteWordLine 0 0 "Low"}
-					"Normal"      {WriteWordLine 0 0 "Normal"}
-					"AboveNormal" {WriteWordLine 0 0 "Above Normal"}
-					"High"        {WriteWordLine 0 0 "High"}
-					Default {WriteWordLine 0 0 "Application importance could not be determined: $($Application.CpuPriorityLevel)"}
-				}
-			}
-			
-			#client options properties
-			WriteWordLine 0 1 "Enable legacy audio`t`t`t`t: " -nonewline
-			Switch ($Application.AudioType)
-			{
-				"Unknown" {WriteWordLine 0 0 "Unknown"}
-				"None"    {WriteWordLine 0 0 "Not Enabled"}
-				"Basic"   {WriteWordLine 0 0 "Enabled"}
-				Default {WriteWordLine 0 0 "Enable legacy audio could not be determined: $($Application.AudioType)"}
-			}
-			WriteWordLine 0 1 "Minimum requirement`t`t`t`t: " -nonewline
-			If($Application.AudioRequired)
-			{
-				WriteWordLine 0 0 "Enabled"
-			}
-			Else
-			{
-				WriteWordLine 0 0 "Disabled"
-			}
-			If($Application.SslConnectionEnabled)
-			{
-				WriteWordLine 0 1 "Enable SSL and TLS protocols`t`t`t: " -nonewline
-				If($Application.SslConnectionEnabled)
-				{
-					WriteWordLine 0 0 "Enabled"
+					WriteWordLine 0 0 "No limit set"
 				}
 				Else
 				{
-					WriteWordLine 0 0 "Disabled"
+					WriteWordLine 0 0 $Application.InstanceLimit
 				}
-			}
-			If($Application.EncryptionLevel)
-			{
-				WriteWordLine 0 1 "Encryption`t`t`t`t`t: " -nonewline
-				Switch ($Application.EncryptionLevel)
+			
+				WriteWordLine 0 1 "Allow only 1 instance of app for each user`t: " -NoNewLine
+			
+				If($Application.MultipleInstancesPerUserAllowed) 
+				{
+					WriteWordLine 0 0 "No"
+				} 
+				Else
+				{
+					WriteWordLine 0 0 "Yes"
+				}
+			
+				If($Application.CpuPriorityLevel)
+				{
+					WriteWordLine 0 1 "Application importance`t`t`t`t: " -nonewline
+					Switch ($Application.CpuPriorityLevel)
+					{
+						"Unknown"     {WriteWordLine 0 0 "Unknown"}
+						"BelowNormal" {WriteWordLine 0 0 "Below Normal"}
+						"Low"         {WriteWordLine 0 0 "Low"}
+						"Normal"      {WriteWordLine 0 0 "Normal"}
+						"AboveNormal" {WriteWordLine 0 0 "Above Normal"}
+						"High"        {WriteWordLine 0 0 "High"}
+						Default {WriteWordLine 0 0 "Application importance could not be determined: $($Application.CpuPriorityLevel)"}
+					}
+				}
+				
+				#client options properties
+				WriteWordLine 0 1 "Enable legacy audio`t`t`t`t: " -nonewline
+				Switch ($Application.AudioType)
 				{
 					"Unknown" {WriteWordLine 0 0 "Unknown"}
-					"Basic"   {WriteWordLine 0 0 "Basic"}
-					"LogOn"   {WriteWordLine 0 0 "128-Bit Login Only (RC-5)"}
-					"Bits40"  {WriteWordLine 0 0 "40-Bit (RC-5)"}
-					"Bits56"  {WriteWordLine 0 0 "56-Bit (RC-5)"}
-					"Bits128" {WriteWordLine 0 0 "128-Bit (RC-5)"}
-					Default {WriteWordLine 0 0 "Encryption could not be determined: $($Application.EncryptionLevel)"}
+					"None"    {WriteWordLine 0 0 "Not Enabled"}
+					"Basic"   {WriteWordLine 0 0 "Enabled"}
+					Default {WriteWordLine 0 0 "Enable legacy audio could not be determined: $($Application.AudioType)"}
 				}
-			}
-			If($Application.EncryptionRequired)
-			{
 				WriteWordLine 0 1 "Minimum requirement`t`t`t`t: " -nonewline
+				If($Application.AudioRequired)
+				{
+					WriteWordLine 0 0 "Enabled"
+				}
+				Else
+				{
+					WriteWordLine 0 0 "Disabled"
+				}
+				If($Application.SslConnectionEnabled)
+				{
+					WriteWordLine 0 1 "Enable SSL and TLS protocols`t`t`t: " -nonewline
+					If($Application.SslConnectionEnabled)
+					{
+						WriteWordLine 0 0 "Enabled"
+					}
+					Else
+					{
+						WriteWordLine 0 0 "Disabled"
+					}
+				}
+				If($Application.EncryptionLevel)
+				{
+					WriteWordLine 0 1 "Encryption`t`t`t`t`t: " -nonewline
+					Switch ($Application.EncryptionLevel)
+					{
+						"Unknown" {WriteWordLine 0 0 "Unknown"}
+						"Basic"   {WriteWordLine 0 0 "Basic"}
+						"LogOn"   {WriteWordLine 0 0 "128-Bit Login Only (RC-5)"}
+						"Bits40"  {WriteWordLine 0 0 "40-Bit (RC-5)"}
+						"Bits56"  {WriteWordLine 0 0 "56-Bit (RC-5)"}
+						"Bits128" {WriteWordLine 0 0 "128-Bit (RC-5)"}
+						Default {WriteWordLine 0 0 "Encryption could not be determined: $($Application.EncryptionLevel)"}
+					}
+				}
 				If($Application.EncryptionRequired)
 				{
-					WriteWordLine 0 0 "Enabled"
+					WriteWordLine 0 1 "Minimum requirement`t`t`t`t: " -nonewline
+					If($Application.EncryptionRequired)
+					{
+						WriteWordLine 0 0 "Enabled"
+					}
+					Else
+					{
+						WriteWordLine 0 0 "Disabled"
+					}
 				}
-				Else
+			
+				WriteWordLine 0 1 "Start app w/o waiting for printer creation`t: " -NoNewLine
+				#another weird one, if True then this is Disabled
+				If($Application.WaitOnPrinterCreation) 
 				{
 					WriteWordLine 0 0 "Disabled"
-				}
-			}
-		
-			WriteWordLine 0 1 "Start app w/o waiting for printer creation`t: " -NoNewLine
-			#another weird one, if True then this is Disabled
-			If($Application.WaitOnPrinterCreation) 
-			{
-				WriteWordLine 0 0 "Disabled"
-			} 
-			Else
-			{
-				WriteWordLine 0 0 "Enabled"
-			}
-			
-			#appearance properties
-			If($Application.WindowType)
-			{
-				WriteWordLine 0 1 "Session window size`t`t`t`t: " $Application.WindowType
-			}
-			If($Application.ColorDepth)
-			{
-				WriteWordLine 0 1 "Maximum color quality`t`t`t`t: " -nonewline
-				Switch ($Application.ColorDepth)
+				} 
+				Else
 				{
-					"Unknown"     {WriteWordLine 0 0 "Unknown color depth"}
-					"Colors8Bit"  {WriteWordLine 0 0 "256-color (8-bit)"}
-					"Colors16Bit" {WriteWordLine 0 0 "Better Speed (16-bit)"}
-					"Colors32Bit" {WriteWordLine 0 0 "Better Appearance (32-bit)"}
-					Default {WriteWordLine 0 0 "Maximum color quality could not be determined: $($Application.ColorDepth)"}
+					WriteWordLine 0 0 "Enabled"
 				}
-			}
-			If($Application.TitleBarHidden)
-			{
-				WriteWordLine 0 1 "Hide application title bar`t`t`t: " -nonewline
+				
+				#appearance properties
+				If($Application.WindowType)
+				{
+					WriteWordLine 0 1 "Session window size`t`t`t`t: " $Application.WindowType
+				}
+				If($Application.ColorDepth)
+				{
+					WriteWordLine 0 1 "Maximum color quality`t`t`t`t: " -nonewline
+					Switch ($Application.ColorDepth)
+					{
+						"Unknown"     {WriteWordLine 0 0 "Unknown color depth"}
+						"Colors8Bit"  {WriteWordLine 0 0 "256-color (8-bit)"}
+						"Colors16Bit" {WriteWordLine 0 0 "Better Speed (16-bit)"}
+						"Colors32Bit" {WriteWordLine 0 0 "Better Appearance (32-bit)"}
+						Default {WriteWordLine 0 0 "Maximum color quality could not be determined: $($Application.ColorDepth)"}
+					}
+				}
 				If($Application.TitleBarHidden)
 				{
-					WriteWordLine 0 0 "Enabled"
+					WriteWordLine 0 1 "Hide application title bar`t`t`t: " -nonewline
+					If($Application.TitleBarHidden)
+					{
+						WriteWordLine 0 0 "Enabled"
+					}
+					Else
+					{
+						WriteWordLine 0 0 "Disabled"
+					}
 				}
-				Else
-				{
-					WriteWordLine 0 0 "Disabled"
-				}
-			}
-			If($Application.MaximizedOnStartup)
-			{
-				WriteWordLine 0 1 "Maximize application at startup`t`t`t: " -nonewline
 				If($Application.MaximizedOnStartup)
 				{
-					WriteWordLine 0 0 "Enabled"
+					WriteWordLine 0 1 "Maximize application at startup`t`t`t: " -nonewline
+					If($Application.MaximizedOnStartup)
+					{
+						WriteWordLine 0 0 "Enabled"
+					}
+					Else
+					{
+						WriteWordLine 0 0 "Disabled"
+					}
 				}
-				Else
-				{
-					WriteWordLine 0 0 "Disabled"
-				}
+				$AppServerInfo = $Null
 			}
-			$AppServerInfo = $Null
-		}
-		Else
-		{
-			WriteWordLine 0 0 $Application.DisplayName
+			Else
+			{
+				WriteWordLine 0 0 $Application.DisplayName
+			}
 		}
 	}
+	ElseIf($Applications -eq $Null)
+	{
+		Write-Verbose "$(Get-Date): There are no Applications published"
+	}
+	Else 
+	{
+		Write-Warning "Application information could not be retrieved."
+	}
+	$Applications = $Null
+	Write-Verbose "$(Get-Date): Finished Processing Applications"
+	Write-Verbose "$(Get-Date): "
 }
-ElseIf($Applications -eq $Null)
-{
-	Write-Verbose "$(Get-Date): There are no Applications published"
-}
-Else 
-{
-	Write-Warning "Application information could not be retrieved."
-}
-$Applications = $Null
-Write-Verbose "$(Get-Date): Finished Processing Applications"
-Write-Verbose "$(Get-Date): "
 
-If(!$Summary)
+If(!$Summary -and ($Section -eq "All" -or $Section -eq "ConfigLog"))
 {
-
+	Write-Verbose "$(Get-Date): Setting summary variables"
 	[int]$TotalConfigLogItems = 0
 
-	Write-Verbose "$(Get-Date): Processing Configuration Logging/History Report"
 	If($ConfigLog)
 	{
+		Write-Verbose "$(Get-Date): Processing Configuration Logging/History Report"
 		#history AKA Configuration Logging report
 		#only process if $ConfigLog = $True and XA65ConfigLog.udl file exists
 		#build connection string
@@ -5202,14 +6476,16 @@ If(!$Summary)
 		#bug fixed by Esther Barthel
 		If(Test-Path "$($pwd.path)\XA65ConfigLog.udl")
 		{
+			Write-Verbose "$(Get-Date): `tRetrieving logging data for date range $($StartDate) through $($EndDate)"
 			$ConnectionString = Get-Content "$($pwd.path)\XA65ConfigLog.udl" | select-object -last 1
 			$ConfigLogReport = get-CtxConfigurationLogReport -connectionstring $ConnectionString -TimePeriodFrom $StartDate -TimePeriodTo $EndDate -EA 0
 
-			If($? -and $ConfigLogReport)
+			If($? -and $ConfigLogReport -ne $Null)
 			{
 				Write-Verbose "$(Get-Date): `tProcessing $($ConfigLogReport.Count) history items"
 				$selection.InsertNewPage()
 				WriteWordLine 1 0 "History:"
+				WriteWordLine 0 0 " For date range $($StartDate) through $($EndDate)"
 				$TableRange   = $doc.Application.Selection.Range
 				[int]$Columns = 6
 				If($ConfigLogReport -is [array])
@@ -5220,35 +6496,30 @@ If(!$Summary)
 				{
 					[int]$Rows = 2
 				}
-				Write-Verbose "$(Get-Date): Add Configuration Logging table to doc"
+				Write-Verbose "$(Get-Date): `t`tAdd Configuration Logging table to doc"
 				$Table = $doc.Tables.Add($TableRange, $Rows, $Columns)
 				$Table.rows.first.headingformat = $wdHeadingFormatTrue
 				$Table.Style = $myHash.Word_TableGrid
 				$Table.Borders.InsideLineStyle = $wdLineStyleNone
 				$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
-				$Table.Cell(1,1).Shading.BackgroundPatternColor = $wdColorGray15
+				$Table.Rows.First.Shading.BackgroundPatternColor = $wdColorGray15
 				$Table.Cell(1,1).Range.Font.Bold = $True
 				$Table.Cell(1,1).Range.Text = "Date"
-				$Table.Cell(1,2).Shading.BackgroundPatternColor = $wdColorGray15
 				$Table.Cell(1,2).Range.Font.Bold = $True
 				$Table.Cell(1,2).Range.Text = "Account"
-				$Table.Cell(1,3).Shading.BackgroundPatternColor = $wdColorGray15
 				$Table.Cell(1,3).Range.Font.Bold = $True
 				$Table.Cell(1,3).Range.Text = "Change description"
-				$Table.Cell(1,4).Shading.BackgroundPatternColor = $wdColorGray15
 				$Table.Cell(1,4).Range.Font.Bold = $True
 				$Table.Cell(1,4).Range.Text = "Type of change"
-				$Table.Cell(1,5).Shading.BackgroundPatternColor = $wdColorGray15
 				$Table.Cell(1,5).Range.Font.Bold = $True
 				$Table.Cell(1,5).Range.Text = "Type of item"
-				$Table.Cell(1,6).Shading.BackgroundPatternColor = $wdColorGray15
 				$Table.Cell(1,6).Range.Font.Bold = $True
 				$Table.Cell(1,6).Range.Text = "Name of item"
 				$xRow = 1
 				ForEach($Item in $ConfigLogReport)
 				{
 					$xRow++
-					Write-Verbose "$(Get-Date): Adding row for $($Item.Description)"
+					Write-Verbose "$(Get-Date): `t`t`tAdding row for $($Item.Description)"
 					If($xRow % 2 -eq 0)
 					{
 						$Table.Cell($xRow,1).Shading.BackgroundPatternColor = $wdColorGray05
@@ -5273,11 +6544,17 @@ If(!$Summary)
 				}
 				$Table.AutoFitBehavior($wdAutoFitContent)
 
-				#return focus back to document
-				$doc.ActiveWindow.ActivePane.view.SeekView=$wdSeekMainDocument
-
-				#move to the end of the current document
-				$selection.EndKey($wdStory,$wdMove) | Out-Null
+				FindWordDocumentEnd
+			}
+			ElseIf($? -and $ConfigLogReport -eq $Null)
+			{
+				Write-Verbose "$(Get-Date): There was no configuration logging data returned"
+				WriteWordLine 0 0 "There was no configuration logging data returned"
+			}
+			ElseIf(!$?)
+			{
+				Write-Warning "Error retrieving configuration logging data"
+				WriteWordLine 0 0 "Error retrieving configuration logging data"
 			}
 		}
 		Else 
@@ -5292,56 +6569,36 @@ If(!$Summary)
 	Write-Verbose "$(Get-Date): "
 }
 
-#load balancing policies
-Write-Verbose "$(Get-Date): Processing Load Balancing Policies"
-Write-Verbose "$(Get-Date): `tSetting summary variables"
-[int]$TotalLBPolicies = 0
-
-Write-Verbose "$(Get-Date): `tRetrieving Load Balancing Policies"
-$LoadBalancingPolicies = Get-XALoadBalancingPolicy -EA 0 | Sort PolicyName
-
-If($? -and $LoadBalancingPolicies -ne $Null)
+If($Section -eq "All" -or $Section -eq "LBPolicies")
 {
-	$selection.InsertNewPage()
-	WriteWordLine 1 0 "Load Balancing Policies:"
-	ForEach($LoadBalancingPolicy in $LoadBalancingPolicies)
+	#load balancing policies
+	Write-Verbose "$(Get-Date): Processing Load Balancing Policies"
+	Write-Verbose "$(Get-Date): `tSetting summary variables"
+	[int]$TotalLBPolicies = 0
+
+	Write-Verbose "$(Get-Date): `tRetrieving Load Balancing Policies"
+	$LoadBalancingPolicies = Get-XALoadBalancingPolicy -EA 0 | Sort PolicyName
+
+	If($? -and $LoadBalancingPolicies -ne $Null)
 	{
-		$TotalLBPolicies++
-		Write-Verbose "$(Get-Date): `t`tProcessing Load Balancing Policy $($LoadBalancingPolicy.PolicyName)"
-		$LoadBalancingPolicyConfiguration = Get-XALoadBalancingPolicyConfiguration -PolicyName $LoadBalancingPolicy.PolicyName -EA 0
-		$LoadBalancingPolicyFilter = Get-XALoadBalancingPolicyFilter -PolicyName $LoadBalancingPolicy.PolicyName -EA 0
-	
-		If(!$Summary)
+		$selection.InsertNewPage()
+		WriteWordLine 1 0 "Load Balancing Policies:"
+		ForEach($LoadBalancingPolicy in $LoadBalancingPolicies)
 		{
-			WriteWordLine 2 0 $LoadBalancingPolicy.PolicyName
-			If(![String]::IsNullOrEmpty($LoadBalancingPolicy.Description))
-			{
-				WriteWordLine 0 1 "Description`t: " $LoadBalancingPolicy.Description
-			}
-			WriteWordLine 0 1 "Enabled`t`t: " -nonewline
-			If($LoadBalancingPolicy.Enabled)
-			{
-				WriteWordLine 0 0 "Yes"
-			}
-			Else
-			{
-				WriteWordLine 0 0 "No"
-			}
-			WriteWordLine 0 1 "Priority`t`t: " $LoadBalancingPolicy.Priority
+			$TotalLBPolicies++
+			Write-Verbose "$(Get-Date): `t`tProcessing Load Balancing Policy $($LoadBalancingPolicy.PolicyName)"
+			$LoadBalancingPolicyConfiguration = Get-XALoadBalancingPolicyConfiguration -PolicyName $LoadBalancingPolicy.PolicyName -EA 0
+			$LoadBalancingPolicyFilter = Get-XALoadBalancingPolicyFilter -PolicyName $LoadBalancingPolicy.PolicyName -EA 0
 		
-			WriteWordLine 0 1 "Filter based on Access Control: " -nonewline
-			If($LoadBalancingPolicyFilter.AccessControlEnabled)
+			If(!$Summary)
 			{
-				WriteWordLine 0 0 "Yes"
-			}
-			Else
-			{
-				WriteWordLine 0 0 "No"
-			}
-			If($LoadBalancingPolicyFilter.AccessControlEnabled)
-			{
-				WriteWordLine 0 1 "Apply to connections made through Access Gateway: " -nonewline
-				If($LoadBalancingPolicyFilter.AllowConnectionsThroughAccessGateway)
+				WriteWordLine 2 0 $LoadBalancingPolicy.PolicyName
+				If(![String]::IsNullOrEmpty($LoadBalancingPolicy.Description))
+				{
+					WriteWordLine 0 1 "Description`t: " $LoadBalancingPolicy.Description
+				}
+				WriteWordLine 0 1 "Enabled`t`t: " -nonewline
+				If($LoadBalancingPolicy.Enabled)
 				{
 					WriteWordLine 0 0 "Yes"
 				}
@@ -5349,1351 +6606,1571 @@ If($? -and $LoadBalancingPolicies -ne $Null)
 				{
 					WriteWordLine 0 0 "No"
 				}
-				If($LoadBalancingPolicyFilter.AllowConnectionsThroughAccessGateway)
+				WriteWordLine 0 1 "Priority`t`t: " $LoadBalancingPolicy.Priority
+			
+				WriteWordLine 0 1 "Filter based on Access Control: " -nonewline
+				If($LoadBalancingPolicyFilter.AccessControlEnabled)
 				{
-					If($LoadBalancingPolicyFilter.AllowOtherConnections)
+					WriteWordLine 0 0 "Yes"
+				}
+				Else
+				{
+					WriteWordLine 0 0 "No"
+				}
+				If($LoadBalancingPolicyFilter.AccessControlEnabled)
+				{
+					WriteWordLine 0 1 "Apply to connections made through Access Gateway: " -nonewline
+					If($LoadBalancingPolicyFilter.AllowConnectionsThroughAccessGateway)
 					{
-						WriteWordLine 0 2 "Any connection"
+						WriteWordLine 0 0 "Yes"
+					}
+					Else
+					{
+						WriteWordLine 0 0 "No"
+					}
+					If($LoadBalancingPolicyFilter.AllowConnectionsThroughAccessGateway)
+					{
+						If($LoadBalancingPolicyFilter.AllowOtherConnections)
+						{
+							WriteWordLine 0 2 "Any connection"
+						} 
+						Else
+						{
+							WriteWordLine 0 2 "Any connection that meets any of the following filters"
+							If($LoadBalancingPolicyFilter.AccessSessionConditions)
+							{
+								Write-Verbose "$(Get-Date): `t`t`tCreate table for Load Balancing Policy Access Session Condition"
+								$TableRange = $doc.Application.Selection.Range
+								[int]$Columns = 2
+								[int]$Rows = $LoadBalancingPolicyFilter.AccessSessionConditions.count + 1
+								$Table = $doc.Tables.Add($TableRange, $Rows, $Columns)
+								$Table.rows.first.headingformat = $wdHeadingFormatTrue
+								$Table.Style = $myHash.Word_TableGrid
+								$Table.Borders.InsideLineStyle = $wdLineStyleSingle
+								$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
+								[int]$xRow = 1
+								Write-Verbose "$(Get-Date): `t`t`t`tFormat first row with column headings"
+								$Table.Rows.First.Shading.BackgroundPatternColor = $wdColorGray15
+								$Table.Cell($xRow,1).Range.Font.Bold = $True
+								$Table.Cell($xRow,1).Range.Text = "Farm Name"
+								$Table.Cell($xRow,2).Range.Font.Bold = $True
+								$Table.Cell($xRow,2).Range.Text = "Filter"
+								ForEach($AccessSessionCondition in $LoadBalancingPolicyFilter.AccessSessionConditions)
+								{
+									[string]$Tmp = $AccessSessionCondition
+									[string]$AGFarm = $Tmp.substring(0, $Tmp.indexof(":"))
+									[string]$AGFilter = $Tmp.substring($Tmp.indexof(":")+1)
+									$xRow++
+									Write-Verbose "$(Get-Date): `t`t`t`t`tProcessing row for Access Session Condition $($Tmp)"
+									$Table.Cell($xRow,1).Range.Text = $AGFarm
+									$Table.Cell($xRow,2).Range.Text = $AGFilter
+								}
+
+								$Table.Rows.SetLeftIndent($Indent2TabStops,$wdAdjustProportional)
+								$Table.AutoFitBehavior($wdAutoFitContent)
+
+								FindWordDocumentEnd
+								$tmp = $Null
+								$AGFarm = $Null
+								$AGFilter = $Null
+							}
+						}
+					}
+				}
+			
+				If($LoadBalancingPolicyFilter.ClientIPAddressEnabled)
+				{
+					WriteWordLine 0 1 "Filter based on client IP address"
+					If($LoadBalancingPolicyFilter.ApplyToAllClientIPAddresses)
+					{
+						WriteWordLine 0 2 "Apply to all client IP addresses"
 					} 
 					Else
 					{
-						WriteWordLine 0 2 "Any connection that meets any of the following filters"
-						If($LoadBalancingPolicyFilter.AccessSessionConditions)
+						If($LoadBalancingPolicyFilter.AllowedIPAddresses)
 						{
-							Write-Verbose "$(Get-Date): `t`t`tCreate table for Load Balancing Policy Access Session Condition"
-							$TableRange = $doc.Application.Selection.Range
-							[int]$Columns = 2
-							[int]$Rows = $LoadBalancingPolicyFilter.AccessSessionConditions.count + 1
-							$Table = $doc.Tables.Add($TableRange, $Rows, $Columns)
-							$Table.rows.first.headingformat = $wdHeadingFormatTrue
-							$Table.Style = $myHash.Word_TableGrid
-							$Table.Borders.InsideLineStyle = $wdLineStyleSingle
-							$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
-							[int]$xRow = 1
-							Write-Verbose "$(Get-Date): `t`t`t`tFormat first row with column headings"
-							$Table.Cell($xRow,1).Shading.BackgroundPatternColor = $wdColorGray15
-							$Table.Cell($xRow,1).Range.Font.Bold = $True
-							$Table.Cell($xRow,1).Range.Text = "Farm Name"
-							$Table.Cell($xRow,2).Shading.BackgroundPatternColor = $wdColorGray15
-							$Table.Cell($xRow,2).Range.Font.Bold = $True
-							$Table.Cell($xRow,2).Range.Text = "Filter"
-							ForEach($AccessSessionCondition in $LoadBalancingPolicyFilter.AccessSessionConditions)
+							ForEach($AllowedIPAddress in $LoadBalancingPolicyFilter.AllowedIPAddresses)
 							{
-								[string]$Tmp = $AccessSessionCondition
-								[string]$AGFarm = $Tmp.substring(0, $Tmp.indexof(":"))
-								[string]$AGFilter = $Tmp.substring($Tmp.indexof(":")+1)
-								$xRow++
-								Write-Verbose "$(Get-Date): `t`t`t`t`tProcessing row for Access Session Condition $($Tmp)"
-								$Table.Cell($xRow,1).Range.Text = $AGFarm
-								$Table.Cell($xRow,2).Range.Text = $AGFilter
+								WriteWordLine 0 2 "Client IP Address Matched: " $AllowedIPAddress
 							}
-
-							$Table.Rows.SetLeftIndent($Indent2TabStops,$wdAdjustProportional)
-							$Table.AutoFitBehavior($wdAutoFitContent)
-
-							#return focus back to document
-							$doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekMainDocument
-
-							#move to the end of the current document
-							$selection.EndKey($wdStory,$wdMove) | Out-Null
-							$tmp = $Null
-							$AGFarm = $Null
-							$AGFilter = $Null
 						}
-					}
-				}
-			}
-		
-			If($LoadBalancingPolicyFilter.ClientIPAddressEnabled)
-			{
-				WriteWordLine 0 1 "Filter based on client IP address"
-				If($LoadBalancingPolicyFilter.ApplyToAllClientIPAddresses)
-				{
-					WriteWordLine 0 2 "Apply to all client IP addresses"
-				} 
-				Else
-				{
-					If($LoadBalancingPolicyFilter.AllowedIPAddresses)
-					{
-						ForEach($AllowedIPAddress in $LoadBalancingPolicyFilter.AllowedIPAddresses)
+						If($LoadBalancingPolicyFilter.DeniedIPAddresses)
 						{
-							WriteWordLine 0 2 "Client IP Address Matched: " $AllowedIPAddress
+							ForEach($DeniedIPAddress in $LoadBalancingPolicyFilter.DeniedIPAddresses)
+							{
+								WriteWordLine 0 2 "Client IP Address Ignored: " $DeniedIPAddress
+							}
 						}
 					}
-					If($LoadBalancingPolicyFilter.DeniedIPAddresses)
+				}
+				If($LoadBalancingPolicyFilter.ClientNameEnabled)
+				{
+					WriteWordLine 0 1 "Filter based on client name"
+					If($LoadBalancingPolicyFilter.ApplyToAllClientNames)
 					{
-						ForEach($DeniedIPAddress in $LoadBalancingPolicyFilter.DeniedIPAddresses)
+						WriteWordLine 0 2 "Apply to all client names"
+					} 
+					Else
+					{
+						If($LoadBalancingPolicyFilter.AllowedClientNames)
 						{
-							WriteWordLine 0 2 "Client IP Address Ignored: " $DeniedIPAddress
+							ForEach($AllowedClientName in $LoadBalancingPolicyFilter.AllowedClientNames)
+							{
+								WriteWordLine 0 2 "Client Name Matched: " $AllowedClientName
+							}
 						}
-					}
-				}
-			}
-			If($LoadBalancingPolicyFilter.ClientNameEnabled)
-			{
-				WriteWordLine 0 1 "Filter based on client name"
-				If($LoadBalancingPolicyFilter.ApplyToAllClientNames)
-				{
-					WriteWordLine 0 2 "Apply to all client names"
-				} 
-				Else
-				{
-					If($LoadBalancingPolicyFilter.AllowedClientNames)
-					{
-						ForEach($AllowedClientName in $LoadBalancingPolicyFilter.AllowedClientNames)
+						If($LoadBalancingPolicyFilter.DeniedClientNames)
 						{
-							WriteWordLine 0 2 "Client Name Matched: " $AllowedClientName
-						}
-					}
-					If($LoadBalancingPolicyFilter.DeniedClientNames)
-					{
-						ForEach($DeniedClientName in $LoadBalancingPolicyFilter.DeniedClientNames)
-						{
-							WriteWordLine 0 2 "Client Name Ignored: " $DeniedClientName
+							ForEach($DeniedClientName in $LoadBalancingPolicyFilter.DeniedClientNames)
+							{
+								WriteWordLine 0 2 "Client Name Ignored: " $DeniedClientName
+							}
 						}
 					}
 				}
-			}
-			If($LoadBalancingPolicyFilter.AccountEnabled)
-			{
-				WriteWordLine 0 1 "Filter based on user"
-				WriteWordLine 0 2 "Apply to anonymous users: " -nonewline
-				If($LoadBalancingPolicyFilter.ApplyToAnonymousAccounts)
+				If($LoadBalancingPolicyFilter.AccountEnabled)
 				{
-					WriteWordLine 0 0 "Yes"
-				}
-				Else
-				{
-					WriteWordLine 0 0 "No"
-				}
-				If($LoadBalancingPolicyFilter.ApplyToAllExplicitAccounts)
-				{
-					WriteWordLine 0 2 "Apply to all explicit (non-anonymous) users"
-				} 
-				Else
-				{
-					If($LoadBalancingPolicyFilter.AllowedAccounts)
+					WriteWordLine 0 1 "Filter based on user"
+					WriteWordLine 0 2 "Apply to anonymous users: " -nonewline
+					If($LoadBalancingPolicyFilter.ApplyToAnonymousAccounts)
 					{
-						ForEach($AllowedAccount in $LoadBalancingPolicyFilter.AllowedAccounts)
-						{
-							WriteWordLine 0 2 "User Matched: " $AllowedAccount
-						}
-					}
-					If($LoadBalancingPolicyFilter.DeniedAccounts)
-					{
-						ForEach($DeniedAccount in $LoadBalancingPolicyFilter.DeniedAccounts)
-						{
-							WriteWordLine 0 2 "User Ignored: " $DeniedAccount
-						}
-					}
-				}
-			}
-			If($LoadBalancingPolicyConfiguration.WorkerGroupPreferenceAndFailoverState)
-			{
-				WriteWordLine 0 1 "Configure application connection preference based on worker group"
-				If($LoadBalancingPolicyConfiguration.WorkerGroupPreferences)
-				{
-					Write-Verbose "$(Get-Date): `t`t`tCreate table for Load Balancing Policy Worker Group Filter"
-					$TableRange = $doc.Application.Selection.Range
-					[int]$Columns = 2
-					[int]$Rows = $LoadBalancingPolicyConfiguration.WorkerGroupPreferences.count + 1
-					$Table = $doc.Tables.Add($TableRange, $Rows, $Columns)
-					$Table.rows.first.headingformat = $wdHeadingFormatTrue
-					$Table.Style = $myHash.Word_TableGrid
-					$Table.Borders.InsideLineStyle = $wdLineStyleSingle
-					$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
-					[int]$xRow = 1
-					Write-Verbose "$(Get-Date): `t`t`t`tFormat first row with column headings"
-					$Table.Cell($xRow,1).Shading.BackgroundPatternColor = $wdColorGray15
-					$Table.Cell($xRow,1).Range.Font.Bold = $True
-					$Table.Cell($xRow,1).Range.Text = "Worker Group"
-					$Table.Cell($xRow,2).Shading.BackgroundPatternColor = $wdColorGray15
-					$Table.Cell($xRow,2).Range.Font.Bold = $True
-					$Table.Cell($xRow,2).Range.Text = "Priority"
-					ForEach($WorkerGroupPreference in $LoadBalancingPolicyConfiguration.WorkerGroupPreferences)
-					{
-						[string]$Tmp = $WorkerGroupPreference
-						[string]$WGName = $Tmp.substring($Tmp.indexof("=")+1)
-						[string]$WGPriority = $Tmp.substring($Tmp.indexof(":")+1, (($Tmp.indexof("=")-1)-$Tmp.indexof(":")))
-						$xRow++
-						Write-Verbose "$(Get-Date): `t`t`tProcessing row for Worker Group Filter $($Tmp)"
-						$Table.Cell($xRow,1).Range.Text = $WGName
-						$Table.Cell($xRow,2).Range.Text = $WGPriority
-					}
-
-					$Table.Rows.SetLeftIndent($Indent2TabStops,$wdAdjustProportional)
-					$Table.AutoFitBehavior($wdAutoFitContent)
-
-					#return focus back to document
-					$doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekMainDocument
-
-					#move to the end of the current document
-					$selection.EndKey($wdStory,$wdMove) | Out-Null
-					$tmp = $Null
-					$WGName = $Null
-					$WGPriority = $Null
-				}
-			}
-			If($LoadBalancingPolicyConfiguration.StreamingDeliveryProtocolState -eq "Enabled")
-			{
-				WriteWordLine 0 1 "Set the delivery protocols for applications streamed to client"
-				WriteWordLine 0 2 "" -nonewline
-				Switch ($LoadBalancingPolicyConfiguration.StreamingDeliveryOption)
-				{
-					"Unknown"                {WriteWordLine 0 0 "Unknown"}
-					"ForceServerAccess"      {WriteWordLine 0 0 "Do not allow applications to stream to the client"}
-					"ForcedStreamedDelivery" {WriteWordLine 0 0 "Force applications to stream to the client"}
-					Default {WriteWordLine 0 0 "Delivery protocol could not be determined: $($LoadBalancingPolicyConfiguration.StreamingDeliveryOption)"}
-				}
-			}
-			Elseif($LoadBalancingPolicyConfiguration.StreamingDeliveryProtocolState -eq "Disabled")
-			{
-				#In the GUI, if "Set the delivery protocols for applications streamed to client" IS selected AND 
-				#"Allow applications to stream to the client or run on a Terminal Server (Default)" IS selected
-				#then "Set the delivery protocols for applications streamed to client" is set to Disabled
-				WriteWordLine 0 1 "Set the delivery protocols for applications streamed to client"
-				WriteWordLine 0 2 "Allow applications to stream to the client or run on a Terminal Server (Default)"
-			}
-			Else
-			{
-				WriteWordLine 0 1 "Streamed App Delivery is not configured"
-			}
-		
-			$LoadBalancingPolicyConfiguration = $Null
-			$LoadBalancingPolicyFilter = $Null
-		}
-		Else
-		{
-			WriteWordLine 0 0 $LoadBalancingPolicy.PolicyName
-		}
-	}
-}
-Elseif($LoadBalancingPolicies -eq $Null)
-{
-	Write-Verbose "$(Get-Date): There are no Load balancing policies created"
-}
-Else 
-{
-	Write-Warning "Load balancing policy information could not be retrieved.  "
-}
-$LoadBalancingPolicies = $Null
-Write-Verbose "$(Get-Date): Finished Processing Load Balancing Policies"
-Write-Verbose "$(Get-Date): "
-
-#load evaluators
-Write-Verbose "$(Get-Date): Processing Load Evaluators"
-Write-Verbose "$(Get-Date): `tSetting summary variables"
-[int]$TotalLoadEvaluators = 0
-
-Write-Verbose "$(Get-Date): `tRetrieving Load Evaluators"
-$LoadEvaluators = Get-XALoadEvaluator -EA 0 | Sort LoadEvaluatorName
-
-If($?)
-{
-	$selection.InsertNewPage()
-	WriteWordLine 1 0 "Load Evaluators:"
-	ForEach($LoadEvaluator in $LoadEvaluators)
-	{
-		$TotalLoadEvaluators++
-		Write-Verbose "$(Get-Date): `t`tProcessing Load Evaluator $($LoadEvaluator.LoadEvaluatorName)"
-		If(!$Summary)
-		{
-			WriteWordLine 2 0 $LoadEvaluator.LoadEvaluatorName
-			If(![String]::IsNullOrEmpty($LoadEvaluator.Description))
-			{
-				WriteWordLine 0 1 "Description: " $LoadEvaluator.Description
-			}
-			
-			If($LoadEvaluator.IsBuiltIn)
-			{
-				WriteWordLine 0 1 "Built-in Load Evaluator"
-			} 
-			Else 
-			{
-				WriteWordLine 0 1 "User created load evaluator"
-			}
-		
-			If($LoadEvaluator.ApplicationUserLoadEnabled)
-			{
-				WriteWordLine 0 1 "Application User Load Settings"
-				WriteWordLine 0 2 "Report full load when the # of users for this application equals: " $LoadEvaluator.ApplicationUserLoad
-				WriteWordLine 0 2 "Application: " $LoadEvaluator.ApplicationBrowserName
-			}
-		
-			If($LoadEvaluator.ContextSwitchesEnabled)
-			{
-				WriteWordLine 0 1 "Context Switches Settings"
-				WriteWordLine 0 2 "Report full load when the # of context Switches per second is > than: " $LoadEvaluator.ContextSwitches[1]
-				WriteWordLine 0 2 "Report no load when the # of context Switches per second is <= to: " $LoadEvaluator.ContextSwitches[0]
-			}
-		
-			If($LoadEvaluator.CpuUtilizationEnabled)
-			{
-				WriteWordLine 0 1 "CPU Utilization Settings"
-				WriteWordLine 0 2 "Report full load when the processor utilization % is > than: " $LoadEvaluator.CpuUtilization[1]
-				WriteWordLine 0 2 "Report no load when the processor utilization % is <= to: " $LoadEvaluator.CpuUtilization[0]
-			}
-		
-			If($LoadEvaluator.DiskDataIOEnabled)
-			{
-				WriteWordLine 0 1 "Disk Data I/O Settings"
-				WriteWordLine 0 2 "Report full load when the total disk I/O in kbps is > than: " $LoadEvaluator.DiskDataIO[1]
-				WriteWordLine 0 2 "Report no load when the total disk I/O in kbps per second is <= to: " $LoadEvaluator.DiskDataIO[0]
-			}
-		
-			If($LoadEvaluator.DiskOperationsEnabled)
-			{
-				WriteWordLine 0 1 "Disk Operations Settings"
-				WriteWordLine 0 2 "Report full load when the total # of R/W operations per second is > than: " $LoadEvaluator.DiskOperations[1]
-				WriteWordLine 0 2 "Report no load when the total # of R/W operations per second is <= to: " $LoadEvaluator.DiskOperations[0]
-			}
-		
-			If($LoadEvaluator.IPRangesEnabled)
-			{
-				WriteWordLine 0 1 "IP Range Settings"
-				If($LoadEvaluator.IPRangesAllowed)
-				{
-					WriteWordLine 0 2 "Allow " -NoNewLine
-				} 
-				Else 
-				{
-					WriteWordLine 0 2 "Deny " -NoNewLine
-				}
-				WriteWordLine 0 0 "client connections from the listed IP Ranges"
-				ForEach($IPRange in $LoadEvaluator.IPRanges)
-				{
-					WriteWordLine 0 3 "IP Address Ranges: " $IPRange
-				}
-			}
-		
-			If($LoadEvaluator.LoadThrottlingEnabled)
-			{
-				WriteWordLine 0 1 "Load Throttling Settings"
-				WriteWordLine 0 2 "Impact of logons on load: " -nonewline
-				Switch ($LoadEvaluator.LoadThrottling)
-				{
-					"Unknown"    {WriteWordLine 0 0 "Unknown"}
-					"Extreme"    {WriteWordLine 0 0 "Extreme"}
-					"High"       {WriteWordLine 0 0 "High (Default)"}
-					"MediumHigh" {WriteWordLine 0 0 "Medium High"}
-					"Medium"     {WriteWordLine 0 0 "Medium"}
-					"MediumLow"  {WriteWordLine 0 0 "Medium Low"}
-					Default {WriteWordLine 0 0 "Impact of logons on load could not be determined: $($LoadEvaluator.LoadThrottling)"}
-				}
-			}
-		
-			If($LoadEvaluator.MemoryUsageEnabled)
-			{
-				WriteWordLine 0 1 "Memory Usage Settings"
-				WriteWordLine 0 2 "Report full load when the memory usage is > than: " $LoadEvaluator.MemoryUsage[1]
-				WriteWordLine 0 2 "Report no load when the memory usage is <= to: " $LoadEvaluator.MemoryUsage[0]
-			}
-		
-			If($LoadEvaluator.PageFaultsEnabled)
-			{
-				WriteWordLine 0 1 "Page Faults Settings"
-				WriteWordLine 0 2 "Report full load when the # of page faults per second is > than: " $LoadEvaluator.PageFaults[1]
-				WriteWordLine 0 2 "Report no load when the # of page faults per second is <= to: " $LoadEvaluator.PageFaults[0]
-			}
-		
-			If($LoadEvaluator.PageSwapsEnabled)
-			{
-				WriteWordLine 0 1 "Page Swaps Settings"
-				WriteWordLine 0 2 "Report full load when the # of page swaps per second is > than: " $LoadEvaluator.PageSwaps[1]
-				WriteWordLine 0 2 "Report no load when the # of page swaps per second is <= to: " $LoadEvaluator.PageSwaps[0]
-			}
-		
-			If($LoadEvaluator.ScheduleEnabled)
-			{
-				WriteWordLine 0 1 "Scheduling Settings"
-				WriteWordLine 0 2 "Sunday Schedule`t: " $LoadEvaluator.SundaySchedule
-				WriteWordLine 0 2 "Monday Schedule`t: " $LoadEvaluator.MondaySchedule
-				WriteWordLine 0 2 "Tuesday Schedule`t: " $LoadEvaluator.TuesdaySchedule
-				WriteWordLine 0 2 "Wednesday Schedule`t: " $LoadEvaluator.WednesdaySchedule
-				WriteWordLine 0 2 "Thursday Schedule`t: " $LoadEvaluator.ThursdaySchedule
-				WriteWordLine 0 2 "Friday Schedule`t`t: " $LoadEvaluator.FridaySchedule
-				WriteWordLine 0 2 "Saturday Schedule`t: " $LoadEvaluator.SaturdaySchedule
-			}
-		
-			If($LoadEvaluator.ServerUserLoadEnabled)
-			{
-				WriteWordLine 0 1 "Server User Load Settings"
-				WriteWordLine 0 2 "Report full load when the # of server users equals: " $LoadEvaluator.ServerUserLoad
-			}
-		
-			WriteWordLine 0 0 ""
-		}
-		Else
-		{
-			WriteWordLine 0 0 $LoadEvaluator.LoadEvaluatorName
-		}
-	}
-}
-Else 
-{
-	Write-Warning "Load Evaluator information could not be retrieved"
-}
-$LoadEvaluators = $Null
-Write-Verbose "$(Get-Date): Finished Processing Load Evaluators"
-Write-Verbose "$(Get-Date): "
-
-#servers
-Write-Verbose "$(Get-Date): Processing Servers"
-Write-Verbose "$(Get-Date): `tSetting summary variables"
-[int]$TotalControllers = 0
-[int]$TotalWorkers = 0
-[int]$TotalServers = 0
-$ServerItems = @()
-
-Write-Verbose "$(Get-Date): `tRetrieving Servers"
-If($Summary)
-{
-	$servers = Get-XAServer -EA 0 | Sort ServerName
-}
-Else
-{
-	$servers = Get-XAServer -EA 0 | Sort FolderPath, ServerName
-}
-
-If($?)
-{
-	$selection.InsertNewPage()
-	WriteWordLine 1 0 "Servers:"
-	ForEach($server in $servers)
-	{
-		Write-Verbose "$(Get-Date): `t`tProcessing server $($server.ServerName)"
-
-		If(!$Summary)
-		{
-			[bool]$SvrOnline = $False
-			Write-Verbose "$(Get-Date): `t`t`tTesting to see if $($server.ServerName) is online and reachable"
-			If(Test-Connection -ComputerName $server.servername -quiet -EA 0)
-			{
-				$SvrOnline = $True
-				If($Hardware -and $Software)
-				{
-					Write-Verbose "$(Get-Date): `t`t`t`t$($server.ServerName) is online.  Hardware inventory, Software Inventory, Citrix Services and Hotfix areas will be processed."
-				}
-				ElseIf($Hardware -and !($Software))
-				{
-					Write-Verbose "$(Get-Date): `t`t`t`t$($server.ServerName) is online.  Hardware inventory, Citrix Services and Hotfix areas will be processed."
-				}
-				ElseIf(!($Hardware) -and $Software)
-				{
-					Write-Verbose "$(Get-Date): `t`t`t`t$($server.ServerName) is online.  Software Inventory, Citrix Services and Hotfix areas will be processed."
-				}
-				Else
-				{
-					Write-Verbose "$(Get-Date): `t`t`t`t$($server.ServerName) is online.  Citrix Services and Hotfix areas will be processed."
-				}
-			}
-			
-			#create array for appendix B
-			Write-Verbose "$(Get-Date): `t`t`tGather server info for Appendix B"
-			$obj = New-Object -TypeName PSObject
-			$obj | Add-Member -MemberType NoteProperty -Name ServerName -Value $server.ServerName
-			$obj | Add-Member -MemberType NoteProperty -Name ZoneName -Value $server.ZoneName
-			$obj | Add-Member -MemberType NoteProperty -Name OSVersion -Value $server.OSVersion
-			$obj | Add-Member -MemberType NoteProperty -Name CitrixVersion -Value $server.CitrixVersion
-			$obj | Add-Member -MemberType NoteProperty -Name ProductEdition -Value $server.CitrixEdition
-			$obj | Add-Member -MemberType NoteProperty -Name LicenseServer -Value $Server.LicenseServerName			
-
-			If($SvrOnline)
-			{
-				$Reg = [Microsoft.Win32.RegistryKey]::OpenRemoteBaseKey('LocalMachine', $server.ServerName)
-				Try
-				{
-					$RegKey= $Reg.OpenSubKey("SYSTEM\\CurrentControlSet\\Control\\Citrix\\Wfshell\\TWI")
-					$SSDisabled = $RegKey.GetValue("SeamlessFlags")
-					
-					If($SSDisabled -eq 1)
-					{
-						$obj | Add-Member -MemberType NoteProperty -Name SessionSharing -Value "Disabled"
+						WriteWordLine 0 0 "Yes"
 					}
 					Else
 					{
-						$obj | Add-Member -MemberType NoteProperty -Name SessionSharing -Value "Enabled"
+						WriteWordLine 0 0 "No"
 					}
-				}
-				Catch
-				{
-						$obj | Add-Member -MemberType NoteProperty -Name SessionSharing -Value "Not Available"
-				}
-			}
-			Else
-			{
-				$obj | Add-Member -MemberType NoteProperty -Name SessionSharing -Value "Server Offline"
-			}
-			
-			$ServerItems += $obj
-
-			WriteWordLine 2 0 $server.ServerName
-			WriteWordLine 0 1 "Product`t`t`t`t: " $server.CitrixProductName
-			WriteWordLine 0 1 "Edition`t`t`t`t: " $server.CitrixEdition
-			WriteWordLine 0 1 "Version`t`t`t`t: " $server.CitrixVersion
-			WriteWordLine 0 1 "Service Pack`t`t`t: " $server.CitrixServicePack
-			WriteWordLine 0 1 "IP Address`t`t`t: " $server.IPAddresses
-			WriteWordLine 0 1 "Logons`t`t`t`t: " -NoNewLine
-			If($server.LogOnsEnabled)
-			{
-				WriteWordLine 0 0 "Enabled"
-			} 
-			Else 
-			{
-				WriteWordLine 0 0 "Disabled"
-			}
-			WriteWordLine 0 1 "Logon Control Mode`t`t: " -nonewline
-			Switch ($Server.LogOnMode)
-			{
-				"Unknown"                       {WriteWordLine 0 0 "Unknown"}
-				"AllowLogOns"                   {WriteWordLine 0 0 "Allow logons and reconnections"}
-				"ProhibitNewLogOnsUntilRestart" {WriteWordLine 0 0 "Prohibit logons until server restart"}
-				"ProhibitNewLogOns "            {WriteWordLine 0 0 "Prohibit logons only"}
-				"ProhibitLogOns "               {WriteWordLine 0 0 "Prohibit logons and reconnections"}
-				Default {WriteWordLine 0 0 "Logon control mode could not be determined: $($Server.LogOnMode)"}
-			}
-
-			WriteWordLine 0 1 "Product Installation Date`t: " $server.CitrixInstallDate
-			WriteWordLine 0 1 "Operating System Version`t: " $server.OSVersion -NoNewLine
-			WriteWordLine 0 0 " " $server.OSServicePack
-			WriteWordLine 0 1 "Zone`t`t`t`t: " $server.ZoneName
-			WriteWordLine 0 1 "Election Preference`t`t: " -nonewline
-			Switch ($server.ElectionPreference)
-			{
-				"Unknown"           {WriteWordLine 0 0 "Unknown"}
-				"MostPreferred"     {WriteWordLine 0 0 "Most Preferred"; $TotalControllers++}
-				"Preferred"         {WriteWordLine 0 0 "Preferred"; $TotalControllers++}
-				"DefaultPreference" {WriteWordLine 0 0 "Default Preference"; $TotalControllers++}
-				"NotPreferred"      {WriteWordLine 0 0 "Not Preferred"; $TotalControllers++}
-				"WorkerMode"        {WriteWordLine 0 0 "Worker Mode"; $TotalWorkers++}
-				Default {WriteWordLine 0 0 "Server election preference could not be determined: $($server.ElectionPreference)"}
-			}
-			WriteWordLine 0 1 "Folder`t`t`t`t: " $server.FolderPath
-			WriteWordLine 0 1 "Product Installation Path`t: " $server.CitrixInstallPath
-			If($server.LicenseServerName)
-			{
-				WriteWordLine 0 1 "License Server Name`t`t: " $server.LicenseServerName
-				WriteWordLine 0 1 "License Server Port`t`t: " $server.LicenseServerPortNumber
-			}
-			If($server.ICAPortNumber -gt 0)
-			{
-				WriteWordLine 0 1 "ICA Port Number`t`t: " $server.ICAPortNumber
-			}
-			WriteWordLine 0 0 ""
-
-			If($SvrOnline -and $Hardware)
-			{
-				GetComputerWMIInfo $server.ServerName
-			}
-			
-			#applications published to server
-			$Applications = Get-XAApplication -ServerName $server.ServerName -EA 0 | Sort FolderPath, DisplayName
-			If($? -and $Applications)
-			{
-				WriteWordLine 0 1 "Published applications:"
-				Write-Verbose "$(Get-Date): `t`tProcessing published applications for server $($server.ServerName)"
-				Write-Verbose "$(Get-Date): `t`tCreate Word Table for server's published applications"
-				$TableRange = $doc.Application.Selection.Range
-				[int]$Columns = 2
-				
-				If($Applications -is [Array])
-				{
-					[int]$Rows = $Applications.count + 1
-				}
-				Else
-				{
-					[int]$Rows = 2
-				}
-
-				$Table = $doc.Tables.Add($TableRange, $Rows, $Columns)
-				$Table.rows.first.headingformat = $wdHeadingFormatTrue
-				$Table.Style = $myHash.Word_TableGrid
-				$Table.Borders.InsideLineStyle = $wdLineStyleSingle
-				$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
-				[int]$xRow = 1
-				Write-Verbose "$(Get-Date): `t`tFormat first row with column headings"
-				$Table.Cell($xRow,1).Shading.BackgroundPatternColor = $wdColorGray15
-				$Table.Cell($xRow,1).Range.Font.Bold = $True
-				$Table.Cell($xRow,1).Range.Text = "Display name"
-				$Table.Cell($xRow,2).Shading.BackgroundPatternColor = $wdColorGray15
-				$Table.Cell($xRow,2).Range.Font.Bold = $True
-				$Table.Cell($xRow,2).Range.Text = "Folder path"
-				ForEach($app in $Applications)
-				{
-					Write-Verbose "$(Get-Date): `t`t`tProcessing published application $($app.DisplayName)"
-					$xRow++
-					$Table.Cell($xRow,1).Range.Text = $app.DisplayName
-					$Table.Cell($xRow,2).Range.Text = $app.FolderPath
-				}
-				Write-Verbose "$(Get-Date): `t`tMove table of published applications to the right"
-				$Table.Rows.SetLeftIndent($Indent1TabStops,$wdAdjustProportional)
-				$Table.AutoFitBehavior($wdAutoFitContent)
-
-				#return focus back to document
-				$doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekMainDocument
-
-				#move to the end of the current document
-				$selection.EndKey($wdStory,$wdMove) | Out-Null
-				WriteWordLine 0 0 ""
-			}
-
-			#get list of applications installed on server
-			# original work by Shaun Ritchie
-			# modified by Jeff Wouters
-			# modified by Webster
-			# fixed, as usual, by Michael B. Smith
-			If($SvrOnline -and $Software)
-			{
-				#section modified on 3-jan-2014 to add displayversion
-				$InstalledApps = @()
-				$JustApps = @()
-
-				#Define the variable to hold the location of Currently Installed Programs
-				$UninstallKey1="SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" 
-
-				#Create an instance of the Registry Object and open the HKLM base key
-				$reg=[microsoft.win32.registrykey]::OpenRemoteBaseKey('LocalMachine',$Server.ServerName) 
-
-				#Drill down into the Uninstall key using the OpenSubKey Method
-				$regkey1=$reg.OpenSubKey($UninstallKey1) 
-
-				#Retrieve an array of string that contain all the subkey names
-				If($regkey1 -ne $Null)
-				{
-					$subkeys1=$regkey1.GetSubKeyNames() 
-
-					#Open each Subkey and use GetValue Method to return the required values for each
-					ForEach($key in $subkeys1) 
+					If($LoadBalancingPolicyFilter.ApplyToAllExplicitAccounts)
 					{
-						$thisKey=$UninstallKey1+"\\"+$key 
-						$thisSubKey=$reg.OpenSubKey($thisKey) 
-						If(![String]::IsNullOrEmpty($($thisSubKey.GetValue("DisplayName")))) 
-						{
-							$obj = New-Object PSObject
-							$obj | Add-Member -MemberType NoteProperty -Name "DisplayName" -Value $($thisSubKey.GetValue("DisplayName"))
-							$obj | Add-Member -MemberType NoteProperty -Name "DisplayVersion" -Value $($thisSubKey.GetValue("DisplayVersion"))
-							$InstalledApps += $obj
-						}
-					}
-				}			
-
-				$UninstallKey2="SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" 
-				$regkey2=$reg.OpenSubKey($UninstallKey2)
-				If($regkey2 -ne $Null)
-				{
-					$subkeys2=$regkey2.GetSubKeyNames()
-
-					ForEach($key in $subkeys2) 
-					{
-						$thisKey=$UninstallKey2+"\\"+$key 
-						$thisSubKey=$reg.OpenSubKey($thisKey) 
-						if(![String]::IsNullOrEmpty($($thisSubKey.GetValue("DisplayName")))) 
-						{
-							$obj = New-Object PSObject
-							$obj | Add-Member -MemberType NoteProperty -Name "DisplayName" -Value $($thisSubKey.GetValue("DisplayName"))
-							$obj | Add-Member -MemberType NoteProperty -Name "DisplayVersion" -Value $($thisSubKey.GetValue("DisplayVersion"))
-							$InstalledApps += $obj
-						}
-					}
-				}
-
-				$InstalledApps = $InstalledApps | Sort DisplayName
-
-				$tmp1 = SWExclusions
-				If($Tmp1 -ne "")
-				{
-					$Func = ConvertTo-ScriptBlock $tmp1
-					$tempapps = Invoke-Command {& $Func}
-				}
-				Else
-				{
-					$tempapps = $InstalledApps
-				}
-				
-				$JustApps = $TempApps | Select DisplayName, DisplayVersion | Sort DisplayName -unique
-
-				WriteWordLine 0 1 "Installed applications:"
-				Write-Verbose "$(Get-Date): `t`tProcessing installed applications for server $($server.ServerName)"
-				Write-Verbose "$(Get-Date): `t`tCreate Word Table for server's installed applications"
-				$TableRange = $doc.Application.Selection.Range
-				[int]$Columns = 2
-				[int]$Rows = $JustApps.count + 1
-
-				$Table = $doc.Tables.Add($TableRange, $Rows, $Columns)
-				$Table.rows.first.headingformat = $wdHeadingFormatTrue
-				$Table.Style = $myHash.Word_TableGrid
-				$Table.Borders.InsideLineStyle = $wdLineStyleSingle
-				$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
-				[int]$xRow = 1
-				Write-Verbose "$(Get-Date): `t`tFormat first row with column headings"
-				$Table.Cell($xRow,1).Shading.BackgroundPatternColor = $wdColorGray15
-				$Table.Cell($xRow,1).Range.Font.Bold = $True
-				$Table.Cell($xRow,1).Range.Text = "Application name"
-				$Table.Cell($xRow,2).Shading.BackgroundPatternColor = $wdColorGray15
-				$Table.Cell($xRow,2).Range.Font.Bold = $True
-				$Table.Cell($xRow,2).Range.Text = "Application version"
-				ForEach($app in $JustApps)
-				{
-					Write-Verbose "$(Get-Date): `t`t`tProcessing installed application $($app.DisplayName)"
-					$xRow++
-					$Table.Cell($xRow,1).Range.Text = $app.DisplayName
-					$Table.Cell($xRow,2).Range.Text = $app.DisplayVersion
-				}
-				Write-Verbose "$(Get-Date): `t`tMove table of installed applications to the right"
-				$Table.Rows.SetLeftIndent($Indent1TabStops,$wdAdjustProportional)
-				$Table.AutoFitBehavior($wdAutoFitContent)
-
-				#return focus back to document
-				$doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekMainDocument
-
-				#move to the end of the current document
-				$selection.EndKey($wdStory,$wdMove) | Out-Null
-				WriteWordLine 0 0 ""
-			}
-			
-			#list citrix services
-			If($SvrOnline)
-			{
-				Write-Verbose "$(Get-Date): `t`tProcessing Citrix services for server $($server.ServerName) by calling Get-Service"
-
-				Try
-				{
-					$Services = Get-Service -ComputerName $server.ServerName -EA 0 | Where {$_.DisplayName -like "*Citrix*"} | Sort DisplayName
-				}
-				
-				Catch
-				{
-					$Services = $Null
-				}
-
-				WriteWordLine 0 1 "Citrix Services"
-				If($? -and $Services -ne $Null)
-				{
-					Write-Verbose "$(Get-Date): `t`tCreate Word Table for Citrix services"
-					$TableRange = $doc.Application.Selection.Range
-					[int]$Columns = 3
-					[int]$Rows = $services.count + 1
-					Write-Verbose "$(Get-Date): `t`tAdd Citrix services table to doc"
-					$Table = $doc.Tables.Add($TableRange, $Rows, $Columns)
-					$Table.rows.first.headingformat = $wdHeadingFormatTrue
-					$Table.Style = $myHash.Word_TableGrid
-					$Table.Borders.InsideLineStyle = $wdLineStyleSingle
-					$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
-					[int]$xRow = 1
-					Write-Verbose "$(Get-Date): `t`tFormat first row with column headings"
-					$Table.Cell($xRow,1).Shading.BackgroundPatternColor = $wdColorGray15
-					$Table.Cell($xRow,1).Range.Font.Bold = $True
-					$Table.Cell($xRow,1).Range.Text = "Display Name"
-					$Table.Cell($xRow,2).Shading.BackgroundPatternColor = $wdColorGray15
-					$Table.Cell($xRow,2).Range.Font.Bold = $True
-					$Table.Cell($xRow,2).Range.Text = "Status"
-					$Table.Cell($xRow,3).Shading.BackgroundPatternColor = $wdColorGray15
-					$Table.Cell($xRow,3).Range.Font.Bold = $True
-					$Table.Cell($xRow,3).Range.Text = "Startup Type"
-					ForEach($Service in $Services)
-					{
-						Write-Verbose "$(Get-Date): `t`t`tProcessing Citrix service $($Service.DisplayName)"
-						$xRow++
-						$Table.Cell($xRow,1).Range.Text = $Service.DisplayName
-						
-						#startup type requested by Pavel Stadler
-						Try
-						{
-							Write-Verbose "$(Get-Date): `t`t`t`tGetting startup type for $($Service.DisplayName)"
-							$StartupType = (Get-WMIObject Win32_Service -ComputerName $server.ServerName -Filter "Name='$($Service.Name)'").StartMode
-						}
-						
-						Catch
-						{
-							Write-Verbose "$(Get-Date): `t`t`t`tGetting startup type for $($Service.DisplayName) failed"
-							$StartupType = "Not Found"
-						}
-						
-						#also requested by Pavel Stadler, if service is stopped only color it red if startup type is automatic
-						If($Service.Status -eq "Stopped" -and $StartupType -eq "Auto")
-						{
-							$Table.Cell($xRow,2).Shading.BackgroundPatternColor = $wdColorRed
-							$Table.Cell($xRow,2).Range.Font.Bold  = $True
-							$Table.Cell($xRow,2).Range.Font.Color = $WDColorBlack
-						}
-						$Table.Cell($xRow,2).Range.Text = $Service.Status
-						$Table.Cell($xRow,3).Range.Text = $StartupType
-					}
-
-					Write-Verbose "$(Get-Date): `t`tMove table of Citrix services to the right"
-					$Table.Rows.SetLeftIndent($Indent1TabStops,$wdAdjustProportional)
-					$Table.AutoFitBehavior($wdAutoFitContent)
-
-					#return focus back to document
-					$doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekMainDocument
-
-					#move to the end of the current document
-					$selection.EndKey($wdStory,$wdMove) | Out-Null
-				}
-				ElseIf(!$?)
-				{
-					Write-Warning "No services were retrieved."
-					WriteWordLine 0 0 "Warning: No Services were retrieved" "" $Null 0 $False $True
-					WriteWordLine 0 1 "If this is a trusted Forest, you may need to rerun the" "" $Null 0 $False $True
-					WriteWordLine 0 1 "script with Admin credentials from the trusted Forest." "" $Null 0 $False $True
-				}
-				Else
-				{
-					Write-Warning "Services retrieval was successful but no services were returned."
-					WriteWordLine 0 0 "Services retrieval was successful but no services were returned." "" $Null 0 $False $True
-				}
-
-				#Citrix hotfixes installed
-				Write-Verbose "$(Get-Date): `t`tGet list of Citrix hotfixes installed using Get-XAServerHotfix"
-				$hotfixes = (Get-XAServerHotfix -ServerName $server.ServerName -EA 0 | Where {$_.Valid -eq $True}) | Sort HotfixName
-				If($? -and $hotfixes)
-				{
-					[int]$Rows = 1
-					$Single_Row = (Get-Member -Type Property -Name Length -InputObject $hotfixes -EA 0) -eq $Null
-					If(-not $Single_Row)
-					{
-						$Rows = $Hotfixes.length
-					}
-					$Rows++
-					
-					Write-Verbose "$(Get-Date): `t`tNumber of hotfixes is $($Rows-1)"
-					$HotfixArray = @()
-					[bool]$HRP2Installed = $False
-					[bool]$HRP3Installed = $False
-					WriteWordLine 0 0 ""
-					WriteWordLine 0 1 "Citrix Installed Hotfixes:"
-					Write-Verbose "$(Get-Date): `t`tCreate Word Table for Citrix Hotfixes"
-					$TableRange = $doc.Application.Selection.Range
-					[int]$Columns = 4
-					Write-Verbose "$(Get-Date): `t`tAdd Citrix installed hotfix table to doc"
-					$Table = $doc.Tables.Add($TableRange, $Rows, $Columns)
-					$Table.rows.first.headingformat = $wdHeadingFormatTrue
-					$Table.Style = $myHash.Word_TableGrid
-					$Table.Borders.InsideLineStyle = $wdLineStyleSingle
-					$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
-					[int]$xRow = 1
-					Write-Verbose "$(Get-Date): `t`tFormat first row with column headings"
-					$Table.Cell($xRow,1).Shading.BackgroundPatternColor = $wdColorGray15
-					$Table.Cell($xRow,1).Range.Font.Bold = $True
-					$Table.Cell($xRow,1).Range.Font.Size = "10"
-					$Table.Cell($xRow,1).Range.Text = "Hotfix"
-					$Table.Cell($xRow,2).Shading.BackgroundPatternColor = $wdColorGray15
-					$Table.Cell($xRow,2).Range.Font.Bold = $True
-					$Table.Cell($xRow,2).Range.Font.Size = "10"
-					$Table.Cell($xRow,2).Range.Text = "Installed By"
-					$Table.Cell($xRow,3).Shading.BackgroundPatternColor = $wdColorGray15
-					$Table.Cell($xRow,3).Range.Font.Bold = $True
-					$Table.Cell($xRow,3).Range.Font.Size = "10"
-					$Table.Cell($xRow,3).Range.Text = "Install Date"
-					$Table.Cell($xRow,4).Shading.BackgroundPatternColor = $wdColorGray15
-					$Table.Cell($xRow,4).Range.Font.Bold = $True
-					$Table.Cell($xRow,4).Range.Font.Size = "10"
-					$Table.Cell($xRow,4).Range.Text = "Type"
-					ForEach($hotfix in $hotfixes)
-					{
-						Write-Verbose "$(Get-Date): `t`t`tProcessing Citrix hotfix $($hotfix.HotfixName)"
-						$xRow++
-						$HotfixArray += $hotfix.HotfixName
-						If($hotfix.HotfixName -eq "XA650W2K8R2X64R02")
-						{
-							$HRP2Installed = $True
-						}
-						If($hotfix.HotfixName -eq "XA650W2K8R2X64R03")
-						{
-							$HRP3Installed = $True
-						}
-						$InstallDate = $hotfix.InstalledOn.ToString()
-						
-						$Table.Cell($xRow,1).Range.Font.Size = "10"
-						$Table.Cell($xRow,1).Range.Text = $hotfix.HotfixName
-						$Table.Cell($xRow,2).Range.Font.Size = "10"
-						$Table.Cell($xRow,2).Range.Text = $hotfix.InstalledBy
-						$Table.Cell($xRow,3).Range.Font.Size = "10"
-						$Table.Cell($xRow,3).Range.Text = $InstallDate.SubString(0,$InstallDate.IndexOf(" "))
-						$Table.Cell($xRow,4).Range.Font.Size = "10"
-						$Table.Cell($xRow,4).Range.Text = $hotfix.HotfixType
-					}
-					Write-Verbose "$(Get-Date): `t`tMove table of Citrix installed hotfixes to the right"
-					$Table.Rows.SetLeftIndent($Indent1TabStops,$wdAdjustProportional)
-					$Table.AutoFitBehavior($wdAutoFitContent)
-
-					#return focus back to document
-					$doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekMainDocument
-
-					#move to the end of the current document
-					$selection.EndKey($wdStory,$wdMove) | Out-Null
-					WriteWordLine 0 0 ""
-
-					#compare Citrix hotfixes to recommended Citrix hotfixes from CTX129229
-					#hotfix lists are from CTX129229 dated 16-JUL-2013
-					Write-Verbose "$(Get-Date): `t`tCompare Citrix hotfixes to recommended Citrix hotfixes from CTX129229"
-					# as of the 16-JUL-2013 update, there are recommended hotfixes for pre R02 and none for post R02
-					Write-Verbose "$(Get-Date): `t`tProcessing Citrix hotfix list for server $($server.ServerName)"
-					If($HRP3Installed)
-					{
-						$RecommendedList = @()
-					}
-					ElseIf($HRP2Installed)
-					{
-						$RecommendedList = @()
-					}
+						WriteWordLine 0 2 "Apply to all explicit (non-anonymous) users"
+					} 
 					Else
 					{
-						$RecommendedList = @("XA650W2K8R2X64001","XA650W2K8R2X64011","XA650W2K8R2X64019","XA650W2K8R2X64025","XA650R01W2K8R2X64061", "XA650W2K8R2X64R02")
+						If($LoadBalancingPolicyFilter.AllowedAccounts)
+						{
+							ForEach($AllowedAccount in $LoadBalancingPolicyFilter.AllowedAccounts)
+							{
+								WriteWordLine 0 2 "User Matched: " $AllowedAccount
+							}
+						}
+						If($LoadBalancingPolicyFilter.DeniedAccounts)
+						{
+							ForEach($DeniedAccount in $LoadBalancingPolicyFilter.DeniedAccounts)
+							{
+								WriteWordLine 0 2 "User Ignored: " $DeniedAccount
+							}
+						}
 					}
-					If($RecommendedList.count -gt 0)
+				}
+				If($LoadBalancingPolicyConfiguration.WorkerGroupPreferenceAndFailoverState)
+				{
+					WriteWordLine 0 1 "Configure application connection preference based on worker group"
+					If($LoadBalancingPolicyConfiguration.WorkerGroupPreferences)
 					{
-						WriteWordLine 0 1 "Citrix Recommended Hotfixes:"
-						Write-Verbose "$(Get-Date): `t`tCreate Word Table for Citrix Hotfixes"
+						Write-Verbose "$(Get-Date): `t`t`tCreate table for Load Balancing Policy Worker Group Filter"
 						$TableRange = $doc.Application.Selection.Range
 						[int]$Columns = 2
-						[int]$Rows = $RecommendedList.count + 1
-						Write-Verbose "$(Get-Date): `t`tAdd Citrix recommended hotfix table to doc"
+						[int]$Rows = $LoadBalancingPolicyConfiguration.WorkerGroupPreferences.count + 1
 						$Table = $doc.Tables.Add($TableRange, $Rows, $Columns)
 						$Table.rows.first.headingformat = $wdHeadingFormatTrue
 						$Table.Style = $myHash.Word_TableGrid
 						$Table.Borders.InsideLineStyle = $wdLineStyleSingle
 						$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
 						[int]$xRow = 1
-						Write-Verbose "$(Get-Date): `t`tFormat first row with column headings"
-						$Table.Cell($xRow,1).Shading.BackgroundPatternColor = $wdColorGray15
+						Write-Verbose "$(Get-Date): `t`t`t`tFormat first row with column headings"
+						$Table.Rows.First.Shading.BackgroundPatternColor = $wdColorGray15
 						$Table.Cell($xRow,1).Range.Font.Bold = $True
-						$Table.Cell($xRow,1).Range.Text = "Citrix Hotfix"
-						$Table.Cell($xRow,2).Shading.BackgroundPatternColor = $wdColorGray15
+						$Table.Cell($xRow,1).Range.Text = "Worker Group"
 						$Table.Cell($xRow,2).Range.Font.Bold = $True
-						$Table.Cell($xRow,2).Range.Text = "Status"
-						ForEach($element in $RecommendedList)
+						$Table.Cell($xRow,2).Range.Text = "Priority"
+						ForEach($WorkerGroupPreference in $LoadBalancingPolicyConfiguration.WorkerGroupPreferences)
 						{
-							Write-Verbose "$(Get-Date): `t`t`tProcessing Recommended Citrix hotfix $($element)"
+							[string]$Tmp = $WorkerGroupPreference
+							[string]$WGName = $Tmp.substring($Tmp.indexof("=")+1)
+							[string]$WGPriority = $Tmp.substring($Tmp.indexof(":")+1, (($Tmp.indexof("=")-1)-$Tmp.indexof(":")))
 							$xRow++
-							$Table.Cell($xRow,1).Range.Text = $element
-							If(!($HotfixArray -contains $element))
-							{
-								#missing a recommended Citrix hotfix
-								$Table.Cell($xRow,2).Shading.BackgroundPatternColor = $wdColorRed
-								$Table.Cell($xRow,2).Range.Font.Bold  = $True
-								$Table.Cell($xRow,2).Range.Font.Color = $WDColorBlack
-								$Table.Cell($xRow,2).Range.Text = "Not Installed"
-							}
-							Else
-							{
-								$Table.Cell($xRow,2).Range.Text = "Installed"
-							}
+							Write-Verbose "$(Get-Date): `t`t`tProcessing row for Worker Group Filter $($Tmp)"
+							$Table.Cell($xRow,1).Range.Text = $WGName
+							$Table.Cell($xRow,2).Range.Text = $WGPriority
 						}
-						Write-Verbose "$(Get-Date): `t`tMove table of Citrix hotfixes to the right"
-						$Table.Rows.SetLeftIndent($Indent1TabStops,$wdAdjustProportional)
+
+						$Table.Rows.SetLeftIndent($Indent2TabStops,$wdAdjustProportional)
 						$Table.AutoFitBehavior($wdAutoFitContent)
 
-						#return focus back to document
-						$doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekMainDocument
-
-						#move to the end of the current document
-						$selection.EndKey($wdStory,$wdMove) | Out-Null
-						WriteWordLine 0 0 ""
+						FindWordDocumentEnd
+						$tmp = $Null
+						$WGName = $Null
+						$WGPriority = $Null
 					}
-					#build list of installed Microsoft hotfixes
-					Write-Verbose "$(Get-Date): `t`tProcessing Microsoft hotfixes for server $($server.ServerName)"
-					[bool]$GotMSHotfixes = $True
-					
+				}
+				If($LoadBalancingPolicyConfiguration.StreamingDeliveryProtocolState -eq "Enabled")
+				{
+					WriteWordLine 0 1 "Set the delivery protocols for applications streamed to client"
+					WriteWordLine 0 2 "" -nonewline
+					Switch ($LoadBalancingPolicyConfiguration.StreamingDeliveryOption)
+					{
+						"Unknown"                {WriteWordLine 0 0 "Unknown"}
+						"ForceServerAccess"      {WriteWordLine 0 0 "Do not allow applications to stream to the client"}
+						"ForcedStreamedDelivery" {WriteWordLine 0 0 "Force applications to stream to the client"}
+						Default {WriteWordLine 0 0 "Delivery protocol could not be determined: $($LoadBalancingPolicyConfiguration.StreamingDeliveryOption)"}
+					}
+				}
+				Elseif($LoadBalancingPolicyConfiguration.StreamingDeliveryProtocolState -eq "Disabled")
+				{
+					#In the GUI, if "Set the delivery protocols for applications streamed to client" IS selected AND 
+					#"Allow applications to stream to the client or run on a Terminal Server (Default)" IS selected
+					#then "Set the delivery protocols for applications streamed to client" is set to Disabled
+					WriteWordLine 0 1 "Set the delivery protocols for applications streamed to client"
+					WriteWordLine 0 2 "Allow applications to stream to the client or run on a Terminal Server (Default)"
+				}
+				Else
+				{
+					WriteWordLine 0 1 "Streamed App Delivery is not configured"
+				}
+			
+				$LoadBalancingPolicyConfiguration = $Null
+				$LoadBalancingPolicyFilter = $Null
+			}
+			Else
+			{
+				WriteWordLine 0 0 $LoadBalancingPolicy.PolicyName
+			}
+		}
+	}
+	Elseif($LoadBalancingPolicies -eq $Null)
+	{
+		Write-Verbose "$(Get-Date): There are no Load balancing policies created"
+	}
+	Else 
+	{
+		Write-Warning "Load balancing policy information could not be retrieved"
+	}
+	$LoadBalancingPolicies = $Null
+	Write-Verbose "$(Get-Date): Finished Processing Load Balancing Policies"
+	Write-Verbose "$(Get-Date): "
+}
+
+If($Section -eq "All" -or $Section -eq "LoadEvals")
+{
+	#load evaluators
+	Write-Verbose "$(Get-Date): Processing Load Evaluators"
+	Write-Verbose "$(Get-Date): `tSetting summary variables"
+	[int]$TotalLoadEvaluators = 0
+
+	Write-Verbose "$(Get-Date): `tRetrieving Load Evaluators"
+	$LoadEvaluators = Get-XALoadEvaluator -EA 0 | Sort LoadEvaluatorName
+
+	If($? -and $LoadEvaluators -ne $Null)
+	{
+		$selection.InsertNewPage()
+		WriteWordLine 1 0 "Load Evaluators:"
+		ForEach($LoadEvaluator in $LoadEvaluators)
+		{
+			$TotalLoadEvaluators++
+			Write-Verbose "$(Get-Date): `t`tProcessing Load Evaluator $($LoadEvaluator.LoadEvaluatorName)"
+			If(!$Summary)
+			{
+				WriteWordLine 2 0 $LoadEvaluator.LoadEvaluatorName
+				If(![String]::IsNullOrEmpty($LoadEvaluator.Description))
+				{
+					WriteWordLine 0 1 "Description: " $LoadEvaluator.Description
+				}
+				
+				If($LoadEvaluator.IsBuiltIn)
+				{
+					WriteWordLine 0 1 "Built-in Load Evaluator"
+				} 
+				Else 
+				{
+					WriteWordLine 0 1 "User created load evaluator"
+				}
+			
+				If($LoadEvaluator.ApplicationUserLoadEnabled)
+				{
+					WriteWordLine 0 1 "Application User Load Settings"
+					WriteWordLine 0 2 "Report full load when the # of users for this application equals: " $LoadEvaluator.ApplicationUserLoad
+					WriteWordLine 0 2 "Application: " $LoadEvaluator.ApplicationBrowserName
+				}
+			
+				If($LoadEvaluator.ContextSwitchesEnabled)
+				{
+					WriteWordLine 0 1 "Context Switches Settings"
+					WriteWordLine 0 2 "Report full load when the # of context Switches per second is > than: " $LoadEvaluator.ContextSwitches[1]
+					WriteWordLine 0 2 "Report no load when the # of context Switches per second is <= to: " $LoadEvaluator.ContextSwitches[0]
+				}
+			
+				If($LoadEvaluator.CpuUtilizationEnabled)
+				{
+					WriteWordLine 0 1 "CPU Utilization Settings"
+					WriteWordLine 0 2 "Report full load when the processor utilization % is > than: " $LoadEvaluator.CpuUtilization[1]
+					WriteWordLine 0 2 "Report no load when the processor utilization % is <= to: " $LoadEvaluator.CpuUtilization[0]
+				}
+			
+				If($LoadEvaluator.DiskDataIOEnabled)
+				{
+					WriteWordLine 0 1 "Disk Data I/O Settings"
+					WriteWordLine 0 2 "Report full load when the total disk I/O in kbps is > than: " $LoadEvaluator.DiskDataIO[1]
+					WriteWordLine 0 2 "Report no load when the total disk I/O in kbps per second is <= to: " $LoadEvaluator.DiskDataIO[0]
+				}
+			
+				If($LoadEvaluator.DiskOperationsEnabled)
+				{
+					WriteWordLine 0 1 "Disk Operations Settings"
+					WriteWordLine 0 2 "Report full load when the total # of R/W operations per second is > than: " $LoadEvaluator.DiskOperations[1]
+					WriteWordLine 0 2 "Report no load when the total # of R/W operations per second is <= to: " $LoadEvaluator.DiskOperations[0]
+				}
+			
+				If($LoadEvaluator.IPRangesEnabled)
+				{
+					WriteWordLine 0 1 "IP Range Settings"
+					If($LoadEvaluator.IPRangesAllowed)
+					{
+						WriteWordLine 0 2 "Allow " -NoNewLine
+					} 
+					Else 
+					{
+						WriteWordLine 0 2 "Deny " -NoNewLine
+					}
+					WriteWordLine 0 0 "client connections from the listed IP Ranges"
+					ForEach($IPRange in $LoadEvaluator.IPRanges)
+					{
+						WriteWordLine 0 3 "IP Address Ranges: " $IPRange
+					}
+				}
+			
+				If($LoadEvaluator.LoadThrottlingEnabled)
+				{
+					WriteWordLine 0 1 "Load Throttling Settings"
+					WriteWordLine 0 2 "Impact of logons on load: " -nonewline
+					Switch ($LoadEvaluator.LoadThrottling)
+					{
+						"Unknown"    {WriteWordLine 0 0 "Unknown"}
+						"Extreme"    {WriteWordLine 0 0 "Extreme"}
+						"High"       {WriteWordLine 0 0 "High (Default)"}
+						"MediumHigh" {WriteWordLine 0 0 "Medium High"}
+						"Medium"     {WriteWordLine 0 0 "Medium"}
+						"MediumLow"  {WriteWordLine 0 0 "Medium Low"}
+						Default {WriteWordLine 0 0 "Impact of logons on load could not be determined: $($LoadEvaluator.LoadThrottling)"}
+					}
+				}
+			
+				If($LoadEvaluator.MemoryUsageEnabled)
+				{
+					WriteWordLine 0 1 "Memory Usage Settings"
+					WriteWordLine 0 2 "Report full load when the memory usage is > than: " $LoadEvaluator.MemoryUsage[1]
+					WriteWordLine 0 2 "Report no load when the memory usage is <= to: " $LoadEvaluator.MemoryUsage[0]
+				}
+			
+				If($LoadEvaluator.PageFaultsEnabled)
+				{
+					WriteWordLine 0 1 "Page Faults Settings"
+					WriteWordLine 0 2 "Report full load when the # of page faults per second is > than: " $LoadEvaluator.PageFaults[1]
+					WriteWordLine 0 2 "Report no load when the # of page faults per second is <= to: " $LoadEvaluator.PageFaults[0]
+				}
+			
+				If($LoadEvaluator.PageSwapsEnabled)
+				{
+					WriteWordLine 0 1 "Page Swaps Settings"
+					WriteWordLine 0 2 "Report full load when the # of page swaps per second is > than: " $LoadEvaluator.PageSwaps[1]
+					WriteWordLine 0 2 "Report no load when the # of page swaps per second is <= to: " $LoadEvaluator.PageSwaps[0]
+				}
+			
+				If($LoadEvaluator.ScheduleEnabled)
+				{
+					WriteWordLine 0 1 "Scheduling Settings"
+					WriteWordLine 0 2 "Sunday Schedule`t: " $LoadEvaluator.SundaySchedule
+					WriteWordLine 0 2 "Monday Schedule`t: " $LoadEvaluator.MondaySchedule
+					WriteWordLine 0 2 "Tuesday Schedule`t: " $LoadEvaluator.TuesdaySchedule
+					WriteWordLine 0 2 "Wednesday Schedule`t: " $LoadEvaluator.WednesdaySchedule
+					WriteWordLine 0 2 "Thursday Schedule`t: " $LoadEvaluator.ThursdaySchedule
+					WriteWordLine 0 2 "Friday Schedule`t`t: " $LoadEvaluator.FridaySchedule
+					WriteWordLine 0 2 "Saturday Schedule`t: " $LoadEvaluator.SaturdaySchedule
+				}
+			
+				If($LoadEvaluator.ServerUserLoadEnabled)
+				{
+					WriteWordLine 0 1 "Server User Load Settings"
+					WriteWordLine 0 2 "Report full load when the # of server users equals: " $LoadEvaluator.ServerUserLoad
+				}
+			
+				WriteWordLine 0 0 ""
+			}
+			Else
+			{
+				WriteWordLine 0 0 $LoadEvaluator.LoadEvaluatorName
+			}
+		}
+	}
+	ElseIf(!$?) 
+	{
+		Write-Warning "Load Evaluator information could not be retrieved"
+	}
+	Else
+	{
+		Write-Warning "No results returned for Load Evaluator information"
+	}
+	$LoadEvaluators = $Null
+	Write-Verbose "$(Get-Date): Finished Processing Load Evaluators"
+	Write-Verbose "$(Get-Date): "
+}
+
+If($Section -eq "All" -or $Section -eq "Servers")
+{
+	#servers
+	Write-Verbose "$(Get-Date): Processing Servers"
+	Write-Verbose "$(Get-Date): `tSetting summary variables"
+	[int]$TotalControllers = 0
+	[int]$TotalWorkers = 0
+	[int]$TotalServers = 0
+	$ServerItems = @()
+
+	Write-Verbose "$(Get-Date): `tRetrieving Servers"
+	If($Summary)
+	{
+		$servers = Get-XAServer -EA 0 | Sort ServerName
+	}
+	Else
+	{
+		$servers = Get-XAServer -EA 0 | Sort FolderPath, ServerName
+	}
+
+	If($? -and $Servers -ne $Null)
+	{
+		$selection.InsertNewPage()
+		WriteWordLine 1 0 "Servers:"
+		ForEach($server in $servers)
+		{
+			Write-Verbose "$(Get-Date): `t`tProcessing server $($server.ServerName)"
+
+			If(!$Summary)
+			{
+				[bool]$SvrOnline = $False
+				Write-Verbose "$(Get-Date): `t`t`tTesting to see if $($server.ServerName) is online and reachable"
+				If(Test-Connection -ComputerName $server.servername -quiet -EA 0)
+				{
+					$SvrOnline = $True
+					If($Hardware -and $Software)
+					{
+						Write-Verbose "$(Get-Date): `t`t`t`t$($server.ServerName) is online.  Hardware inventory, Software Inventory, Citrix Services and Hotfix areas will be processed."
+					}
+					ElseIf($Hardware -and !($Software))
+					{
+						Write-Verbose "$(Get-Date): `t`t`t`t$($server.ServerName) is online.  Hardware inventory, Citrix Services and Hotfix areas will be processed."
+					}
+					ElseIf(!($Hardware) -and $Software)
+					{
+						Write-Verbose "$(Get-Date): `t`t`t`t$($server.ServerName) is online.  Software Inventory, Citrix Services and Hotfix areas will be processed."
+					}
+					Else
+					{
+						Write-Verbose "$(Get-Date): `t`t`t`t$($server.ServerName) is online.  Citrix Services and Hotfix areas will be processed."
+					}
+				}
+				
+				#create array for appendix B
+				Write-Verbose "$(Get-Date): `t`t`tGather server info for Appendix B"
+				$obj = New-Object -TypeName PSObject
+				$obj | Add-Member -MemberType NoteProperty -Name ServerName -Value $server.ServerName
+				$obj | Add-Member -MemberType NoteProperty -Name ZoneName -Value $server.ZoneName
+				$obj | Add-Member -MemberType NoteProperty -Name OSVersion -Value $server.OSVersion
+				$obj | Add-Member -MemberType NoteProperty -Name CitrixVersion -Value $server.CitrixVersion
+				$obj | Add-Member -MemberType NoteProperty -Name ProductEdition -Value $server.CitrixEdition
+				$obj | Add-Member -MemberType NoteProperty -Name LicenseServer -Value $Server.LicenseServerName			
+
+				If($SvrOnline)
+				{
+					$Reg = [Microsoft.Win32.RegistryKey]::OpenRemoteBaseKey('LocalMachine', $server.ServerName)
 					Try
 					{
-						$results = Get-HotFix -computername $Server.ServerName 
-						$MSInstalledHotfixes = $results | select-object -Expand HotFixID | Sort HotFixID
-						$results = $Null
+						$RegKey= $Reg.OpenSubKey("SYSTEM\\CurrentControlSet\\Control\\Citrix\\Wfshell\\TWI")
+						$SSDisabled = $RegKey.GetValue("SeamlessFlags")
+						
+						If($SSDisabled -eq 1)
+						{
+							$obj | Add-Member -MemberType NoteProperty -Name SessionSharing -Value "Disabled"
+						}
+						Else
+						{
+							$obj | Add-Member -MemberType NoteProperty -Name SessionSharing -Value "Enabled"
+						}
+					}
+					Catch
+					{
+							$obj | Add-Member -MemberType NoteProperty -Name SessionSharing -Value "Not Available"
+					}
+				}
+				Else
+				{
+					$obj | Add-Member -MemberType NoteProperty -Name SessionSharing -Value "Server Offline"
+				}
+				
+				$ServerItems += $obj
+
+				WriteWordLine 2 0 $server.ServerName
+				WriteWordLine 0 1 "Product`t`t`t`t: " $server.CitrixProductName
+				WriteWordLine 0 1 "Edition`t`t`t`t: " $server.CitrixEdition
+				WriteWordLine 0 1 "Version`t`t`t`t: " $server.CitrixVersion
+				WriteWordLine 0 1 "Service Pack`t`t`t: " $server.CitrixServicePack
+				WriteWordLine 0 1 "IP Address`t`t`t: " $server.IPAddresses
+				WriteWordLine 0 1 "Logons`t`t`t`t: " -NoNewLine
+				If($server.LogOnsEnabled)
+				{
+					WriteWordLine 0 0 "Enabled"
+				} 
+				Else 
+				{
+					WriteWordLine 0 0 "Disabled"
+				}
+				WriteWordLine 0 1 "Logon Control Mode`t`t: " -nonewline
+				Switch ($Server.LogOnMode)
+				{
+					"Unknown"                       {WriteWordLine 0 0 "Unknown"}
+					"AllowLogOns"                   {WriteWordLine 0 0 "Allow logons and reconnections"}
+					"ProhibitNewLogOnsUntilRestart" {WriteWordLine 0 0 "Prohibit logons until server restart"}
+					"ProhibitNewLogOns "            {WriteWordLine 0 0 "Prohibit logons only"}
+					"ProhibitLogOns "               {WriteWordLine 0 0 "Prohibit logons and reconnections"}
+					Default {WriteWordLine 0 0 "Logon control mode could not be determined: $($Server.LogOnMode)"}
+				}
+
+				WriteWordLine 0 1 "Product Installation Date`t: " $server.CitrixInstallDate
+				WriteWordLine 0 1 "Operating System Version`t: " $server.OSVersion -NoNewLine
+				WriteWordLine 0 0 " " $server.OSServicePack
+				WriteWordLine 0 1 "Zone`t`t`t`t: " $server.ZoneName
+				WriteWordLine 0 1 "Election Preference`t`t: " -nonewline
+				Switch ($server.ElectionPreference)
+				{
+					"Unknown"           {WriteWordLine 0 0 "Unknown"}
+					"MostPreferred"     {WriteWordLine 0 0 "Most Preferred"; $TotalControllers++}
+					"Preferred"         {WriteWordLine 0 0 "Preferred"; $TotalControllers++}
+					"DefaultPreference" {WriteWordLine 0 0 "Default Preference"; $TotalControllers++}
+					"NotPreferred"      {WriteWordLine 0 0 "Not Preferred"; $TotalControllers++}
+					"WorkerMode"        {WriteWordLine 0 0 "Worker Mode"; $TotalWorkers++}
+					Default {WriteWordLine 0 0 "Server election preference could not be determined: $($server.ElectionPreference)"}
+				}
+				WriteWordLine 0 1 "Folder`t`t`t`t: " $server.FolderPath
+				WriteWordLine 0 1 "Product Installation Path`t: " $server.CitrixInstallPath
+				If($server.LicenseServerName)
+				{
+					WriteWordLine 0 1 "License Server Name`t`t: " $server.LicenseServerName
+					WriteWordLine 0 1 "License Server Port`t`t: " $server.LicenseServerPortNumber
+				}
+				If($server.ICAPortNumber -gt 0)
+				{
+					WriteWordLine 0 1 "ICA Port Number`t`t: " $server.ICAPortNumber
+				}
+				WriteWordLine 0 0 ""
+
+				If($SvrOnline -and $Hardware)
+				{
+					GetComputerWMIInfo $server.ServerName
+				}
+				
+				#applications published to server
+				$Applications = Get-XAApplication -ServerName $server.ServerName -EA 0 | Sort FolderPath, DisplayName
+				If($? -and $Applications -ne $Null)
+				{
+					WriteWordLine 0 1 "Published applications:"
+					Write-Verbose "$(Get-Date): `t`tProcessing published applications for server $($server.ServerName)"
+					Write-Verbose "$(Get-Date): `t`tCreate Word Table for server's published applications"
+					$TableRange = $doc.Application.Selection.Range
+					[int]$Columns = 2
+					
+					If($Applications -is [Array])
+					{
+						[int]$Rows = $Applications.count + 1
+					}
+					Else
+					{
+						[int]$Rows = 2
+					}
+
+					$Table = $doc.Tables.Add($TableRange, $Rows, $Columns)
+					$Table.rows.first.headingformat = $wdHeadingFormatTrue
+					$Table.Style = $myHash.Word_TableGrid
+					$Table.Borders.InsideLineStyle = $wdLineStyleSingle
+					$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
+					[int]$xRow = 1
+					Write-Verbose "$(Get-Date): `t`tFormat first row with column headings"
+					$Table.Rows.First.Shading.BackgroundPatternColor = $wdColorGray15
+					$Table.Cell($xRow,1).Range.Font.Bold = $True
+					$Table.Cell($xRow,1).Range.Text = "Display name"
+					$Table.Cell($xRow,2).Range.Font.Bold = $True
+					$Table.Cell($xRow,2).Range.Text = "Folder path"
+					ForEach($app in $Applications)
+					{
+						Write-Verbose "$(Get-Date): `t`t`tProcessing published application $($app.DisplayName)"
+						$xRow++
+						$Table.Cell($xRow,1).Range.Text = $app.DisplayName
+						$Table.Cell($xRow,2).Range.Text = $app.FolderPath
+					}
+					Write-Verbose "$(Get-Date): `t`tMove table of published applications to the right"
+					$Table.Rows.SetLeftIndent($Indent1TabStops,$wdAdjustProportional)
+					$Table.AutoFitBehavior($wdAutoFitContent)
+
+					FindWordDocumentEnd
+					WriteWordLine 0 0 ""
+				}
+
+				#get list of applications installed on server
+				# original work by Shaun Ritchie
+				# modified by Jeff Wouters
+				# modified by Webster
+				# fixed, as usual, by Michael B. Smith
+				If($SvrOnline -and $Software)
+				{
+					#section modified on 3-jan-2014 to add displayversion
+					$InstalledApps = @()
+					$JustApps = @()
+
+					#Define the variable to hold the location of Currently Installed Programs
+					$UninstallKey1="SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" 
+
+					#Create an instance of the Registry Object and open the HKLM base key
+					$reg=[microsoft.win32.registrykey]::OpenRemoteBaseKey('LocalMachine',$Server.ServerName) 
+
+					#Drill down into the Uninstall key using the OpenSubKey Method
+					$regkey1=$reg.OpenSubKey($UninstallKey1) 
+
+					#Retrieve an array of string that contain all the subkey names
+					If($regkey1 -ne $Null)
+					{
+						$subkeys1=$regkey1.GetSubKeyNames() 
+
+						#Open each Subkey and use GetValue Method to return the required values for each
+						ForEach($key in $subkeys1) 
+						{
+							$thisKey=$UninstallKey1+"\\"+$key 
+							$thisSubKey=$reg.OpenSubKey($thisKey) 
+							If(![String]::IsNullOrEmpty($($thisSubKey.GetValue("DisplayName")))) 
+							{
+								$obj = New-Object PSObject
+								$obj | Add-Member -MemberType NoteProperty -Name "DisplayName" -Value $($thisSubKey.GetValue("DisplayName"))
+								$obj | Add-Member -MemberType NoteProperty -Name "DisplayVersion" -Value $($thisSubKey.GetValue("DisplayVersion"))
+								$InstalledApps += $obj
+							}
+						}
+					}			
+
+					$UninstallKey2="SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" 
+					$regkey2=$reg.OpenSubKey($UninstallKey2)
+					If($regkey2 -ne $Null)
+					{
+						$subkeys2=$regkey2.GetSubKeyNames()
+
+						ForEach($key in $subkeys2) 
+						{
+							$thisKey=$UninstallKey2+"\\"+$key 
+							$thisSubKey=$reg.OpenSubKey($thisKey) 
+							if(![String]::IsNullOrEmpty($($thisSubKey.GetValue("DisplayName")))) 
+							{
+								$obj = New-Object PSObject
+								$obj | Add-Member -MemberType NoteProperty -Name "DisplayName" -Value $($thisSubKey.GetValue("DisplayName"))
+								$obj | Add-Member -MemberType NoteProperty -Name "DisplayVersion" -Value $($thisSubKey.GetValue("DisplayVersion"))
+								$InstalledApps += $obj
+							}
+						}
+					}
+
+					$InstalledApps = $InstalledApps | Sort DisplayName
+
+					$tmp1 = SWExclusions
+					If($Tmp1 -ne "")
+					{
+						$Func = ConvertTo-ScriptBlock $tmp1
+						$tempapps = Invoke-Command {& $Func}
+					}
+					Else
+					{
+						$tempapps = $InstalledApps
+					}
+					
+					$JustApps = $TempApps | Select DisplayName, DisplayVersion | Sort DisplayName -unique
+
+					WriteWordLine 0 1 "Installed applications:"
+					Write-Verbose "$(Get-Date): `t`tProcessing installed applications for server $($server.ServerName)"
+					Write-Verbose "$(Get-Date): `t`tCreate Word Table for server's installed applications"
+					$TableRange = $doc.Application.Selection.Range
+					[int]$Columns = 2
+					[int]$Rows = $JustApps.count + 1
+
+					$Table = $doc.Tables.Add($TableRange, $Rows, $Columns)
+					$Table.rows.first.headingformat = $wdHeadingFormatTrue
+					$Table.Style = $myHash.Word_TableGrid
+					$Table.Borders.InsideLineStyle = $wdLineStyleSingle
+					$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
+					[int]$xRow = 1
+					Write-Verbose "$(Get-Date): `t`tFormat first row with column headings"
+					$Table.Rows.First.Shading.BackgroundPatternColor = $wdColorGray15
+					$Table.Cell($xRow,1).Range.Font.Bold = $True
+					$Table.Cell($xRow,1).Range.Text = "Application name"
+					$Table.Cell($xRow,2).Range.Font.Bold = $True
+					$Table.Cell($xRow,2).Range.Text = "Application version"
+					ForEach($app in $JustApps)
+					{
+						Write-Verbose "$(Get-Date): `t`t`tProcessing installed application $($app.DisplayName)"
+						$xRow++
+						$Table.Cell($xRow,1).Range.Text = $app.DisplayName
+						$Table.Cell($xRow,2).Range.Text = $app.DisplayVersion
+					}
+					Write-Verbose "$(Get-Date): `t`tMove table of installed applications to the right"
+					$Table.Rows.SetLeftIndent($Indent1TabStops,$wdAdjustProportional)
+					$Table.AutoFitBehavior($wdAutoFitContent)
+
+					FindWordDocumentEnd
+					WriteWordLine 0 0 ""
+				}
+				
+				#list citrix services
+				If($SvrOnline)
+				{
+					Write-Verbose "$(Get-Date): `t`tProcessing Citrix services for server $($server.ServerName) by calling Get-Service"
+
+					Try
+					{
+						#Iain Brighton optimization 5-Jun-2014
+						#Replaced with a single call to retrieve services via WMI. The repeated
+						## "Get-WMIObject Win32_Service -Filter" calls were the major delays in the script.
+						## If we need to retrieve the StartUp type might as well just use WMI.
+						$Services = Get-WMIObject Win32_Service -ComputerName $server.ServerName -EA 0 | Where {$_.DisplayName -like "*Citrix*"} | Sort DisplayName
 					}
 					
 					Catch
 					{
-						Write-Verbose "$(Get-Date): Get-HotFix failed for $($server.ServerName)"
-						$GotMSHotfixes = $False
-						Write-Warning "Get-HotFix failed for $($server.ServerName)"
-						WriteWordLine 0 0 "Get-HotFix failed for $($server.ServerName)"
-						WriteWordLine 0 0 "On $($server.ServerName) you may need to run winmgmt /verifyrepository and winmgmt /salvagerepository"
+						$Services = $Null
 					}
-					
-					If($GotMSHotfixes)
+
+					WriteWordLine 0 1 "Citrix Services" -NoNewLine
+					If($? -and $Services -ne $Null)
 					{
-						If($server.OSServicePack.IndexOf('1') -gt 0)
+						If($Services -is [array])
 						{
-							#Server 2008 R2 SP1 installed
-							$RecommendedList = @("KB2465772", "KB2620656", "KB2647753", "KB2661332", 
-											"KB2728738", "KB2748302", "KB2775511", "KB2778831",
-											"KB2896256", "KB917607")
+							[int]$NumServices = $Services.count
 						}
 						Else
 						{
-							#Server 2008 R2 without SP1 installed
-							$RecommendedList = @("KB2265716", "KB2388142", "KB2383928", "KB2465772", 
-											"KB2620656", "KB2647753", "KB2661332", "KB2728738", 
-											"KB2748302", "KB2775511", "KB2778831", "KB2896256", 
-											"KB917607", "KB975777", "KB979530", "KB980663", 
-											"KB983460")
+							[int]$NumServices = 1
+						}
+						Write-Verbose "$(Get-Date): `t`tCreate Word Table for Citrix services"
+						Write-Verbose "$(Get-Date): `t`t $NumServices Services found"
+						
+						If($MSWord -or $PDF)
+						{
+							WriteWordLine 0 0 " ($NumServices Services found)"
+							## IB - replacement Services table generation utilising AddWordTable function
+
+							## Create an array of hashtables to store our services
+							[System.Collections.Hashtable[]] $ServicesWordTable = @();
+							## Create an array of hashtables to store references of cells that we wish to highlight after the table has been added
+							[System.Collections.Hashtable[]] $HighlightedCells = @();
+							## Seed the $Services row index from the second row
+							[int] $CurrentServiceIndex = 2;
+						}
+						ElseIf($Text)
+						{
+							Line 0 " ($NumServices Services found)"
+						}
+						ElseIf($HTML)
+						{
 						}
 						
-						WriteWordLine 0 1 "Microsoft Recommended Hotfixes (from CTX129229):"
-						Write-Verbose "$(Get-Date): `t`tCreate Word Table for Microsoft Hotfixes"
-						$TableRange = $doc.Application.Selection.Range
-						[int]$Columns = 2
-						[int]$Rows = $RecommendedList.count + 1
-						Write-Verbose "$(Get-Date): `t`tAdd Microsoft hotfix table to doc"
-						$Table = $doc.Tables.Add($TableRange, $Rows, $Columns)
-						$Table.rows.first.headingformat = $wdHeadingFormatTrue
-						$Table.Style = $myHash.Word_TableGrid
-						$Table.Borders.InsideLineStyle = $wdLineStyleSingle
-						$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
-						[int]$xRow = 1
-						Write-Verbose "$(Get-Date): `t`tFormat first row with column headings"
-						$Table.Cell($xRow,1).Shading.BackgroundPatternColor = $wdColorGray15
-						$Table.Cell($xRow,1).Range.Font.Bold = $True
-						$Table.Cell($xRow,1).Range.Text = "Microsoft Hotfix"
-						$Table.Cell($xRow,2).Shading.BackgroundPatternColor = $wdColorGray15
-						$Table.Cell($xRow,2).Range.Font.Bold = $True
-						$Table.Cell($xRow,2).Range.Text = "Status"
-
-						$results = @{}
-						ForEach($hotfix in $RecommendedList)
+						ForEach($Service in $Services) 
 						{
-							$xRow++
-							Write-Verbose "$(Get-Date): `t`t`tProcessing Microsoft hotfix $($hotfix)"
-							$Table.Cell($xRow,1).Range.Text = $hotfix
-							If(!($MSInstalledHotfixes -contains $hotfix))
+							#Write-Verbose "$(Get-Date): `t`t`t Processing service $($Service.DisplayName)";
+
+							If($MSWord -or $PDF)
 							{
-								$Table.Cell($xRow,2).Shading.BackgroundPatternColor = $wdColorRed
-								$Table.Cell($xRow,2).Range.Font.Bold  = $True
-								$Table.Cell($xRow,2).Range.Font.Color = $WDColorBlack
-								$Table.Cell($xRow,2).Range.Text = "Not Installed"
+								## Add the required key/values to the hashtable
+								$WordTableRowHash = @{ DisplayName = $Service.DisplayName; Status = $Service.State; StartMode = $Service.StartMode; }
+
+								## Add the hash to the array
+								$ServicesWordTable += $WordTableRowHash;
+
+								## Store "to highlight" cell references
+								If($Service.State -like "Stopped" -and $Service.StartMode -like "Auto") 
+								{
+									$HighlightedCells += @{ Row = $CurrentServiceIndex; Column = 2; }
+								}
+								$CurrentServiceIndex++;
+							}
+							ElseIf($Text)
+							{
+								Line 0 "Display Name`t: " $Service.DisplayName
+								Line 0 "Status`t`t: " $Service.State
+								Line 0 "Start Mode`t: " $Service.StartMode
+								Line 0 ""
+							}
+							ElseIf($HTML)
+							{
+							}
+						}
+						
+						If($MSWord -or $PDF)
+						{
+							## Add the table to the document, using the hashtable (-Alt is short for -AlternateBackgroundColor!)
+							$Table = AddWordTable -Hashtable $ServicesWordTable `
+							-Columns DisplayName, Status, StartMode `
+							-Headers "Display Name", "Status", "Startup Type" `
+							-AutoFit $wdAutoFitContent;
+
+							## IB - Set the header row format after the SetWordTableAlternateRowColor function as it will paint the header row!
+							SetWordCellFormat -Collection $Table.Rows.Item(1).Cells -Bold -BackgroundColor $wdColorGray15;
+							## IB - Set the required highlighted cells
+							SetWordCellFormat -Coordinates $HighlightedCells -Table $Table -Bold -BackgroundColor $wdColorRed -Solid;
+
+							#indent the entire table 1 tab stop
+							$Table.Rows.SetLeftIndent($Indent1TabStops,$wdAdjustProportional)
+
+							FindWordDocumentEnd
+							$Table = $Null
+						}
+						ElseIf($Text)
+						{
+						}
+						ElseIf($HTML)
+						{
+						}
+					}
+					ElseIf(!$?)
+					{
+						Write-Warning "No services were retrieved."
+						If($MSWord -or $PDF)
+						{
+							WriteWordLine 0 0 "Warning: No Services were retrieved" "" $Null 0 $False $True
+							WriteWordLine 0 1 "If this is a trusted Forest, you may need to rerun the" "" $Null 0 $False $True
+							WriteWordLine 0 1 "script with Admin credentials from the trusted Forest." "" $Null 0 $False $True
+						}
+						ElseIf($Text)
+						{
+							Line 0 "Warning: No Services were retrieved"
+							Line 1 "If this is a trusted Forest, you may need to rerun the"
+							Line 1 "script with Admin credentials from the trusted Forest."
+						}
+						ElseIf($HTML)
+						{
+						}
+					}
+					Else
+					{
+						Write-Warning "Services retrieval was successful but no services were returned."
+						WriteWordLine 0 0 "Services retrieval was successful but no services were returned." "" $Null 0 $False $True
+					}
+
+					#Citrix hotfixes installed
+					Write-Verbose "$(Get-Date): `t`tGet list of Citrix hotfixes installed using Get-XAServerHotfix"
+					Try
+					{
+						$hotfixes = (Get-XAServerHotfix -ServerName $server.ServerName -EA 0 | Where {$_.Valid -eq $True}) | Sort HotfixName
+					}
+					
+					Catch
+					{
+						$hotfixes = $Null
+					}
+					
+					If($? -and $hotfixes -ne $Null)
+					{
+						[int]$Rows = 1
+						$Single_Row = (Get-Member -Type Property -Name Length -InputObject $hotfixes -EA 0) -eq $Null
+						If(-not $Single_Row)
+						{
+							$Rows = $Hotfixes.length
+						}
+						$Rows++
+						
+						Write-Verbose "$(Get-Date): `t`tNumber of Citrix hotfixes is $($Rows-1)"
+						$HotfixArray = @()
+						[bool]$HRP2Installed = $False
+						[bool]$HRP3Installed = $False
+						[bool]$HRP4Installed = $False
+						[bool]$HRP5Installed = $False
+						
+						If($MSWord -or $PDF)
+						{
+							WriteWordLine 0 0 ""
+							WriteWordLine 0 1 "Citrix Installed Hotfixes ($($Rows-1)):"
+							Write-Verbose "$(Get-Date): `t`tCreate Word Table for Citrix Hotfixes"
+							Write-Verbose "$(Get-Date): `t`tAdd Citrix installed hotfix table to doc"
+							## Create an array of hashtables to store our hotfixes
+							[System.Collections.Hashtable[]] $hotfixesWordTable = @();
+							## Seed the row index from the second row
+							[int] $CurrentServiceIndex = 2;
+						}
+						ElseIf($Text)
+						{
+						}
+						ElseIf($HTML)
+						{
+						}
+
+						ForEach($hotfix in $hotfixes)
+						{
+							$HotfixArray += $hotfix.HotfixName
+							Switch ($hotfix.HotfixName)
+							{
+								"XA650W2K8R2X64R02" {$HRP2Installed = $True}
+								"XA650W2K8R2X64R03" {$HRP3Installed = $True}
+								"XA650W2K8R2X64R04" {$HRP4Installed = $True}
+								"XA650W2K8R2X64R05" {$HRP5Installed = $True}
+							}
+							$InstallDate = $hotfix.InstalledOn.ToString()
+							
+							If($MSWord -or $PDF)
+							{
+								## Add the required key/values to the hashtable
+								$WordTableRowHash = @{ HotfixName = $hotfix.HotfixName; InstalledBy = $hotfix.InstalledBy; InstallDate = $InstallDate.SubString(0,$InstallDate.IndexOf(" ")); HotfixType = $hotfix.HotfixType}
+
+								## Add the hash to the array
+								$HotfixesWordTable += $WordTableRowHash;
+
+								$CurrentServiceIndex++;
+							}
+							ElseIf($Text)
+							{
+								Line 1 "Hotfix: " $hotfix.HotfixName
+								Line 1 "Installed By: " $hotfix.InstalledBy
+								Line 1 "Install Date: " $InstallDate.SubString(0,$InstallDate.IndexOf(" "))
+								Line 1 "Type: " $hotfix.HotfixType
+								Line 0 ""
+							}
+							ElseIf($HTML)
+							{
+							}
+						}
+						
+						If($MSWord -or $PDF)
+						{
+							## Add the table to the document, using the hashtable (-Alt is short for -AlternateBackgroundColor!)
+							$Table = AddWordTable -Hashtable $HotfixesWordTable `
+							-Columns HotfixName, InstalledBy, InstallDate, HotfixType `
+							-Headers "Hotfix", "Installed By", "Install Date", "Type" `
+							-AutoFit $wdAutoFitContent;
+
+							SetWordCellFormat -Collection $Table -Size 10
+							## IB - Set the header row format after the SetWordTableAlternateRowColor function as it will paint the header row!
+							SetWordCellFormat -Collection $Table.Rows.Item(1).Cells -Bold -Size 10 -BackgroundColor $wdColorGray15;
+
+							#indent the entire table 1 tab stop
+							$Table.Rows.SetLeftIndent($Indent1TabStops,$wdAdjustProportional)
+
+							FindWordDocumentEnd
+							$Table = $Null
+							WriteWordLine 0 0 ""
+						}
+						ElseIf($Text)
+						{
+						}
+						ElseIf($HTML)
+						{
+						}
+
+						#compare Citrix hotfixes to recommended Citrix hotfixes from CTX129229
+						#hotfix lists are from CTX129229 dated 18-DEC-2014
+						Write-Verbose "$(Get-Date): `t`tCompare Citrix hotfixes to recommended Citrix hotfixes from CTX129229"
+						Write-Verbose "$(Get-Date): `t`tProcessing Citrix hotfix list for server $($server.ServerName)"
+						If($HRP5Installed)
+						{
+							$RecommendedList = @()
+						}
+						ElseIf($HRP4Installed)
+						{
+							$RecommendedList = @("XA650W2K8R2X64R05")
+						}
+						ElseIf($HRP3Installed)
+						{
+							$RecommendedList = @("XA650W2K8R2X64R04", "XA650W2K8R2X64R05")
+						}
+						ElseIf($HRP2Installed)
+						{
+							$RecommendedList = @("XA650W2K8R2X64R03", "XA650W2K8R2X64R04", "XA650W2K8R2X64R05")
+						}
+						Else
+						{
+							$RecommendedList = @("XA650W2K8R2X64001", "XA650W2K8R2X64011", "XA650W2K8R2X64019", "XA650W2K8R2X64025", 
+												"XA650R01W2K8R2X64061", "XA650W2K8R2X64R01", "XA650W2K8R2X64R03")
+						}
+						
+						If($RecommendedList.count -gt 0)
+						{
+							Write-Verbose "$(Get-Date): `t`tCreate Word Table for Citrix Hotfixes"
+							If($MSWord -or $PDF)
+							{
+								WriteWordLine 0 1 "Citrix Recommended Hotfixes:"
+								## Create an array of hashtables to store our hotfixes
+								[System.Collections.Hashtable[]] $HotfixesWordTable = @();
+								## Create an array of hashtables to store references of cells that we wish to highlight after the table has been added
+								[System.Collections.Hashtable[]] $HighlightedCells = @();
+								## Seed the row index from the second row
+								[int] $CurrentServiceIndex = 2;
+							}
+							ElseIf($Text)
+							{
+								Line 1 "Citrix Recommended Hotfixes:"
+							}
+							ElseIf($HTML)
+							{
+							}
+							
+							ForEach($element in $RecommendedList)
+							{
+								$Tmp = $Null
+								If(!($HotfixArray -contains $element))
+								{
+									#missing a recommended Citrix hotfix
+									$Tmp = "Not Installed"
+								}
+								Else
+								{
+									$Tmp = "Installed"
+								}
+								If($MSWord -or $PDF)
+								{
+									## Add the required key/values to the hashtable
+									$WordTableRowHash = @{ CitrixHotfix = $element; Status = $Tmp}
+
+									## Add the hash to the array
+									$HotfixesWordTable += $WordTableRowHash;
+
+									If($Tmp -eq "Not Installed")
+									{
+										## Store "to highlight" cell references
+										$HighlightedCells += @{ Row = $CurrentServiceIndex; Column = 2; }
+									}
+									$CurrentServiceIndex++;
+								}
+								ElseIf($Text)
+								{
+									Line 0 "Citrix Hotfix: " $element
+									Line 0 "Status: " $Tmp
+									Line 0 ""
+								}
+								ElseIf($HTML)
+								{
+								}
+							}
+							
+							If($MSWord -or $PDF)
+							{
+								## Add the table to the document, using the hashtable (-Alt is short for -AlternateBackgroundColor!)
+								$Table = AddWordTable -Hashtable $HotfixesWordTable `
+								-Columns CitrixHotfix, Status `
+								-Headers "Citrix Hotfix", "Status" `
+								-AutoFit $wdAutoFitContent;
+
+								## IB - Set the header row format after the SetWordTableAlternateRowColor function as it will paint the header row!
+								SetWordCellFormat -Collection $Table.Rows.Item(1).Cells -Bold -BackgroundColor $wdColorGray15;
+								## IB - Set the required highlighted cells
+								SetWordCellFormat -Coordinates $HighlightedCells -Table $Table -Bold -BackgroundColor $wdColorRed -Solid;
+
+								#indent the entire table 1 tab stop
+								$Table.Rows.SetLeftIndent($Indent1TabStops,$wdAdjustProportional)
+
+								FindWordDocumentEnd
+								$Table = $Null
+								WriteWordLine 0 0 ""
+							}
+							ElseIf($Text)
+							{
+							}
+							ElseIf($HTML)
+							{
+							}
+						}
+						#build list of installed Microsoft hotfixes
+						Write-Verbose "$(Get-Date): `t`tProcessing Microsoft hotfixes for server $($server.ServerName)"
+						[bool]$GotMSHotfixes = $True
+						
+						Try
+						{
+							$results = Get-HotFix -computername $Server.ServerName 
+							$MSInstalledHotfixes = $results | select-object -Expand HotFixID | Sort HotFixID
+							$results = $Null
+						}
+						
+						Catch
+						{
+							$GotMSHotfixes = $False
+						}
+						
+						If($GotMSHotfixes)
+						{
+							If($server.OSServicePack.IndexOf('1') -gt 0)
+							{
+								#Server 2008 R2 SP1 installed
+								$RecommendedList = @("KB2465772", "KB2620656", "KB2647753", "KB2661332", 
+												"KB2728738", "KB2748302", "KB2775511", "KB2778831",
+												"KB2896256", "KB2908190", "KB2920289", "KB917607")
 							}
 							Else
 							{
-								$Table.Cell($xRow,2).Range.Text = "Installed"
+								#Server 2008 R2 without SP1 installed
+								$RecommendedList = @("KB2265716", "KB2388142", "KB2383928", "KB2465772", 
+												"KB2620656", "KB2647753", "KB2661332", "KB2728738", 
+												"KB2748302", "KB2775511", "KB2778831", "KB2896256", 
+												"KB917607", "KB975777", "KB979530", "KB980663", 
+												"KB983460")
+							}
+							
+							If($RecommendedList.count -gt 0)
+							{
+								Write-Verbose "$(Get-Date): `t`tCreate Word Table for Microsoft Hotfixes"
+								Write-Verbose "$(Get-Date): `t`tAdd Microsoft hotfix table to doc"
+								If($MSWord -or $PDF)
+								{
+									WriteWordLine 0 1 "Microsoft Recommended Hotfixes (from CTX129229):"
+									## Create an array of hashtables to store our hotfixes
+									[System.Collections.Hashtable[]] $HotfixesWordTable = @();
+									## Create an array of hashtables to store references of cells that we wish to highlight after the table has been added
+									[System.Collections.Hashtable[]] $HighlightedCells = @();
+									## Seed the row index from the second row
+									[int] $CurrentServiceIndex = 2;
+								}
+								ElseIf($Text)
+								{
+									Line 1 "Microsoft Recommended Hotfixes (from CTX129229):"
+								}
+								ElseIf($HTML)
+								{
+								}
+
+								ForEach($hotfix in $RecommendedList)
+								{
+									$Tmp = $Null
+									If(!($MSInstalledHotfixes -contains $hotfix))
+									{
+										$Tmp = "Not Installed"
+									}
+									Else
+									{
+										$Tmp = "Installed"
+									}
+									If($MSWord -or $PDF)
+									{
+										## Add the required key/values to the hashtable
+										$WordTableRowHash = @{ MicrosoftHotfix = $hotfix; Status = $Tmp}
+
+										## Add the hash to the array
+										$HotfixesWordTable += $WordTableRowHash;
+
+										If($Tmp -eq "Not Installed")
+										{
+											## Store "to highlight" cell references
+											$HighlightedCells += @{ Row = $CurrentServiceIndex; Column = 2; }
+										}
+										$CurrentServiceIndex++;
+									}
+									ElseIf($Text)
+									{
+										Line 0 "Microsoft Hotfix: " $hotfix
+										Line 0 "Status: " $Tmp
+										Line 0 ""
+									}
+									ElseIf($HTML)
+									{
+									}
+								}
+								
+								If($MSWord -or $PDF)
+								{
+									## Add the table to the document, using the hashtable (-Alt is short for -AlternateBackgroundColor!)
+									$Table = AddWordTable -Hashtable $HotfixesWordTable `
+									-Columns MicrosoftHotfix, Status `
+									-Headers "Microsoft Hotfix", "Status" `
+									-AutoFit $wdAutoFitContent;
+
+									## IB - Set the header row format after the SetWordTableAlternateRowColor function as it will paint the header row!
+									SetWordCellFormat -Collection $Table.Rows.Item(1).Cells -Bold -BackgroundColor $wdColorGray15;
+									## IB - Set the required highlighted cells
+									SetWordCellFormat -Coordinates $HighlightedCells -Table $Table -Bold -BackgroundColor $wdColorRed -Solid;
+
+									#indent the entire table 1 tab stop
+									$Table.Rows.SetLeftIndent($Indent1TabStops,$wdAdjustProportional)
+
+									FindWordDocumentEnd
+									$Table = $Null
+									WriteWordLine 0 1 "Not all missing Microsoft hotfixes may be needed for this server `n`tor might already be replaced and not recorded in CTX129229."
+									WriteWordLine 0 0 ""
+								}
+								ElseIf($Text)
+								{
+								}
+								ElseIf($HTML)
+								{
+								}
 							}
 						}
-						Write-Verbose "$(Get-Date): `t`tMove table of Microsoft hotfixes to the right"
-						$Table.Rows.SetLeftIndent($Indent1TabStops,$wdAdjustProportional)
-						$Table.AutoFitBehavior($wdAutoFitContent)
-
-						#return focus back to document
-						$doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekMainDocument
-
-						#move to the end of the current document
-						$selection.EndKey($wdStory,$wdMove) | Out-Null
-						WriteWordLine 0 1 "Not all missing Microsoft hotfixes may be needed for this server `n`tor might already be replaced and not recorded in CTX129229."
+						Else
+						{
+							Write-Verbose "$(Get-Date): Get-HotFix failed for $($server.ServerName)"
+							Write-Warning "Get-HotFix failed for $($server.ServerName)"
+							If($MSWord -or $PDF)
+							{
+								WriteWordLine 0 0 "Get-HotFix failed for $($server.ServerName)" "" $Null 0 $False $True
+								WriteWordLine 0 0 "On $($server.ServerName) you may need to run winmgmt /verifyrepository and winmgmt /salvagerepository"
+							}
+							ElseIf($Text)
+							{
+								Line 0 "Get-HotFix failed for $($server.ServerName)"
+								Line 0 "On $($server.ServerName) you may need to run winmgmt /verifyrepository and winmgmt /salvagerepository"
+							}
+							ElseIf($HTML)
+							{
+							}
+						}
 					}
-				}
-			}
-			Else
-			{
-				Write-Verbose "$(Get-Date): `t`t$($server.ServerName) is offline or unreachable.  Citrix Services and Hotfix areas skipped."
-				WriteWordLine 0 0 "Server $($server.ServerName) was offline or unreachable at "(get-date).ToString()
-				WriteWordLine 0 0 "The Citrix Services and Hotfix areas were skipped."
-			}
-			WriteWordLine 0 0 "" 
-			Write-Verbose "$(Get-Date): `tFinished Processing server $($server.ServerName)"
-			Write-Verbose "$(Get-Date): "
-		}
-		Else
-		{
-			WriteWordLine 0 0 $server.ServerName
-			$TotalServers++
-		}
-	}
-}
-Else 
-{
-	Write-Warning "Server information could not be retrieved"
-}
-$servers = $Null
-Write-Verbose "$(Get-Date): Finished Processing Servers"
-Write-Verbose "$(Get-Date): "
-
-#worker groups
-Write-Verbose "$(Get-Date): Processing Worker Groups"
-Write-Verbose "$(Get-Date): `tSetting summary variables"
-[int]$TotalWGByServerName = 0
-[int]$TotalWGByServerGroup = 0
-[int]$TotalWGByOU = 0
-[int]$TotalWGs = 0
-
-Write-Verbose "$(Get-Date): `tRetrieving Worker Groups"
-$WorkerGroups = Get-XAWorkerGroup -EA 0 | Sort WorkerGroupName
-
-If($? -and $WorkerGroups -ne $Null)
-{
-	$selection.InsertNewPage()
-	WriteWordLine 1 0 "Worker Groups:"
-	ForEach($WorkerGroup in $WorkerGroups)
-	{
-		Write-Verbose "$(Get-Date): `t`tProcessing Worker Group $($WorkerGroup.WorkerGroupName)"
-		If(!$Summary)
-		{
-			WriteWordLine 2 0 $WorkerGroup.WorkerGroupName
-			If(![String]::IsNullOrEmpty($WorkerGroup.Description))
-			{
-				WriteWordLine 0 1 "Description: " $WorkerGroup.Description
-			}
-			WriteWordLine 0 1 "Folder Path: " $WorkerGroup.FolderPath
-			If($WorkerGroup.ServerNames)
-			{
-				$TotalWGByServerName++
-				WriteWordLine 0 1 "Farm Servers:"
-				Write-Verbose "$(Get-Date): `t`tProcessing Worker Group by Farm Servers"
-				Write-Verbose "$(Get-Date): `t`tCreate Word Table for Worker Group by Farm Server"
-				$TempArray = $WorkerGroup.ServerNames | Sort
-				BuildTableForServerOrWG $TempArray "Server"
-				$TempArray = $Null
-			}
-			If($WorkerGroup.ServerGroups)
-			{
-				$TotalWGByServerGroup++
-				WriteWordLine 0 1 "Server Group Accounts:"
-				Write-Verbose "$(Get-Date): `t`tProcessing Worker Group by Server Groups"
-				Write-Verbose "$(Get-Date): `t`tCreate Word Table for Worker Group by Server Groups"
-				$TempArray = $WorkerGroup.ServerGroups | Sort
-				BuildTableForServerOrWG $TempArray "Security Group"
-				$TempArray = $Null
-			}
-			If($WorkerGroup.OUs)
-			{
-				$TotalWGByOU++
-				WriteWordLine 0 1 "Organizational Units:"
-				Write-Verbose "$(Get-Date): `t`tProcessing Worker Group by OUs"
-				Write-Verbose "$(Get-Date): `t`tCreate Word Table for Worker Group by OUs"
-				$TempArray = $WorkerGroup.OUs | Sort {$_.Length}
-				BuildTableForServerOrWG $TempArray "OU"
-				$TempArray = $Null
-			}
-			#applications published to worker group
-			$Applications = Get-XAApplication -WorkerGroup $WorkerGroup.WorkerGroupName -EA 0 | Sort FolderPath, DisplayName
-			If($? -and $Applications)
-			{
-				WriteWordLine 0 0 ""
-				WriteWordLine 0 1 "Published applications:"
-				Write-Verbose "$(Get-Date): `t`tProcessing published applications for Worker Group $($WorkerGroup.WorkerGroupName)"
-				Write-Verbose "$(Get-Date): `t`tCreate Word Table for Worker Group's published applications"
-				$TableRange = $doc.Application.Selection.Range
-				[int]$Columns = 2
-				
-				If($Applications -is [Array])
-				{
-					[int]$Rows = $Applications.count + 1
+					ElseIf(!$?)
+					{
+						Write-Warning "No Citrix hotfixes were retrieved"
+						If($MSWORD -or $PDF)
+						{
+							WriteWordLine 0 0 "Warning: No Citrix hotfixes were retrieved" "" $Null 0 $False $True
+						}
+						ElseIf($Text)
+						{
+							Line 0 "Warning: No Citrix hotfixes were retrieved"
+						}
+						ElseIf($HTML)
+						{
+						}
+					}
+					Else
+					{
+						Write-Warning "Citrix hotfix retrieval was successful but no Citrix hotfixes were returned."
+						If($MSWORD -or $PDF)
+						{
+							WriteWordLine 0 0 "Citrix hotfix retrieval was successful but no Citrix hotfixes were returned." "" $Null 0 $False $True
+						}
+						ElseIf($Text)
+						{
+							Line 0 "Citrix hotfix retrieval was successful but no Citrix hotfixes were returned."
+						}
+						ElseIf($HTML)
+						{
+						}
+					}
 				}
 				Else
 				{
-					[int]$Rows = 2
+					Write-Verbose "$(Get-Date): `t`t$($server.ServerName) is offline or unreachable.  Citrix Services and Hotfix areas skipped."
+					WriteWordLine 0 0 "Server $($server.ServerName) was offline or unreachable at "(get-date).ToString()
+					WriteWordLine 0 0 "The Citrix Services and Hotfix areas were skipped."
 				}
-
-				$Table = $doc.Tables.Add($TableRange, $Rows, $Columns)
-				$Table.rows.first.headingformat = $wdHeadingFormatTrue
-				$Table.Style = $myHash.Word_TableGrid
-				$Table.Borders.InsideLineStyle = $wdLineStyleSingle
-				$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
-				[int]$xRow = 1
-				Write-Verbose "$(Get-Date): `t`tFormat first row with column headings"
-				$Table.Cell($xRow,1).Shading.BackgroundPatternColor = $wdColorGray15
-				$Table.Cell($xRow,1).Range.Font.Bold = $True
-				$Table.Cell($xRow,1).Range.Text = "Display name"
-				$Table.Cell($xRow,2).Shading.BackgroundPatternColor = $wdColorGray15
-				$Table.Cell($xRow,2).Range.Font.Bold = $True
-				$Table.Cell($xRow,2).Range.Text = "Folder path"
-				ForEach($app in $Applications)
-				{
-					Write-Verbose "$(Get-Date): `t`t`tProcessing published application $($app.DisplayName)"
-					$xRow++
-					$Table.Cell($xRow,1).Range.Text = $app.DisplayName
-					$Table.Cell($xRow,2).Range.Text = $app.FolderPath
-				}
-				Write-Verbose "$(Get-Date): `t`tMove table of published applications to the right"
-				$Table.Rows.SetLeftIndent($Indent1TabStops,$wdAdjustProportional)
-				$Table.AutoFitBehavior($wdAutoFitContent)
-
-				#return focus back to document
-				$doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekMainDocument
-
-				#move to the end of the current document
-				$selection.EndKey($wdStory,$wdMove) | Out-Null
-			}
-			WriteWordLine 0 0 ""
-		}
-		Else
-		{
-			WriteWordLine 0 0 $WorkerGroup.WorkerGroupName
-			$TotalWGs++
-		}
-	}
-}
-ElseIf($WorkerGroups -eq $Null)
-{
-	Write-Verbose "$(Get-Date): There are no Worker Groups created"
-}
-Else 
-{
-	Write-Warning "Worker Group information could not be retrieved"
-}
-$WorkerGroups = $Null
-Write-Verbose "$(Get-Date): Finished Processing Worker Groups"
-Write-Verbose "$(Get-Date): "
-
-#zones
-Write-Verbose "$(Get-Date): Processing Zones"
-Write-Verbose "$(Get-Date): `tSetting summary variables"
-[int]$TotalZones = 0
-
-Write-Verbose "$(Get-Date): `tRetrieving Zones"
-$Zones = Get-XAZone -EA 0 | Sort ZoneName
-If($?)
-{
-	$selection.InsertNewPage()
-	WriteWordLine 1 0 "Zones:"
-	ForEach($Zone in $Zones)
-	{
-		$TotalZones++
-		Write-Verbose "$(Get-Date): `t`tProcessing Zone $($Zone.ZoneName)"
-		If(!$Summary)
-		{
-			WriteWordLine 2 0 $Zone.ZoneName
-			WriteWordLine 0 1 "Current Data Collector: " $Zone.DataCollector
-			$Servers = Get-XAServer -ZoneName $Zone.ZoneName -EA 0 | Sort ElectionPreference, ServerName
-			If($?)
-			{		
-				WriteWordLine 0 1 "Servers in Zone"
-		
-				ForEach($Server in $Servers)
-				{
-					WriteWordLine 0 2 "Server Name and Preference: " $server.ServerName -NoNewLine
-					WriteWordLine 0 0  " - " -nonewline
-					Switch ($server.ElectionPreference)
-					{
-						"Unknown"           {WriteWordLine 0 0 "Unknown"}
-						"MostPreferred"     {WriteWordLine 0 0 "Most Preferred"}
-						"Preferred"         {WriteWordLine 0 0 "Preferred"}
-						"DefaultPreference" {WriteWordLine 0 0 "Default Preference"}
-						"NotPreferred"      {WriteWordLine 0 0 "Not Preferred"}
-						"WorkerMode"        {WriteWordLine 0 0 "Worker Mode"}
-						Default {WriteWordLine 0 0 "Zone preference could not be determined: $($server.ElectionPreference)"}
-					}
-				}
+				WriteWordLine 0 0 "" 
+				Write-Verbose "$(Get-Date): `tFinished Processing server $($server.ServerName)"
+				Write-Verbose "$(Get-Date): "
 			}
 			Else
 			{
-				WriteWordLine 0 1 "Unable to enumerate servers in the zone"
+				WriteWordLine 0 0 $server.ServerName
+				$TotalServers++
 			}
-			$Servers = $Null
-		}
-		Else
-		{
-			WriteWordLine 0 0 $Zone.ZoneName
 		}
 	}
-}
-Else 
-{
-	Write-Warning "Zone information could not be retrieved"
-}
-$Servers = $Null
-$Zones = $Null
-Write-Verbose "$(Get-Date): Finished Processing Zones"
-Write-Verbose "$(Get-Date): "
-
-[int]$Global:TotalComputerPolicies = 0
-[int]$Global:TotalUserPolicies = 0
-[int]$Global:TotalIMAPolicies = 0
-[int]$Global:TotalADPolicies = 0
-[int]$Global:TotalADPoliciesNotProcessed = 0
-[int]$Global:TotalPolicies = 0
-$ADPoliciesNotProcessed = @()
-
-#if remoting is enabled, the citrix.grouppolicy.commands module does not work with remoting so skip it
-If($Remoting)
-{
-	Write-Warning "Remoting is enabled."
-	Write-Warning "The Citrix.GroupPolicy.Commands module does not work with Remoting."
-	Write-Warning "Citrix Policy documentation will not take place."
-}
-Else
-{
-	#make sure Citrix.GroupPolicy.Commands module is loaded
-	If(!(Check-LoadedModule "Citrix.GroupPolicy.Commands"))
+	ElseIf(!$?)
 	{
-		Write-Warning "The Citrix Group Policy module Citrix.GroupPolicy.Commands.psm1 could not be loaded `nPlease see the Prerequisites section in the ReadMe file (https://www.dropbox.com/s/glq4u2p5xte8s6g/XA65_Inventory_V4_ReadMe.rtf). `nCitrix Policy documentation will not take place"
-		Write-Verbose "$(Get-Date): "
+		Write-Warning "Server information could not be retrieved"
 	}
 	Else
 	{
-		$selection.InsertNewPage()
-		WriteWordLine 1 0 "Policies:"
-		Write-Verbose "$(Get-Date): Processing Citrix IMA Policies"
-		Write-Verbose "$(Get-Date): `tRetrieving IMA Farm Policies"
-		ProcessCitrixPolicies	
-		Write-Verbose "$(Get-Date): Finished Processing Citrix IMA Policies"
-		Write-Verbose "$(Get-Date): "
-		
-		#thanks to the Citrix Engineering Team for helping me solve processing Citrix AD based Policies
-		Write-Verbose "$(Get-Date): See if there are any Citrix AD based policies to process"
-		$CtxGPOArray = @()
-		$CtxGPOArray = GetCtxGPOsInAD
-		If($CtxGPOArray -is [Array] -and $CtxGPOArray.Count -gt 0)
-		{
-			Write-Verbose "$(Get-Date): There are $($CtxGPOArray.Count) Citrix AD based policies to process"
+		Write-Warning "No results returned for Server information"
+	}
+	$servers = $Null
+	Write-Verbose "$(Get-Date): Finished Processing Servers"
+	Write-Verbose "$(Get-Date): "
+}
 
-			$CtxGPOArray = $CtxGPOArray | Sort
-			
-			ForEach($CtxGPO in $CtxGPOArray)
+If($Section -eq "All" -or $Section -eq "WGs")
+{
+	#worker groups
+	Write-Verbose "$(Get-Date): Processing Worker Groups"
+	Write-Verbose "$(Get-Date): `tSetting summary variables"
+	[int]$TotalWGByServerName = 0
+	[int]$TotalWGByServerGroup = 0
+	[int]$TotalWGByOU = 0
+	[int]$TotalWGs = 0
+
+	Write-Verbose "$(Get-Date): `tRetrieving Worker Groups"
+	$WorkerGroups = Get-XAWorkerGroup -EA 0 | Sort WorkerGroupName
+
+	If($? -and $WorkerGroups -ne $Null)
+	{
+		$selection.InsertNewPage()
+		WriteWordLine 1 0 "Worker Groups:"
+		ForEach($WorkerGroup in $WorkerGroups)
+		{
+			Write-Verbose "$(Get-Date): `t`tProcessing Worker Group $($WorkerGroup.WorkerGroupName)"
+			If(!$Summary)
 			{
-				Write-Verbose "$(Get-Date): Creating ADGpoDrv PSDrive"
-				New-PSDrive -Name ADGpoDrv -PSProvider CitrixGroupPolicy -Root \ -DomainGpo $($CtxGPO) -Scope "Global" | Out-Null
-				If(Get-PSDrive ADGpoDrv -EA 0)
+				WriteWordLine 2 0 $WorkerGroup.WorkerGroupName
+				If(![String]::IsNullOrEmpty($WorkerGroup.Description))
 				{
-					Write-Verbose "$(Get-Date): Processing Citrix AD Policy $($CtxGPO)"
-				
-					Write-Verbose "$(Get-Date): `tRetrieving AD Policy $($CtxGPO)"
-					ProcessCitrixPolicies "ADGpoDrv"
-					Write-Verbose "$(Get-Date): Finished Processing Citrix AD Policy $($CtxGPO)"
-					Write-Verbose "$(Get-Date): "
+					WriteWordLine 0 1 "Description: " $WorkerGroup.Description
+				}
+				WriteWordLine 0 1 "Folder Path: " $WorkerGroup.FolderPath
+				If($WorkerGroup.ServerNames)
+				{
+					$TotalWGByServerName++
+					WriteWordLine 0 1 "Farm Servers:"
+					Write-Verbose "$(Get-Date): `t`tProcessing Worker Group by Farm Servers"
+					Write-Verbose "$(Get-Date): `t`tCreate Word Table for Worker Group by Farm Server"
+					$TempArray = $WorkerGroup.ServerNames | Sort
+					BuildTableForServerOrWG $TempArray "Server"
+					$TempArray = $Null
+				}
+				If($WorkerGroup.ServerGroups)
+				{
+					$TotalWGByServerGroup++
+					WriteWordLine 0 1 "Server Group Accounts:"
+					Write-Verbose "$(Get-Date): `t`tProcessing Worker Group by Server Groups"
+					Write-Verbose "$(Get-Date): `t`tCreate Word Table for Worker Group by Server Groups"
+					$TempArray = $WorkerGroup.ServerGroups | Sort
+					BuildTableForServerOrWG $TempArray "Security Group"
+					$TempArray = $Null
+				}
+				If($WorkerGroup.OUs)
+				{
+					$TotalWGByOU++
+					WriteWordLine 0 1 "Organizational Units:"
+					Write-Verbose "$(Get-Date): `t`tProcessing Worker Group by OUs"
+					Write-Verbose "$(Get-Date): `t`tCreate Word Table for Worker Group by OUs"
+					$TempArray = $WorkerGroup.OUs | Sort {$_.Length}
+					BuildTableForServerOrWG $TempArray "OU"
+					$TempArray = $Null
+				}
+				#applications published to worker group
+				$Applications = Get-XAApplication -WorkerGroup $WorkerGroup.WorkerGroupName -EA 0 | Sort FolderPath, DisplayName
+				If($? -and $Applications -ne $Null)
+				{
+					WriteWordLine 0 0 ""
+					WriteWordLine 0 1 "Published applications:"
+					Write-Verbose "$(Get-Date): `t`tProcessing published applications for Worker Group $($WorkerGroup.WorkerGroupName)"
+					Write-Verbose "$(Get-Date): `t`tCreate Word Table for Worker Group's published applications"
+					$TableRange = $doc.Application.Selection.Range
+					[int]$Columns = 2
+					
+					If($Applications -is [Array])
+					{
+						[int]$Rows = $Applications.count + 1
+					}
+					Else
+					{
+						[int]$Rows = 2
+					}
+
+					$Table = $doc.Tables.Add($TableRange, $Rows, $Columns)
+					$Table.rows.first.headingformat = $wdHeadingFormatTrue
+					$Table.Style = $myHash.Word_TableGrid
+					$Table.Borders.InsideLineStyle = $wdLineStyleSingle
+					$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
+					[int]$xRow = 1
+					Write-Verbose "$(Get-Date): `t`tFormat first row with column headings"
+					$Table.Rows.First.Shading.BackgroundPatternColor = $wdColorGray15
+					$Table.Cell($xRow,1).Range.Font.Bold = $True
+					$Table.Cell($xRow,1).Range.Text = "Display name"
+					$Table.Cell($xRow,2).Range.Font.Bold = $True
+					$Table.Cell($xRow,2).Range.Text = "Folder path"
+					ForEach($app in $Applications)
+					{
+						Write-Verbose "$(Get-Date): `t`t`tProcessing published application $($app.DisplayName)"
+						$xRow++
+						$Table.Cell($xRow,1).Range.Text = $app.DisplayName
+						$Table.Cell($xRow,2).Range.Text = $app.FolderPath
+					}
+					Write-Verbose "$(Get-Date): `t`tMove table of published applications to the right"
+					$Table.Rows.SetLeftIndent($Indent1TabStops,$wdAdjustProportional)
+					$Table.AutoFitBehavior($wdAutoFitContent)
+
+					FindWordDocumentEnd
+				}
+				WriteWordLine 0 0 ""
+			}
+			Else
+			{
+				WriteWordLine 0 0 $WorkerGroup.WorkerGroupName
+				$TotalWGs++
+			}
+		}
+	}
+	ElseIf($WorkerGroups -eq $Null)
+	{
+		Write-Verbose "$(Get-Date): There are no Worker Groups created"
+	}
+	Else 
+	{
+		Write-Warning "No results returned for Worker Group information"
+	}
+	$WorkerGroups = $Null
+	Write-Verbose "$(Get-Date): Finished Processing Worker Groups"
+	Write-Verbose "$(Get-Date): "
+}
+
+If($Section -eq "All" -or $Section -eq "Zones")
+{
+	#zones
+	Write-Verbose "$(Get-Date): Processing Zones"
+	Write-Verbose "$(Get-Date): `tSetting summary variables"
+	[int]$TotalZones = 0
+
+	Write-Verbose "$(Get-Date): `tRetrieving Zones"
+	$Zones = Get-XAZone -EA 0 | Sort ZoneName
+	If($? -and $Zones -ne $Null)
+	{
+		$selection.InsertNewPage()
+		WriteWordLine 1 0 "Zones:"
+		ForEach($Zone in $Zones)
+		{
+			$TotalZones++
+			Write-Verbose "$(Get-Date): `t`tProcessing Zone $($Zone.ZoneName)"
+			If(!$Summary)
+			{
+				WriteWordLine 2 0 $Zone.ZoneName
+				WriteWordLine 0 1 "Current Data Collector: " $Zone.DataCollector
+				$Servers = Get-XAServer -ZoneName $Zone.ZoneName -EA 0 | Sort ElectionPreference, ServerName
+				If($? -and $Servers -ne $Null)
+				{		
+					WriteWordLine 0 1 "Servers in Zone"
+			
+					ForEach($Server in $Servers)
+					{
+						WriteWordLine 0 2 "Server Name and Preference: " $server.ServerName -NoNewLine
+						WriteWordLine 0 0  " - " -nonewline
+						Switch ($server.ElectionPreference)
+						{
+							"Unknown"           {WriteWordLine 0 0 "Unknown"}
+							"MostPreferred"     {WriteWordLine 0 0 "Most Preferred"}
+							"Preferred"         {WriteWordLine 0 0 "Preferred"}
+							"DefaultPreference" {WriteWordLine 0 0 "Default Preference"}
+							"NotPreferred"      {WriteWordLine 0 0 "Not Preferred"}
+							"WorkerMode"        {WriteWordLine 0 0 "Worker Mode"}
+							Default {WriteWordLine 0 0 "Zone preference could not be determined: $($server.ElectionPreference)"}
+						}
+					}
 				}
 				Else
 				{
-					$ADPoliciesNotProcessed += $CtxGPO
-					$Global:TotalADPoliciesNotProcessed++
-					Write-Warning "$($CtxGPO) is not readable by this XenApp 6.5 server"
-					Write-Warning "$($CtxGPO) was probably created by an updated Citrix Group Policy Provider"
+					WriteWordLine 0 1 "Unable to enumerate servers in the zone"
 				}
+				$Servers = $Null
 			}
-			
-			If(!$Summary)
+			Else
 			{
-				If($Global:TotalADPoliciesNotProcessed -gt 0)
-				{
-					Write-Verbose "$(Get-Date): Processing list of Citrix AD Policies not processed"
-					$ADPoliciesNotProcessed = $ADPoliciesNotProcessed | Sort -unique
-					WriteWordLine 0 0 ""
-					WriteWordLine 2 0 "Active Directory Citrix policies that could not be processed:"
-					ForEach($Policy in $ADPoliciesNotProcessed)
-					{
-						Write-Verbose "$(Get-Date): `t Processing skipped Citrix AD policy $($Policy)"
-						WriteWordLine 0 1 $Policy
-					}
-					Write-Verbose "$(Get-Date): Finished processing list of Citrix AD Policies not processed"
-					WriteWordLine 0 0 ""
-				}
+				WriteWordLine 0 0 $Zone.ZoneName
 			}
-			Write-Verbose "$(Get-Date): Finished Processing Citrix AD Policies"
+		}
+	}
+	ElseIf(!$?)
+	{
+		Write-Warning "Zone information could not be retrieved"
+	}
+	Else
+	{
+		Write-Warning "No results returned for Zone information"
+	}
+	$Servers = $Null
+	$Zones = $Null
+	Write-Verbose "$(Get-Date): Finished Processing Zones"
+	Write-Verbose "$(Get-Date): "
+}
+
+If($Section -eq "All" -or $Section -eq "Policies")
+{
+	[int]$Global:TotalComputerPolicies = 0
+	[int]$Global:TotalUserPolicies = 0
+	[int]$Global:TotalIMAPolicies = 0
+	[int]$Global:TotalADPolicies = 0
+	[int]$Global:TotalADPoliciesNotProcessed = 0
+	[int]$Global:TotalPolicies = 0
+	$ADPoliciesNotProcessed = @()
+
+	#if remoting is enabled, the citrix.grouppolicy.commands module does not work with remoting so skip it
+	If($Remoting)
+	{
+		Write-Warning "Remoting is enabled."
+		Write-Warning "The Citrix.GroupPolicy.Commands module does not work with Remoting."
+		Write-Warning "Citrix Policy documentation will not take place."
+	}
+	Else
+	{
+		#make sure Citrix.GroupPolicy.Commands module is loaded
+		If(!(Check-LoadedModule "Citrix.GroupPolicy.Commands"))
+		{
+			Write-Warning "The Citrix Group Policy module Citrix.GroupPolicy.Commands.psm1 could not be loaded `nPlease see the Prerequisites section in the ReadMe file (https://www.dropbox.com/s/glq4u2p5xte8s6g/XA65_Inventory_V4_ReadMe.rtf). `nCitrix Policy documentation will not take place"
 			Write-Verbose "$(Get-Date): "
 		}
 		Else
 		{
-			Write-Verbose "$(Get-Date): There are no Citrix AD based policies to process"
+			$selection.InsertNewPage()
+			WriteWordLine 1 0 "Policies:"
+			Write-Verbose "$(Get-Date): Processing Citrix IMA Policies"
+			Write-Verbose "$(Get-Date): `tRetrieving IMA Farm Policies"
+			ProcessCitrixPolicies	
+			Write-Verbose "$(Get-Date): Finished Processing Citrix IMA Policies"
+			Write-Verbose "$(Get-Date): "
+			
+			#thanks to the Citrix Engineering Team for helping me solve processing Citrix AD based Policies
+			Write-Verbose "$(Get-Date): See if there are any Citrix AD based policies to process"
+			$CtxGPOArray = @()
+			$CtxGPOArray = GetCtxGPOsInAD
+			If($CtxGPOArray -is [Array] -and $CtxGPOArray.Count -gt 0)
+			{
+				Write-Verbose "$(Get-Date): There are $($CtxGPOArray.Count) Citrix AD based policies to process"
+
+				$CtxGPOArray = $CtxGPOArray | Sort
+				
+				ForEach($CtxGPO in $CtxGPOArray)
+				{
+					Write-Verbose "$(Get-Date): Creating ADGpoDrv PSDrive"
+					New-PSDrive -Name ADGpoDrv -PSProvider CitrixGroupPolicy -Root \ -DomainGpo $($CtxGPO) -Scope "Global" | Out-Null
+					If(Get-PSDrive ADGpoDrv -EA 0)
+					{
+						Write-Verbose "$(Get-Date): Processing Citrix AD Policy $($CtxGPO)"
+					
+						Write-Verbose "$(Get-Date): `tRetrieving AD Policy $($CtxGPO)"
+						ProcessCitrixPolicies "ADGpoDrv"
+						Write-Verbose "$(Get-Date): Finished Processing Citrix AD Policy $($CtxGPO)"
+						Write-Verbose "$(Get-Date): "
+					}
+					Else
+					{
+						$ADPoliciesNotProcessed += $CtxGPO
+						$Global:TotalADPoliciesNotProcessed++
+						Write-Warning "$($CtxGPO) is not readable by this XenApp 6.5 server"
+						Write-Warning "$($CtxGPO) was probably created by an updated Citrix Group Policy Provider"
+					}
+				}
+				
+				If(!$Summary)
+				{
+					If($Global:TotalADPoliciesNotProcessed -gt 0)
+					{
+						Write-Verbose "$(Get-Date): Processing list of Citrix AD Policies not processed"
+						$ADPoliciesNotProcessed = $ADPoliciesNotProcessed | Sort -unique
+						WriteWordLine 0 0 ""
+						WriteWordLine 2 0 "Active Directory Citrix policies that could not be processed:"
+						ForEach($Policy in $ADPoliciesNotProcessed)
+						{
+							Write-Verbose "$(Get-Date): `t Processing skipped Citrix AD policy $($Policy)"
+							WriteWordLine 0 1 $Policy
+						}
+						Write-Verbose "$(Get-Date): Finished processing list of Citrix AD Policies not processed"
+						WriteWordLine 0 0 ""
+					}
+				}
+				Write-Verbose "$(Get-Date): Finished Processing Citrix AD Policies"
+				Write-Verbose "$(Get-Date): "
+			}
+			Else
+			{
+				Write-Verbose "$(Get-Date): There are no Citrix AD based policies to process"
+				Write-Verbose "$(Get-Date): "
+			}
+			Write-Verbose "$(Get-Date): Finished Processing Citrix Policies"
 			Write-Verbose "$(Get-Date): "
 		}
-		Write-Verbose "$(Get-Date): Finished Processing Citrix Policies"
-		Write-Verbose "$(Get-Date): "
 	}
 }
 
-If(!$Summary)
+If(!$Summary -and ($Section -eq "All"))
 {
-	Write-Verbose "$(Get-Date): Create Appendix A Session Sharing Items"
-	$selection.InsertNewPage()
-	WriteWordLine 1 0 "Appendix A - Session Sharing Items from CTX159159"
 	#	The Session Sharing Key is generated by the XML Broker in XenApp 6.5.  
 	#	Web Interface or StoreFront send the following information to the XML Broker:"
 	#	Audio Quality (Policy Setting)"
@@ -6727,381 +8204,325 @@ If(!$Summary)
 	#	Type: REG_DWORD
 	#	Value: SeamlessFlags = 1
 
-	$TableRange = $doc.Application.Selection.Range
-	[int]$Columns = 5
-	[int]$Rows = $SessionSharingItems.count + 1
+	Write-Verbose "$(Get-Date): Create Appendix A Session Sharing Items"
 	Write-Verbose "$(Get-Date): `tAdd Session Sharing Items table to doc"
-	$Table = $doc.Tables.Add($TableRange, $Rows, $Columns)
-	$Table.rows.first.headingformat = $wdHeadingFormatTrue
-	$Table.Style = $myHash.Word_TableGrid
-	$Table.Borders.InsideLineStyle = $wdLineStyleSingle
-	$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
-	[int]$xRow = 1
-	Write-Verbose "$(Get-Date): `t`tFormat first row with column headings"
-	$Table.Cell($xRow,1).Shading.BackgroundPatternColor = $wdColorGray15
-	$Table.Cell($xRow,1).Range.Font.Bold = $True
-	$Table.Cell($xRow,1).Range.Text = "Application Name"
-	$Table.Cell($xRow,2).Shading.BackgroundPatternColor = $wdColorGray15
-	$Table.Cell($xRow,2).Range.Font.Bold = $True
-	$Table.Cell($xRow,2).Range.Text = "Maximum color quality"
-	$Table.Cell($xRow,3).Shading.BackgroundPatternColor = $wdColorGray15
-	$Table.Cell($xRow,3).Range.Font.Bold = $True
-	$Table.Cell($xRow,3).Range.Text = "Session window size"
-	$Table.Cell($xRow,4).Shading.BackgroundPatternColor = $wdColorGray15
-	$Table.Cell($xRow,4).Range.Font.Bold = $True
-	$Table.Cell($xRow,4).Range.Text = "Access Control Filters"
-	$Table.Cell($xRow,5).Shading.BackgroundPatternColor = $wdColorGray15
-	$Table.Cell($xRow,5).Range.Font.Bold = $True
-	$Table.Cell($xRow,5).Range.Text = "Encryption"
+	If($MSWord -or $PDF)
+	{
+		$selection.InsertNewPage()
+		WriteWordLine 1 0 "Appendix A - Session Sharing Items from CTX159159"
+		## Create an array of hashtables to store our services
+		[System.Collections.Hashtable[]] $ItemsWordTable = @();
+		## Seed the row index from the second row
+		[int] $CurrentServiceIndex = 2;
+	}
+	ElseIf($Text)
+	{
+		Line 0 "Appendix A - Session Sharing Items from CTX159159"
+		Line 0 ""
+	}
+	ElseIf($HTML)
+	{
+	}
+	
 	ForEach($Item in $SessionSharingItems)
 	{
-		$xRow++
-		Write-Verbose "$(Get-Date): `t`t`tProcessing row for application $($Item.ApplicationName)"
-		$Table.Cell($xRow,1).Range.Text = $Item.ApplicationName
-		$Table.Cell($xRow,2).Range.Text = $Item.MaximumColorQuality
-		$Table.Cell($xRow,3).Range.Text = $Item.SessionWindowSize
-		$Table.Cell($xRow,4).Range.Text = $Item.AccessControlFilters
-		$Table.Cell($xRow,5).Range.Text = $Item.Encryption
+		If($MSWord -or $PDF)
+		{
+			## Add the required key/values to the hashtable
+			$WordTableRowHash = @{ ApplicationName = $Item.ApplicationName;
+			MaximumColorQuality = $Item.MaximumColorQuality;
+			SessionWindowSize = $Item.SessionWindowSize; 
+			AccessControlFilters = $Item.AccessControlFilters;
+			Encryption = $Item.Encryption}
+
+			## Add the hash to the array
+			$ItemsWordTable += $WordTableRowHash;
+
+			$CurrentServiceIndex++;
+		}
+		ElseIf($Text)
+		{
+			Line 1 "Application Name`t: " $Item.ApplicationName
+			Line 1 "Maximum color quality`t: " $Item.MaximumColorQuality
+			Line 1 "Session window size`t: " $Item.SessionWindowSize
+			Line 1 "Access Control Filters`t: " $Item.AccessControlFilters
+			Line 1 "Encryption`t`t: " $Item.Encryption
+			Line 0 ""
+		}
+		ElseIf($HTML)
+		{
+		}
 	}
 
-	$Table.AutoFitBehavior($wdAutoFitContent)
+	If($MSWord -or $PDF)
+	{
+		## Add the table to the document, using the hashtable (-Alt is short for -AlternateBackgroundColor!)
+		$Table = AddWordTable -Hashtable $ItemsWordTable `
+		-Columns ApplicationName, MaximumColorQuality, SessionWindowSize, AccessControlFilters, Encryption `
+		-Headers "Application Name", "Maximum color quality", "Session window size", "Access Control Filters", "Encryption" `
+		-AutoFit $wdAutoFitContent;
 
-	#return focus back to document
-	$doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekMainDocument
+		## IB - Set the header row format after the SetWordTableAlternateRowColor function as it will paint the header row!
+		SetWordCellFormat -Collection $Table.Rows.Item(1).Cells -Bold -BackgroundColor $wdColorGray15;
 
-	#move to the end of the current document
-	$selection.EndKey($wdStory,$wdMove) | Out-Null
+		$Table.Rows.SetLeftIndent($Indent0TabStops,$wdAdjustProportional)
+
+		FindWordDocumentEnd
+		$TableRange = $Null
+		$Table = $Null
+	}
+	ElseIf($Text)
+	{
+		#nothing to do
+	}
+	ElseIf($HTML)
+	{
+	}
+	
 	Write-Verbose "$(Get-Date): Finished Create Appendix A - Session Sharing Items"
 	Write-Verbose "$(Get-Date): "
 
-
 	Write-Verbose "$(Get-Date): Create Appendix B Server Major Items"
-	$selection.InsertNewPage()
-	WriteWordLine 1 0 "Appendix B - Server Major Items"
-	$TableRange = $doc.Application.Selection.Range
-	[int]$Columns = 7
-	[int]$Rows = $ServerItems.count + 1
 	Write-Verbose "$(Get-Date): `tAdd Major Server Items table to doc"
-	$Table = $doc.Tables.Add($TableRange, $Rows, $Columns)
-	$Table.rows.first.headingformat = $wdHeadingFormatTrue
-	$Table.Style = $myHash.Word_TableGrid
-	$Table.Borders.InsideLineStyle = $wdLineStyleSingle
-	$Table.Borders.OutsideLineStyle = $wdLineStyleSingle
-	[int]$xRow = 1
-	Write-Verbose "$(Get-Date): `t`tFormat first row with column headings"
-	$Table.Cell($xRow,1).Shading.BackgroundPatternColor = $wdColorGray15
-	$Table.Cell($xRow,1).Range.Font.Bold = $True
-	$Table.Cell($xRow,1).Range.Text = "Server Name"
-	$Table.Cell($xRow,2).Shading.BackgroundPatternColor = $wdColorGray15
-	$Table.Cell($xRow,2).Range.Font.Bold = $True
-	$Table.Cell($xRow,2).Range.Text = "Zone Name"
-	$Table.Cell($xRow,3).Shading.BackgroundPatternColor = $wdColorGray15
-	$Table.Cell($xRow,3).Range.Font.Bold = $True
-	$Table.Cell($xRow,3).Range.Text = "OS Version"
-	$Table.Cell($xRow,4).Shading.BackgroundPatternColor = $wdColorGray15
-	$Table.Cell($xRow,4).Range.Font.Bold = $True
-	$Table.Cell($xRow,4).Range.Text = "Citrix Version"
-	$Table.Cell($xRow,5).Shading.BackgroundPatternColor = $wdColorGray15
-	$Table.Cell($xRow,5).Range.Font.Bold = $True
-	$Table.Cell($xRow,5).Range.Text = "Product Edition"
-	$Table.Cell($xRow,6).Shading.BackgroundPatternColor = $wdColorGray15
-	$Table.Cell($xRow,6).Range.Font.Bold = $True
-	$Table.Cell($xRow,6).Range.Text = "License Server"
-	$Table.Cell($xRow,7).Shading.BackgroundPatternColor = $wdColorGray15
-	$Table.Cell($xRow,7).Range.Font.Bold = $True
-	$Table.Cell($xRow,7).Range.Text = "Session Sharing"
-	ForEach($ServerItem in $ServerItems)
+	If($MSWord -or $PDF)
 	{
-		$xRow++
-		Write-Verbose "$(Get-Date): `t`t`tProcessing row for server $($ServerItem.ServerName)"
-		$Table.Cell($xRow,1).Range.Text = $ServerItem.ServerName
-		$Table.Cell($xRow,2).Range.Text = $ServerItem.ZoneName
-		$Table.Cell($xRow,3).Range.Text = $ServerItem.OSVersion
-		$Table.Cell($xRow,4).Range.Text = $ServerItem.CitrixVersion
-		$Table.Cell($xRow,5).Range.Text = $ServerItem.ProductEdition
-		If([String]::IsNullOrEmpty($ServerItem.LicenseServer))
+		$selection.InsertNewPage()
+		WriteWordLine 1 0 "Appendix B - Server Major Items"
+		## Create an array of hashtables to store our services
+		[System.Collections.Hashtable[]] $ItemsWordTable = @();
+		## Seed the row index from the second row
+		[int] $CurrentServiceIndex = 2;
+	}
+	ElseIf($Text)
+	{
+		Line 0 "Appendix B - Server Major Items"
+		Line 0 ""
+	}
+	ElseIf($HTML)
+	{
+	}
+
+	ForEach($Item in $ServerItems)
+	{
+		$Tmp = $Null
+		If([String]::IsNullOrEmpty($Item.LicenseServer))
 		{
-			$Table.Cell($xRow,6).Range.Text = "Set by policy"
+			$Tmp = "Set by policy"
 		}
 		Else
 		{
-			$Table.Cell($xRow,6).Range.Text = $ServerItem.LicenseServer
+			$Tmp = $Item.LicenseServer
 		}
-		$Table.Cell($xRow,7).Range.Text = $ServerItem.SessionSharing
+		If($MSWord -or $PDF)
+		{
+			## Add the required key/values to the hashtable
+			$WordTableRowHash = @{ ServerName = $Item.ServerName;
+			ZoneName = $Item.ZoneName;
+			OSVersion = $Item.OSVersion;
+			CitrixVersion = $Item.CitrixVersion;
+			ProductEdition = $Item.ProductEdition;
+			LicenseServer = $Tmp
+			SessionSharing = $Item.SessionSharing}
+			## Add the hash to the array
+			$ItemsWordTable += $WordTableRowHash;
+
+			$CurrentServiceIndex++;
+		}
+		ElseIf($Text)
+		{
+			Line 1 "Server Name`t: " $Item.ServerName
+			Line 1 "Zone Name`t: " $Item.ZoneName
+			Line 1 "OS Version`t: " $Item.OSVersion
+			Line 1 "Citrix Version`t: " $Item.CitrixVersion
+			Line 1 "Product Edition`t: " $Item.ProductEdition
+			Line 1 "License Server`t: " $tmp
+			Line 1 "Session Sharing`t: " $Item.SessionSharing
+			Line 0 ""
+		}
+		ElseIf($HTML)
+		{
+		}
 	}
 
-	$Table.AutoFitBehavior($wdAutoFitContent)
+	If($MSWord -or $PDF)
+	{
+		## Add the table to the document, using the hashtable (-Alt is short for -AlternateBackgroundColor!)
+		$Table = AddWordTable -Hashtable $ItemsWordTable `
+		-Columns ServerName, ZoneName, OSVersion, CitrixVersion, ProductEdition, LicenseServer, SessionSharing `
+		-Headers "Server Name", "Zone Name", "OS Version", "Citrix Version", "Product Edition", "License Server", "Session Sharing" `
+		-AutoFit $wdAutoFitContent;
 
-	#return focus back to document
-	$doc.ActiveWindow.ActivePane.view.SeekView = $wdSeekMainDocument
+		## IB - Set the header row format after the SetWordTableAlternateRowColor function as it will paint the header row!
+		SetWordCellFormat -Collection $Table.Rows.Item(1).Cells -Bold -BackgroundColor $wdColorGray15;
 
-	#move to the end of the current document
-	$selection.EndKey($wdStory,$wdMove) | Out-Null
+		$Table.Rows.SetLeftIndent($Indent0TabStops,$wdAdjustProportional)
+
+		FindWordDocumentEnd
+		$Table = $Null
+	}
+	ElseIf($Text)
+	{
+		#nothing to do
+	}
+	ElseIf($HTML)
+	{
+	}
+	
 	Write-Verbose "$(Get-Date): Finished Create Appendix B - Server Major Items"
 	Write-Verbose "$(Get-Date): "
 }
 
-#summary page
-Write-Verbose "$(Get-Date): Create Summary Page"
-$selection.InsertNewPage()
-WriteWordLine 1 0 "Summary Page"
-If(!$Summary)
+If($Section -eq "All")
 {
-	Write-Verbose "$(Get-Date): `tAdd administrator summary info"
-	WriteWordLine 0 0 "Administrators"
-	WriteWordLine 0 1 "Total Full Administrators`t: " $TotalFullAdmins
-	WriteWordLine 0 1 "Total View Administrators`t: " $TotalViewAdmins
-	WriteWordLine 0 1 "Total Custom Administrators`t: " $TotalCustomAdmins
-	WriteWordLine 0 2 "Total Administrators`t: " ($TotalFullAdmins + $TotalViewAdmins + $TotalCustomAdmins)
-	WriteWordLine 0 0 ""
-	Write-Verbose "$(Get-Date): `tAdd application summary info"
-	WriteWordLine 0 0 "Applications"
-	WriteWordLine 0 1 "Total Published Applications`t: " $TotalPublishedApps
-	WriteWordLine 0 1 "Total Published Content`t`t: " $TotalPublishedContent
-	WriteWordLine 0 1 "Total Published Desktops`t: " $TotalPublishedDesktops
-	WriteWordLine 0 1 "Total Streamed Applications`t: " $TotalStreamedApps
-	WriteWordLine 0 2 "Total Applications`t: " ($TotalPublishedApps + $TotalPublishedContent + $TotalPublishedDesktops + $TotalStreamedApps)
-	WriteWordLine 0 0 ""
-	Write-Verbose "$(Get-Date): `tAdd configuration logging summary info"
-	WriteWordLine 0 0 "Configuration Logging"
-	WriteWordLine 0 1 "Total Config Log Items`t`t: " $TotalConfigLogItems 
-	WriteWordLine 0 0 ""
-	Write-Verbose "$(Get-Date): `tAdd load balancing policies summary info"
-	WriteWordLine 0 0 "Load Balancing Policies"
-	WriteWordLine 0 1 "Total Load Balancing Policies`t: " $TotalLBPolicies
-	WriteWordLine 0 0 ""
-	Write-Verbose "$(Get-Date): `tAdd load evaluator summary info"
-	WriteWordLine 0 0 "Load Evaluators"
-	WriteWordLine 0 1 "Total Load Evaluators`t`t: " $TotalLoadEvaluators
-	WriteWordLine 0 0 ""
-	Write-Verbose "$(Get-Date): `tAdd server summary info"
-	WriteWordLine 0 0 "Servers"
-	WriteWordLine 0 1 "Total Controllers`t`t: " $TotalControllers
-	WriteWordLine 0 1 "Total Workers`t`t`t: " $TotalWorkers
-	WriteWordLine 0 2 "Total Servers`t`t: " ($TotalControllers + $TotalWorkers)
-	WriteWordLine 0 0 ""
-	Write-Verbose "$(Get-Date): `tAdd worker group summary info"
-	WriteWordLine 0 0 "Worker Groups"
-	WriteWordLine 0 1 "Total WGs by Server Name`t: " $TotalWGByServerName
-	WriteWordLine 0 1 "Total WGs by Server Group`t: " $TotalWGByServerGroup
-	WriteWordLine 0 1 "Total WGs by AD Container`t: " $TotalWGByOU
-	WriteWordLine 0 2 "Total Worker Groups`t: " ($TotalWGByServerName + $TotalWGByServerGroup + $TotalWGByOU)
-	WriteWordLine 0 0 ""
-	Write-Verbose "$(Get-Date): `tAdd zone summary info"
-	WriteWordLine 0 0 "Zones"
-	WriteWordLine 0 1 "Total Zones`t`t`t: " $TotalZones
-	WriteWordLine 0 0 ""
-	Write-Verbose "$(Get-Date): `tAdd policy summary info"
-	WriteWordLine 0 0 "Policies"
-	WriteWordLine 0 1 "Total Computer Policies`t`t: " $Global:TotalComputerPolicies
-	WriteWordLine 0 1 "Total User Policies`t`t: " $Global:TotalUserPolicies
-	WriteWordLine 0 2 "Total Policies`t`t: " ($Global:TotalComputerPolicies + $Global:TotalUserPolicies)
-	WriteWordLine 0 0 ""
-	WriteWordLine 0 1 "IMA Policies`t`t`t: " $Global:TotalIMAPolicies
-	WriteWordLine 0 1 "Citrix AD Policies Processed`t: $($Global:TotalADPolicies)`t(AD Policies can contain multiple Citrix policies)"
-	WriteWordLine 0 1 "Citrix AD Policies not Processed`t: " $Global:TotalADPoliciesNotProcessed
-}
-Else
-{
-	Write-Verbose "$(Get-Date): `tAdd administrator summary info"
-	WriteWordLine 0 0 "Administrators"
-	WriteWordLine 0 1 "Total Administrators`t`t: " $TotalAdmins
-	WriteWordLine 0 0 ""
-	Write-Verbose "$(Get-Date): `tAdd application summary info"
-	WriteWordLine 0 0 "Applications"
-	WriteWordLine 0 1 "Total Applications`t`t: " $TotalApps
-	WriteWordLine 0 0 ""
-	Write-Verbose "$(Get-Date): `tAdd load balancing policies summary info"
-	WriteWordLine 0 0 "Load Balancing Policies"
-	WriteWordLine 0 1 "Total Load Balancing Policies`t: " $TotalLBPolicies
-	WriteWordLine 0 0 ""
-	Write-Verbose "$(Get-Date): `tAdd load evaluator summary info"
-	WriteWordLine 0 0 "Load Evaluators"
-	WriteWordLine 0 1 "Total Load Evaluators`t`t: " $TotalLoadEvaluators
-	WriteWordLine 0 0 ""
-	Write-Verbose "$(Get-Date): `tAdd server summary info"
-	WriteWordLine 0 0 "Servers"
-	WriteWordLine 0 1 "Total Servers`t`t`t: " $TotalServers
-	WriteWordLine 0 0 ""
-	Write-Verbose "$(Get-Date): `tAdd worker group summary info"
-	WriteWordLine 0 0 "Worker Groups"
-	WriteWordLine 0 1 "Total Worker Groups`t`t: " $TotalWGs
-	WriteWordLine 0 0 ""
-	Write-Verbose "$(Get-Date): `tAdd zone summary info"
-	WriteWordLine 0 0 "Zones"
-	WriteWordLine 0 1 "Total Zones`t`t`t: " $TotalZones
-	WriteWordLine 0 0 ""
-	Write-Verbose "$(Get-Date): `tAdd policy summary info"
-	WriteWordLine 0 0 "Policies"
-	WriteWordLine 0 1 "IMA Policies`t`t`t: " $Global:TotalIMAPolicies
-	WriteWordLine 0 1 "Citrix AD Policies Processed`t: $($Global:TotalADPolicies)`t(AD Policies can contain multiple Citrix policies)"
-	WriteWordLine 0 1 "Total Policies`t`t`t: " $Global:TotalPolicies
+	#summary page
+	Write-Verbose "$(Get-Date): Create Summary Page"
+	$selection.InsertNewPage()
+	WriteWordLine 1 0 "Summary Page"
+	If(!$Summary)
+	{
+		Write-Verbose "$(Get-Date): `tAdd administrator summary info"
+		WriteWordLine 0 0 "Administrators"
+		WriteWordLine 0 1 "Total Full Administrators`t: " $TotalFullAdmins
+		WriteWordLine 0 1 "Total View Administrators`t: " $TotalViewAdmins
+		WriteWordLine 0 1 "Total Custom Administrators`t: " $TotalCustomAdmins
+		WriteWordLine 0 2 "Total Administrators`t: " ($TotalFullAdmins + $TotalViewAdmins + $TotalCustomAdmins)
+		WriteWordLine 0 0 ""
+		Write-Verbose "$(Get-Date): `tAdd application summary info"
+		WriteWordLine 0 0 "Applications"
+		WriteWordLine 0 1 "Total Published Applications`t: " $TotalPublishedApps
+		WriteWordLine 0 1 "Total Published Content`t`t: " $TotalPublishedContent
+		WriteWordLine 0 1 "Total Published Desktops`t: " $TotalPublishedDesktops
+		WriteWordLine 0 1 "Total Streamed Applications`t: " $TotalStreamedApps
+		WriteWordLine 0 2 "Total Applications`t: " ($TotalPublishedApps + $TotalPublishedContent + $TotalPublishedDesktops + $TotalStreamedApps)
+		WriteWordLine 0 0 ""
+		Write-Verbose "$(Get-Date): `tAdd configuration logging summary info"
+		WriteWordLine 0 0 "Configuration Logging"
+		WriteWordLine 0 1 "Total Config Log Items`t`t: " $TotalConfigLogItems 
+		WriteWordLine 0 0 ""
+		Write-Verbose "$(Get-Date): `tAdd load balancing policies summary info"
+		WriteWordLine 0 0 "Load Balancing Policies"
+		WriteWordLine 0 1 "Total Load Balancing Policies`t: " $TotalLBPolicies
+		WriteWordLine 0 0 ""
+		Write-Verbose "$(Get-Date): `tAdd load evaluator summary info"
+		WriteWordLine 0 0 "Load Evaluators"
+		WriteWordLine 0 1 "Total Load Evaluators`t`t: " $TotalLoadEvaluators
+		WriteWordLine 0 0 ""
+		Write-Verbose "$(Get-Date): `tAdd server summary info"
+		WriteWordLine 0 0 "Servers"
+		WriteWordLine 0 1 "Total Controllers`t`t: " $TotalControllers
+		WriteWordLine 0 1 "Total Workers`t`t`t: " $TotalWorkers
+		WriteWordLine 0 2 "Total Servers`t`t: " ($TotalControllers + $TotalWorkers)
+		WriteWordLine 0 0 ""
+		Write-Verbose "$(Get-Date): `tAdd worker group summary info"
+		WriteWordLine 0 0 "Worker Groups"
+		WriteWordLine 0 1 "Total WGs by Server Name`t: " $TotalWGByServerName
+		WriteWordLine 0 1 "Total WGs by Server Group`t: " $TotalWGByServerGroup
+		WriteWordLine 0 1 "Total WGs by AD Container`t: " $TotalWGByOU
+		WriteWordLine 0 2 "Total Worker Groups`t: " ($TotalWGByServerName + $TotalWGByServerGroup + $TotalWGByOU)
+		WriteWordLine 0 0 ""
+		Write-Verbose "$(Get-Date): `tAdd zone summary info"
+		WriteWordLine 0 0 "Zones"
+		WriteWordLine 0 1 "Total Zones`t`t`t: " $TotalZones
+		WriteWordLine 0 0 ""
+		Write-Verbose "$(Get-Date): `tAdd policy summary info"
+		WriteWordLine 0 0 "Policies"
+		WriteWordLine 0 1 "Total Computer Policies`t`t: " $Global:TotalComputerPolicies
+		WriteWordLine 0 1 "Total User Policies`t`t: " $Global:TotalUserPolicies
+		WriteWordLine 0 2 "Total Policies`t`t: " ($Global:TotalComputerPolicies + $Global:TotalUserPolicies)
+		WriteWordLine 0 0 ""
+		WriteWordLine 0 1 "IMA Policies`t`t`t: " $Global:TotalIMAPolicies
+		WriteWordLine 0 1 "Citrix AD Policies Processed`t: $($Global:TotalADPolicies)`t(AD Policies can contain multiple Citrix policies)"
+		WriteWordLine 0 1 "Citrix AD Policies not Processed`t: " $Global:TotalADPoliciesNotProcessed
+	}
+	Else
+	{
+		Write-Verbose "$(Get-Date): `tAdd administrator summary info"
+		WriteWordLine 0 0 "Administrators"
+		WriteWordLine 0 1 "Total Administrators`t`t: " $TotalAdmins
+		WriteWordLine 0 0 ""
+		Write-Verbose "$(Get-Date): `tAdd application summary info"
+		WriteWordLine 0 0 "Applications"
+		WriteWordLine 0 1 "Total Applications`t`t: " $TotalApps
+		WriteWordLine 0 0 ""
+		Write-Verbose "$(Get-Date): `tAdd load balancing policies summary info"
+		WriteWordLine 0 0 "Load Balancing Policies"
+		WriteWordLine 0 1 "Total Load Balancing Policies`t: " $TotalLBPolicies
+		WriteWordLine 0 0 ""
+		Write-Verbose "$(Get-Date): `tAdd load evaluator summary info"
+		WriteWordLine 0 0 "Load Evaluators"
+		WriteWordLine 0 1 "Total Load Evaluators`t`t: " $TotalLoadEvaluators
+		WriteWordLine 0 0 ""
+		Write-Verbose "$(Get-Date): `tAdd server summary info"
+		WriteWordLine 0 0 "Servers"
+		WriteWordLine 0 1 "Total Servers`t`t`t: " $TotalServers
+		WriteWordLine 0 0 ""
+		Write-Verbose "$(Get-Date): `tAdd worker group summary info"
+		WriteWordLine 0 0 "Worker Groups"
+		WriteWordLine 0 1 "Total Worker Groups`t`t: " $TotalWGs
+		WriteWordLine 0 0 ""
+		Write-Verbose "$(Get-Date): `tAdd zone summary info"
+		WriteWordLine 0 0 "Zones"
+		WriteWordLine 0 1 "Total Zones`t`t`t: " $TotalZones
+		WriteWordLine 0 0 ""
+		Write-Verbose "$(Get-Date): `tAdd policy summary info"
+		WriteWordLine 0 0 "Policies"
+		WriteWordLine 0 1 "IMA Policies`t`t`t: " $Global:TotalIMAPolicies
+		WriteWordLine 0 1 "Citrix AD Policies Processed`t: $($Global:TotalADPolicies)`t(AD Policies can contain multiple Citrix policies)"
+		WriteWordLine 0 1 "Total Policies`t`t`t: " $Global:TotalPolicies
+	}
+
+	Write-Verbose "$(Get-Date): Finished Create Summary Page"
+	Write-Verbose "$(Get-Date): "
 }
 
-Write-Verbose "$(Get-Date): Finished Create Summary Page"
-Write-Verbose "$(Get-Date): "
-
-Write-Verbose "$(Get-Date): Finishing up Word document"
+Write-Verbose "$(Get-Date): Finishing up document"
 #end of document processing
-#Update document properties
 
-If($CoverPagesExist)
+$AbstractTitle = "Citrix XenApp 6.5 Inventory"
+$SubjectTitle = "XenApp 6.5 Farm Inventory"
+UpdateDocumentProperties $AbstractTitle $SubjectTitle
+
+If($MSWORD -or $PDF)
 {
-	Write-Verbose "$(Get-Date): Set Cover Page Properties"
-	_SetDocumentProperty $doc.BuiltInDocumentProperties "Company" $CompanyName
-	_SetDocumentProperty $doc.BuiltInDocumentProperties "Title" $title
-	If($Summary)
-	{
-		_SetDocumentProperty $doc.BuiltInDocumentProperties "Subject" "XenApp 6.5 Summary Farm Inventory"
-	}
-	Else
-	{
-		_SetDocumentProperty $doc.BuiltInDocumentProperties "Subject" "XenApp 6.5 Farm Inventory"
-	}
-	_SetDocumentProperty $doc.BuiltInDocumentProperties "Author" $username
-
-	#Get the Coverpage XML part
-	$cp = $doc.CustomXMLParts | where {$_.NamespaceURI -match "coverPageProps$"}
-
-	#get the abstract XML part
-	$ab = $cp.documentelement.ChildNodes | Where {$_.basename -eq "Abstract"}
-	#set the text
-	If([String]::IsNullOrEmpty($CompanyName))
-	{
-		[string]$abstract = "Citrix XenApp 6.5 Inventory"
-	}
-	Else
-	{
-		[string]$abstract = "Citrix XenApp 6.5 Inventory for $CompanyName"
-	}
-	$ab.Text = $abstract
-
-	$ab = $cp.documentelement.ChildNodes | Where {$_.basename -eq "PublishDate"}
-	#set the text
-	[string]$abstract = (Get-Date -Format d).ToString()
-	$ab.Text = $abstract
-
-	Write-Verbose "$(Get-Date): Update the Table of Contents"
-	#update the Table of Contents
-	$doc.TablesOfContents.item(1).Update()
-	$cp = $Null
-	$ab = $Null
-	$abstract = $Null
+    SaveandCloseDocumentandShutdownWord
+}
+ElseIf($Text)
+{
+    SaveandCloseTextDocument
+}
+ElseIf($HTML)
+{
+    SaveandCloseHTMLDocument
 }
 
-#bug fix 1-Apr-2014
-#reset Grammar and Spelling options back to their original settings
-$Word.Options.CheckGrammarAsYouType = $CurrentGrammarOption
-$Word.Options.CheckSpellingAsYouType = $CurrentSpellingOption
-
-Write-Verbose "$(Get-Date): Save and Close document and Shutdown Word"
-If($WordVersion -eq $wdWord2007)
-{
-	If($PDF)
-	{
-		Write-Verbose "$(Get-Date): Saving as DOCX file first before saving to PDF"
-	}
-	Else
-	{
-		Write-Verbose "$(Get-Date): Saving DOCX file"
-	}
-
-	If($AddDateTime)
-	{
-		$FileName1 += "_$(Get-Date -f yyyy-MM-dd_HHmm).docx"
-		If($PDF)
-		{
-			$FileName2 += "_$(Get-Date -f yyyy-MM-dd_HHmm).pdf"
-		}
-	}
-
-	Write-Verbose "$(Get-Date): Running Word 2007 and detected operating system $($RunningOS)"
-	If($RunningOS.Contains("Server 2008 R2"))
-	{
-		$SaveFormat = "microsoft.office.interop.word.WdSaveFormat" -as [type] 
-		$doc.SaveAs($filename1, $SaveFormat)
-		If($PDF)
-		{
-			Write-Verbose "$(Get-Date): Now saving as PDF"
-			$SaveFormat = $wdSaveFormatPDF
-			$doc.SaveAs($filename2, $SaveFormat)
-		}
-	}
-	Else
-	{
-		#works for Server 2008 and Windows 7
-		$saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], "wdFormatDocumentDefault")
-		$doc.SaveAs([REF]$filename1, [ref]$SaveFormat)
-		If($PDF)
-		{
-			Write-Verbose "$(Get-Date): Now saving as PDF"
-			$saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], "wdFormatPDF")
-			$doc.SaveAs([REF]$filename2, [ref]$saveFormat)
-		}
-	}
-}
-Else
-{
-	#the $saveFormat below passes StrictMode 2
-	#I found this at the following two links
-	#http://blogs.technet.com/b/bshukla/archive/2011/09/27/3347395.aspx
-	#http://msdn.microsoft.com/en-us/library/microsoft.office.interop.word.wdsaveformat(v=office.14).aspx
-	If($PDF)
-	{
-		Write-Verbose "$(Get-Date): Saving as DOCX file first before saving to PDF"
-	}
-	Else
-	{
-		Write-Verbose "$(Get-Date): Saving DOCX file"
-	}
-
-	If($AddDateTime)
-	{
-		$FileName1 += "_$(Get-Date -f yyyy-MM-dd_HHmm).docx"
-		If($PDF)
-		{
-			$FileName2 += "_$(Get-Date -f yyyy-MM-dd_HHmm).pdf"
-		}
-	}
-
-	$saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], "wdFormatDocumentDefault")
-	$doc.SaveAs([REF]$filename1, [ref]$SaveFormat)
-	If($PDF)
-	{
-		Write-Verbose "$(Get-Date): Now saving as PDF"
-		$saveFormat = [Enum]::Parse([Microsoft.Office.Interop.Word.WdSaveFormat], "wdFormatPDF")
-		$doc.SaveAs([REF]$filename2, [ref]$saveFormat)
-	}
-}
-
-Write-Verbose "$(Get-Date): Closing Word"
-$doc.Close()
-$Word.Quit()
-If($PDF)
-{
-	Write-Verbose "$(Get-Date): Deleting $($filename1) since only $($filename2) is needed"
-	Remove-Item $filename1 -EA 0
-}
-Write-Verbose "$(Get-Date): System Cleanup"
-[System.Runtime.Interopservices.Marshal]::ReleaseComObject($Word) | Out-Null
-If(Test-Path variable:global:word)
-{
-	Remove-Variable -Name word -Scope Global
-}
-$SaveFormat = $Null
-[gc]::collect() 
-[gc]::WaitForPendingFinalizers()
 Write-Verbose "$(Get-Date): Script has completed"
 Write-Verbose "$(Get-Date): "
 
 If($PDF)
 {
-	Write-Verbose "$(Get-Date): $($filename2) is ready for use"
+	If(Test-Path "$($Script:FileName2)")
+	{
+		Write-Verbose "$(Get-Date): $($Script:FileName2) is ready for use"
+	}
+	Else
+	{
+		Write-Warning "$(Get-Date): Unable to save the output file, $($Script:FileName2)"
+		Write-Error "Unable to save the output file, $($Script:FileName2)"
+	}
 }
 Else
 {
-	Write-Verbose "$(Get-Date): $($filename1) is ready for use"
+	If(Test-Path "$($Script:FileName1)")
+	{
+		Write-Verbose "$(Get-Date): $($Script:FileName1) is ready for use"
+	}
+	Else
+	{
+		Write-Warning "$(Get-Date): Unable to save the output file, $($Script:FileName1)"
+		Write-Error "Unable to save the output file, $($Script:FileName1)"
+	}
 }
+
 Write-Verbose "$(Get-Date): "
 
 #http://poshtips.com/measuring-elapsed-time-in-powershell/
@@ -7109,11 +8530,12 @@ Write-Verbose "$(Get-Date): Script started: $($Script:StartTime)"
 Write-Verbose "$(Get-Date): Script ended: $(Get-Date)"
 $runtime = $(Get-Date) - $Script:StartTime
 $Str = [string]::format("{0} days, {1} hours, {2} minutes, {3}.{4} seconds", `
-        $runtime.Days, `
-        $runtime.Hours, `
-        $runtime.Minutes, `
-        $runtime.Seconds,
-        $runtime.Milliseconds)
+	$runtime.Days, `
+	$runtime.Hours, `
+	$runtime.Minutes, `
+	$runtime.Seconds,
+	$runtime.Milliseconds)
 Write-Verbose "$(Get-Date): Elapsed time: $($Str)"
 $runtime = $Null
 $Str = $Null
+$ErrorActionPreference = $SaveEAPreference
